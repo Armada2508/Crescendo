@@ -15,4 +15,9 @@ public class Constants {
         );
     }
 
+    public static class Pivot {
+        public static final int ID = 0;
+        public static final int FID = 1;
+    }
+
 }
