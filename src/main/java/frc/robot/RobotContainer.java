@@ -3,14 +3,19 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.lib.controller.SmartJoystick;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
 
+    private final SmartJoystick joystick = new SmartJoystick(0);
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+
     public RobotContainer() {
+        driveSubsystem.setDefaultCommand(driveSubsystem.getDriveCommand(joystick::getY, joystick::getX, joystick::getZ, () -> joystick.getRawButton(12)));
         configureBindings();
     }
 
