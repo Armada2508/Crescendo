@@ -18,4 +18,9 @@ public class Constants {
         public static final double wheelDiameter = Units.inchesToMeters(6);
     }
 
+    public static class Pivot {
+        public static final int ID = 0;
+        public static final int FID = 1;
+    }
+
 }
