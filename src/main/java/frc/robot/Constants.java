@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
 
 public class Constants {
@@ -13,6 +14,8 @@ public class Constants {
         public static final DriveConfig driveConfig = new DriveConfig(
             1, 1, 1, 0.5, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
         );
+        public static final double gearRatio = 10.71;
+        public static final double wheelDiameter = Units.inchesToMeters(6);
     }
 
 }

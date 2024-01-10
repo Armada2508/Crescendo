@@ -21,6 +21,7 @@ public class RobotContainer {
 
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
+        driveSubsystem.stop();
     }
     
     private void configureBindings() {
