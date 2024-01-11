@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 import edu.wpi.first.math.util.Units;
 import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
 
@@ -16,6 +18,7 @@ public class Constants {
         );
         public static final double gearRatio = 10.71;
         public static final double wheelDiameter = Units.inchesToMeters(6);
+        public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
     }
 
     public static class Pivot {

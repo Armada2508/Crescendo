@@ -15,7 +15,7 @@ public class RobotContainer {
     private final DriveSubsystem driveSubsystem = new DriveSubsystem();
 
     public RobotContainer() {
-        driveSubsystem.setDefaultCommand(driveSubsystem.getDriveCommand(joystick::getY, joystick::getX, joystick::getZ, () -> joystick.getRawButton(12)));
+        driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(joystick::getY, joystick::getX, joystick::getZ, () -> joystick.getRawButton(12)));
         configureBindings();
     }
 
