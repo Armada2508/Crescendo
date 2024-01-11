@@ -8,11 +8,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.PivotSubsystem;
 
 public class RobotContainer {
 
     private final SmartJoystick joystick = new SmartJoystick(0);
     private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+    private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
 
     public RobotContainer() {
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(joystick::getY, joystick::getX, joystick::getZ, () -> joystick.getRawButton(12)));
@@ -22,6 +24,7 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
+        pivotSubsystem.stop();
     }
     
     private void configureBindings() {

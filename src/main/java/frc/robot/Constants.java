@@ -28,6 +28,8 @@ public class Constants {
     public static class Pivot {
         public static final int ID = 0;
         public static final int FID = 1;
+        public static final double gearRatio = 100;
+        public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
     }
 
 }
