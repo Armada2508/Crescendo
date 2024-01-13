@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
 
@@ -28,6 +29,11 @@ public class Constants {
     public static class Pivot {
         public static final int ID = 0;
         public static final int FID = 1;
+    }
+
+    public static class Vision {
+        public static final String cameraName = "HDCamera";
+        public static final Transform3d cameraToRobot = new Transform3d(); //! Have to configure
     }
 
 }
