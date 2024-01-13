@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 @SuppressWarnings("unused")
@@ -15,6 +16,7 @@ public class RobotContainer {
 
     private final SmartJoystick joystick = new SmartJoystick(0);
     private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+    private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
     public RobotContainer() {
@@ -25,6 +27,7 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
+        pivotSubsystem.stop();
     }
     
     private void configureBindings() {
