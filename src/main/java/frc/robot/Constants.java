@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
 
@@ -20,6 +21,7 @@ public class Constants {
         );
         public static final double gearRatio = 10.71;
         public static final double wheelDiameter = Units.inchesToMeters(6);
+        public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(Units.inchesToMeters(24.5));   //? Double check when drivebase built
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
@@ -35,7 +37,7 @@ public class Constants {
 
     public static class Vision {
         public static final String cameraName = "HDCamera";
-        public static final Transform3d cameraToRobot = new Transform3d(); //! Have to configure
+        public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
     }
 
 }

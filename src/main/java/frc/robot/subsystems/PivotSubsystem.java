@@ -1,22 +1,21 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.Drive.gearRatio;
+import static frc.robot.Constants.Pivot.FID;
+import static frc.robot.Constants.Pivot.ID;
+import static frc.robot.Constants.Pivot.slot0ConfigMotionMagic;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.util.Util;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import static frc.robot.Constants.Pivot.ID;
-import static frc.robot.Constants.Pivot.FID;
-import static frc.robot.Constants.Pivot.slot0ConfigMotionMagic;
-import static frc.robot.Constants.Drive.gearRatio;
 
 
 public class PivotSubsystem extends SubsystemBase {
