@@ -40,4 +40,9 @@ public class Constants {
         public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
     }
 
+    public static class Intake {
+        public static final int INID = 0;
+        public static final int SID = 1;
+    }
+
 }
