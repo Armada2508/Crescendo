@@ -9,11 +9,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
     private final SmartJoystick joystick = new SmartJoystick(0);
-    private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getEstimatedGlobalPose);
     private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
 
     public RobotContainer() {
@@ -30,7 +32,7 @@ public class RobotContainer {
     private void configureBindings() {
         
     }
-    
+
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
     }
