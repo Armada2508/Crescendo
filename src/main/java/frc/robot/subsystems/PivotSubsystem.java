@@ -24,17 +24,17 @@ public class PivotSubsystem extends SubsystemBase {
     final TalonFX talonF = new TalonFX(FID);
 
     public PivotSubsystem() {
-        configureTalon();
+        configTalons();
     }
 
-    public void configureTalon() {
+    public void configTalons() {
         Util.factoryResetTalons(talon, talonF);
         Util.brakeMode(talon, talonF);
         talonF.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(slot0ConfigMotionMagic);
     }
 
-    public void configureMotionMagic(double degree) {
+    public void configMotionMagic(double degree) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         config.MotionMagicAcceleration = Encoder.fromRotationalAngle(degree, gearRatio);
         config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(degree, gearRatio);;
@@ -45,19 +45,20 @@ public class PivotSubsystem extends SubsystemBase {
         talon.set(speed);
     }
 
+    public void stop() {
+        talon.setControl(new NeutralOut());
+    }
+    
     public void setAngle(double degree) {
         double angleRots = Encoder.fromRotationalAngle(degree, gearRatio);
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
         talon.setControl(request);
     }
 
-    public void stop() {
-        talon.setControl(new NeutralOut());
-    }
     public Command setAngleCommand(double degree) {
         final double deadbandRotations = Encoder.fromRotationalAngle(degree, gearRatio);
         return runOnce(() -> {
-            configureMotionMagic(degree);
+            configMotionMagic(degree);
             setAngle(degree);
         })
         .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
