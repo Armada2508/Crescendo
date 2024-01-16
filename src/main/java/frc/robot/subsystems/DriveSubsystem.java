@@ -34,6 +34,8 @@ import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,15 +53,18 @@ public class DriveSubsystem extends SubsystemBase {
     private final PIDController turnPIDController = new PIDController(turnPIDConfig.kP, turnPIDConfig.kI, turnPIDConfig.kD);
     private DifferentialDrivePoseEstimator poseEstimator;
     private final Supplier<Optional<EstimatedRobotPose>> visionEstimatedPose; 
+    private final Field2d field2d = new Field2d();
     
     public DriveSubsystem(Supplier<Optional<EstimatedRobotPose>> visionEstimator) {
         this.visionEstimatedPose = visionEstimator;
         turnPIDController.setTolerance(0.5); // degrees
         configTalons();
+        SmartDashboard.putData("Field", field2d);
     }
 
     @Override
     public void periodic() {
+        if (pigeon.getState() != PigeonState.Ready) return;
         Optional<EstimatedRobotPose> visionPose = visionEstimatedPose.get();
         if (poseEstimator == null) { // Initialize field pose
             if (visionPose.isPresent()) {
@@ -67,12 +72,13 @@ public class DriveSubsystem extends SubsystemBase {
             }
             return;
         }
-        if (pigeon.getState() != PigeonState.Ready) return;
         poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
         if (visionPose.isPresent()) {
             poseEstimator.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), visionPose.get().timestampSeconds);
         }
-        System.out.println(getPose());
+        // System.out.println(getPose());
+        field2d.setRobotPose(getPose());
+
     }
 
     private void configTalons() {
