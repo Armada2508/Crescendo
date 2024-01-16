@@ -19,6 +19,7 @@ public class RobotContainer {
     private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
 
     public RobotContainer() {
+        joystick.bindButtons(12);
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(joystick::getY, joystick::getX, joystick::getZ, () -> joystick.getRawButton(12)));
         configureBindings();
     }
