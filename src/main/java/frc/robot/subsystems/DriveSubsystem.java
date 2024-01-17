@@ -1,18 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.Drive.LFID;
-import static frc.robot.Constants.Drive.LID;
-import static frc.robot.Constants.Drive.RFID;
-import static frc.robot.Constants.Drive.RID;
-import static frc.robot.Constants.Drive.diffKinematics;
-import static frc.robot.Constants.Drive.gearRatio;
-import static frc.robot.Constants.Drive.joystickDriveConfig;
-import static frc.robot.Constants.Drive.maxTurnSpeed;
-import static frc.robot.Constants.Drive.pigeonID;
-import static frc.robot.Constants.Drive.slot0ConfigMotionMagic;
-import static frc.robot.Constants.Drive.turnPIDConfig;
-import static frc.robot.Constants.Drive.wheelDiameter;
-
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -39,18 +26,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Drive;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.drive.ButterySmoothDriveCommand;
 import frc.robot.lib.util.Util;
 
 public class DriveSubsystem extends SubsystemBase {
 
-    private final TalonFX talonL = new TalonFX(LID);
-    private final TalonFX talonR = new TalonFX(RID);
-    private final TalonFX talonLF = new TalonFX(LFID);
-    private final TalonFX talonRF = new TalonFX(RFID);
-    private final PigeonIMU pigeon = new PigeonIMU(pigeonID);
-    private final PIDController turnPIDController = new PIDController(turnPIDConfig.kP, turnPIDConfig.kI, turnPIDConfig.kD);
+    private final TalonFX talonL = new TalonFX(Drive.LID);
+    private final TalonFX talonR = new TalonFX(Drive.RID);
+    private final TalonFX talonLF = new TalonFX(Drive.LFID);
+    private final TalonFX talonRF = new TalonFX(Drive.RFID);
+    private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID);
+    private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private DifferentialDrivePoseEstimator poseEstimator;
     private final Supplier<Optional<EstimatedRobotPose>> visionEstimatedPose; 
     private final Field2d field2d = new Field2d();
@@ -68,7 +56,7 @@ public class DriveSubsystem extends SubsystemBase {
         Optional<EstimatedRobotPose> visionPose = visionEstimatedPose.get();
         if (poseEstimator == null) { // Initialize field pose
             if (visionPose.isPresent()) {
-                poseEstimator = new DifferentialDrivePoseEstimator(diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), visionPose.get().estimatedPose.toPose2d());
+                poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), visionPose.get().estimatedPose.toPose2d());
             }
             return;
         }
@@ -92,8 +80,8 @@ public class DriveSubsystem extends SubsystemBase {
         talonRF.setControl(new StrictFollower(talonR.getDeviceID()));
         talonLF.setInverted(true);
         talonRF.setInverted(true);
-        talonL.getConfigurator().apply(slot0ConfigMotionMagic);
-        talonR.getConfigurator().apply(slot0ConfigMotionMagic);
+        talonL.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
+        talonR.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
     }
 
     /**
@@ -104,8 +92,8 @@ public class DriveSubsystem extends SubsystemBase {
     private void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         // Time period is 1s
-        config.MotionMagicCruiseVelocity = Encoder.fromDistance(velocity, gearRatio, wheelDiameter);
-        config.MotionMagicAcceleration = Encoder.fromDistance(acceleration, gearRatio, wheelDiameter);
+        config.MotionMagicCruiseVelocity = Encoder.fromDistance(velocity, Drive.gearRatio, Drive.wheelDiameter);
+        config.MotionMagicAcceleration = Encoder.fromDistance(acceleration, Drive.gearRatio, Drive.wheelDiameter);
         talonL.getConfigurator().apply(config);
         talonR.getConfigurator().apply(config);
     }
@@ -115,7 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
      * @param meters - distance to travel
      */
     private void driveDistance(double meters) {
-        double distanceRots = Encoder.fromDistance(meters, gearRatio, wheelDiameter);
+        double distanceRots = Encoder.fromDistance(meters, Drive.gearRatio, Drive.wheelDiameter);
         MotionMagicVoltage request = new MotionMagicVoltage(distanceRots);
         talonL.setControl(request);
         talonR.setControl(request);
@@ -134,7 +122,7 @@ public class DriveSubsystem extends SubsystemBase {
      * @return Command for the robot to drive distance using motion magic
      */
     public Command driveDistanceCommand(double distance, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromDistance(Units.inchesToMeters(0.5), gearRatio, wheelDiameter); 
+        final double deadbandRotations = Encoder.fromDistance(Units.inchesToMeters(0.5), Drive.gearRatio, Drive.wheelDiameter); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
             driveDistance(distance);
@@ -153,7 +141,7 @@ public class DriveSubsystem extends SubsystemBase {
         turnPIDController.setSetpoint(pigeon.getYaw() + angle);
         return runEnd(() -> {
             double speed = turnPIDController.calculate(pigeon.getYaw());
-            speed = MathUtil.clamp(speed, -maxTurnSpeed, maxTurnSpeed);
+            speed = MathUtil.clamp(speed, -Drive.maxTurnSpeed, Drive.maxTurnSpeed);
             setSpeed(speed, -speed);
         }, this::stop).until(turnPIDController::atSetpoint);
     }
@@ -164,11 +152,11 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     private double getLeftPosition() {
-        return Encoder.toDistance(talonL.getPosition().getValueAsDouble(), gearRatio, wheelDiameter);
+        return Encoder.toDistance(talonL.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter);
     }
 
     private double getRightPosition() {
-        return Encoder.toDistance(talonR.getPosition().getValueAsDouble(), gearRatio, wheelDiameter);
+        return Encoder.toDistance(talonR.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter);
     }
 
     private Rotation2d getAngle() {
@@ -180,7 +168,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
-        return new ButterySmoothDriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, joystickDriveConfig, this::setSpeed, this::stop, this);
+        return new ButterySmoothDriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
     }
 
 }

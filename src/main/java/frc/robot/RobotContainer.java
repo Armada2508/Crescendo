@@ -28,7 +28,7 @@ public class RobotContainer {
         joystick.bindButtons(12); // Drive Slow
         buttonBoard.bindButtons(reverseButton); // Drive Reverse
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
-            reverseAxisIf(joystick::getY, reverseButton), reverseAxisIf(joystick::getX, reverseButton), reverseAxisIf(joystick::getY, reverseButton), () -> joystick.getRawButton(12)
+            reverseAxisIf(joystick::getY, reverseButton), reverseAxisIf(joystick::getX, reverseButton), reverseAxisIf(joystick::getZ, reverseButton), () -> joystick.getRawButton(12)
         ));
         configureBindings();
     }
