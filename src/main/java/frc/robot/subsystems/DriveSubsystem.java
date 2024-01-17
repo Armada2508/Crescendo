@@ -74,11 +74,11 @@ public class DriveSubsystem extends SubsystemBase {
         }
         poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
         if (visionPose.isPresent()) {
-            poseEstimator.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), visionPose.get().timestampSeconds);
-        }
+            poseEstimator.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), visionPose.get().timestampSeconds
+            /*,VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(45))*/);
+        }   
         // System.out.println(getPose());
         field2d.setRobotPose(getPose());
-
     }
 
     private void configTalons() {

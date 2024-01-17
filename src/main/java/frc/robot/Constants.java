@@ -33,6 +33,7 @@ public class Constants {
         public static final int FID = 1;
         public static final double gearRatio = 100;
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final double boreEncoderOffset = 0; //! Have to find this value
     }
 
     public static class Vision {

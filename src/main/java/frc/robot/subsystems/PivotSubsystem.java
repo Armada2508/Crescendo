@@ -11,9 +11,11 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Pivot;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.util.Util;
 
@@ -22,6 +24,7 @@ public class PivotSubsystem extends SubsystemBase {
     
     final TalonFX talon = new TalonFX(ID);
     final TalonFX talonF = new TalonFX(FID);
+    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(0);
 
     public PivotSubsystem() {
         configTalons();
@@ -32,6 +35,7 @@ public class PivotSubsystem extends SubsystemBase {
         Util.brakeMode(talon, talonF);
         talonF.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(slot0ConfigMotionMagic);
+        talon.setPosition(throughBoreEncoder.getDistance() + Pivot.boreEncoderOffset);
     }
 
     public void configMotionMagic(double degree) {
