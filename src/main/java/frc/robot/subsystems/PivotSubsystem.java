@@ -1,10 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.Drive.gearRatio;
-import static frc.robot.Constants.Pivot.FID;
-import static frc.robot.Constants.Pivot.ID;
-import static frc.robot.Constants.Pivot.slot0ConfigMotionMagic;
-
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -22,26 +17,26 @@ import frc.robot.lib.util.Util;
 
 public class PivotSubsystem extends SubsystemBase {
     
-    final TalonFX talon = new TalonFX(ID);
-    final TalonFX talonF = new TalonFX(FID);
+    private final TalonFX talon = new TalonFX(Pivot.ID);
+    private final TalonFX talonF = new TalonFX(Pivot.FID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(0);
 
     public PivotSubsystem() {
         configTalons();
     }
 
-    public void configTalons() {
+    private void configTalons() {
         Util.factoryResetTalons(talon, talonF);
         Util.brakeMode(talon, talonF);
         talonF.setControl(new StrictFollower(talon.getDeviceID()));
-        talon.getConfigurator().apply(slot0ConfigMotionMagic);
+        talon.getConfigurator().apply(Pivot.slot0ConfigMotionMagic);
         talon.setPosition(throughBoreEncoder.getDistance() + Pivot.boreEncoderOffset);
     }
 
-    public void configMotionMagic(double degree) {
+    public void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
-        config.MotionMagicAcceleration = Encoder.fromRotationalAngle(degree, gearRatio);
-        config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(degree, gearRatio);;
+        config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Pivot.gearRatio);
+        config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(velocity, Pivot.gearRatio);;
         talon.getConfigurator().apply(config);
     }
 
@@ -54,15 +49,15 @@ public class PivotSubsystem extends SubsystemBase {
     }
     
     public void setAngle(double degree) {
-        double angleRots = Encoder.fromRotationalAngle(degree, gearRatio);
+        double angleRots = Encoder.fromRotationalAngle(degree, Pivot.gearRatio);
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
         talon.setControl(request);
     }
 
-    public Command setAngleCommand(double degree) {
-        final double deadbandRotations = Encoder.fromRotationalAngle(degree, gearRatio);
+    public Command setAngleCommand(double degree, double velocity, double acceleration) {
+        final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! test degree
         return runOnce(() -> {
-            configMotionMagic(degree);
+            configMotionMagic(velocity, acceleration);
             setAngle(degree);
         })
         .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))

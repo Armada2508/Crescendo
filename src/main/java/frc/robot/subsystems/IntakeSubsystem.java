@@ -1,20 +1,18 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.Intake.INID;
-import static frc.robot.Constants.Intake.SID;
-
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.Constants.Intake;
 import frc.robot.lib.util.Util;
 
 public class IntakeSubsystem extends SubsystemBase{
 
-    final TalonFX talonIntake = new TalonFX(INID); // intaking
-    final TalonFX talonShoot = new TalonFX(SID); //shooting
+    private final TalonFX talonIntake = new TalonFX(Intake.INID); // intaking / index
+    private final TalonFX talonShoot = new TalonFX(Intake.SID); // shooting
 
     public IntakeSubsystem() {
         configTalons();
@@ -22,6 +20,8 @@ public class IntakeSubsystem extends SubsystemBase{
 
     private void configTalons() {
         Util.factoryResetTalons(talonIntake, talonShoot);
+        Util.coastMode(talonIntake, talonShoot);
+        talonShoot.getConfigurator().apply(Intake.slot0Config);
     }
 
     public void setSpeed(double speed, TalonFX talon) {
@@ -33,18 +33,15 @@ public class IntakeSubsystem extends SubsystemBase{
         talonShoot.setControl(new NeutralOut());
     }
 
-    public Boolean isSensorTripped() {
+    public boolean isSensorTripped() {
         //fill in once sensor details are finished
         return false;
     }
 
     public void intake() {
-        setSpeed(1, talonIntake); //? possibly tune speed
-        while (isSensorTripped() == false) { //check w/ brock to see if bad
-            if (isSensorTripped() == true) {
-                setSpeed(0, talonIntake);
-            }
-        }
+        setSpeed(0.5, talonIntake); //? possibly tune speed
+        //sensor something
+        setSpeed(0, talonIntake); 
     }
 
     public Command intakeCommand() {
@@ -54,15 +51,16 @@ public class IntakeSubsystem extends SubsystemBase{
         .finallyDo(this::stop);
     }
 
-    public void shoot() {
-
+    public void shoot(double velocity) {
+        //wait until velocity at set point
+        setSpeed(0.5, talonIntake); //runs index motor, test speed //? change speed depending on target (amp or speaker)?
+        Timer.delay(1); //! possibly dangerous, test
     }
 
-    public Command shootCommand() {
+    public Command shootCommand(double velocity) {
         return runOnce(() -> {
-
+            shoot(velocity);
         })
-        .andThen() // if needed
         .finallyDo(this::stop);
     }
 }
