@@ -38,7 +38,7 @@ public class Constants {
     }
 
     public static class Vision {
-        public static final String cameraName = "HDCamera";
+        public static final String cameraName = "LifeCam";
         public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
     }
 
