@@ -9,6 +9,8 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
 
 public class Constants {
+
+    public static final double gravity = 9.81;
     
     public static class Drive {
         public static final int LID = 0;
@@ -46,6 +48,12 @@ public class Constants {
         public static final int INID = 6;
         public static final int SID = 7;
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+    }
+
+    public static class CommandConstants {
+        //! Gotta find all of these
+        public static final double shootAngle = 0;
+        public static final double lowSpeakerHeight = Units.inchesToMeters(78);
     }
 
 }

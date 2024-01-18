@@ -1,7 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CommandConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
@@ -34,4 +36,15 @@ public class CommandRoutines extends SubsystemBase{
             pivotSubsystem.setAngleCommand(0, 0, 0); //stow
         });
     }
+
+    public Command scoreSpeakerBase() {
+        pivotSubsystem.setAngleCommand(CommandConstants.shootAngle, 0, 0).andThen(intakeSubsystem.shootCommand(0)).andThen(stowCommand());
+    }
+
+    public Command scoreSpeakerVision() {
+        // sqrt(2g * H) / sin(theta)
+        double velocity = Math.sqrt(2 * Constants.gravity * CommandConstants.lowSpeakerHeight) / Math.sin(Units.degreesToRadians(CommandConstants.shootAngle));
+        pivotSubsystem.setAngleCommand(CommandConstants.shootAngle, 0, 0).andThen(intakeSubsystem.shootCommand(velocity)).andThen(stowCommand());
+    }
+
 }
