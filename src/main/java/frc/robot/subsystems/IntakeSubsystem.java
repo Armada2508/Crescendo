@@ -1,10 +1,11 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
 import frc.robot.lib.util.Util;
@@ -34,33 +35,31 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
     public boolean isSensorTripped() {
-        //fill in once sensor details are finished
+        //fill in with sensor details
         return false;
-    }
-
-    public void intake() {
-        setSpeed(0.5, talonIntake); //? possibly tune speed
-        //sensor something
-        setSpeed(0, talonIntake); 
     }
 
     public Command intakeCommand() {
         return runOnce(() -> {
-            intake();
+            setSpeed(0.5, talonIntake); //? possibly tune speed
         })
+        .andThen(Commands.waitUntil(() -> isSensorTripped()))
+        .andThen(Commands.waitSeconds(1)) //tune wait seconds for note
         .finallyDo(this::stop);
     }
-
-    public void shoot(double velocity) {
-        //wait until velocity at set point
-        setSpeed(0.5, talonIntake); //runs index motor, test speed //? change speed depending on target (amp or speaker)?
-        Timer.delay(1); //! possibly dangerous, test
-    }
-
+    /**
+     * 
+     * @param velocity rps
+     * @return
+     */
     public Command shootCommand(double velocity) {
         return runOnce(() -> {
-            shoot(velocity);
+            final VelocityVoltage request = new VelocityVoltage(velocity).withSlot(0);
+            talonShoot.setControl(request);
         })
+        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonShoot.getVelocity().getValueAsDouble(), velocity, 1))) //?maybe tune epi
+        .andThen(runOnce(() -> setSpeed(0.5, talonIntake)))
+        .andThen(Commands.waitSeconds(1))
         .finallyDo(this::stop);
     }
 }

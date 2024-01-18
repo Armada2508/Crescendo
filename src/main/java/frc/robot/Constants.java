@@ -29,11 +29,12 @@ public class Constants {
     }
 
     public static class Pivot {
-        public static final int ID = 0;
-        public static final int FID = 1;
+        public static final int ID = 4;
+        public static final int FID = 5;
         public static final double gearRatio = 100;
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final double boreEncoderOffset = 0; //! Have to find this value
+        public static final int stowAngle = 0; //! find angle for stow
     }
 
     public static class Vision {
@@ -42,8 +43,8 @@ public class Constants {
     }
 
     public static class Intake {
-        public static final int INID = 0;
-        public static final int SID = 1;
+        public static final int INID = 6;
+        public static final int SID = 7;
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
     }
 
