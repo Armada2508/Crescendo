@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,7 +42,14 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        
+        // joystick.whileTrue(5, intakeSubsystem.runOnce(() -> intakeSubsystem.setSpeed(1)).finallyDo(intakeSubsystem::stop));
+        // joystick.whileTrue(6, pivotSubsystem.runOnce(() -> intakeSubsystem.setSpeed(.25)).finallyDo(pivotSubsystem::stop));
+        // joystick.whileTrue(4, pivotSubsystem.runOnce(() -> intakeSubsystem.setSpeed(-.25)).finallyDo(pivotSubsystem::stop));
+        // joystick.onTrue(8, driveSubsystem.turnCommand(-45));
+        // joystick.onTrue(9, driveSubsystem.turnCommand(45));
+        // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(-2, 2, 2));
+        // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(-2, 2, 2));
+        joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, pivotSubsystem, intakeSubsystem));
     }
 
     public Command getAutonomousCommand() {

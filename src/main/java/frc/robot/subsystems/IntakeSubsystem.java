@@ -25,8 +25,8 @@ public class IntakeSubsystem extends SubsystemBase{
         talonShoot.getConfigurator().apply(Intake.slot0Config);
     }
 
-    public void setSpeed(double speed, TalonFX talon) {
-        talon.set(speed);
+    public void setSpeed(double speed) {
+        talonIntake.set(speed);
     }
 
     public void stop() {
@@ -41,7 +41,7 @@ public class IntakeSubsystem extends SubsystemBase{
 
     public Command intakeCommand() {
         return runOnce(() -> {
-            setSpeed(0.5, talonIntake); //? possibly tune speed
+            setSpeed(0.5); //? possibly tune speed
         })
         .andThen(Commands.waitUntil(() -> isSensorTripped()))
         .andThen(Commands.waitSeconds(1)) //tune wait seconds for note
@@ -59,7 +59,7 @@ public class IntakeSubsystem extends SubsystemBase{
             talonShoot.setControl(request);
         })
         .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonShoot.getVelocity().getValueAsDouble(), velocity, 1))) //?maybe tune epi
-        .andThen(runOnce(() -> setSpeed(0.5, talonIntake)))
+        .andThen(runOnce(() -> setSpeed(0.5)))
         .andThen(Commands.waitSeconds(1))
         .finallyDo(this::stop);
     }
