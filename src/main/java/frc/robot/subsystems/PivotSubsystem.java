@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -53,8 +55,8 @@ public class PivotSubsystem extends SubsystemBase {
         talon.setControl(new NeutralOut());
     }
     
-    public void setAngle(double degree) {
-        double angleRots = Encoder.fromRotationalAngle(degree, Pivot.gearRatio);
+    public void setAngle(DoubleSupplier degree) {
+        double angleRots = Encoder.fromRotationalAngle(degree.getAsDouble(), Pivot.gearRatio);
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
         talon.setControl(request);
     }
@@ -66,7 +68,7 @@ public class PivotSubsystem extends SubsystemBase {
      * @param acceleration rps/s
      * @return
      */
-    public Command setAngleCommand(double degree, double velocity, double acceleration) {
+    public Command setAngleCommand(DoubleSupplier degree, double velocity, double acceleration) {
         final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! test degree
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
@@ -75,4 +77,9 @@ public class PivotSubsystem extends SubsystemBase {
         .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
         .finallyDo(this::stop);
     }
+
+    public Command setAngleCommand(double degree, double velocity, double acceleration) {
+        return setAngleCommand(() -> degree, velocity, acceleration);
+    }
+
 }
