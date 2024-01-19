@@ -47,6 +47,7 @@ public class IntakeSubsystem extends SubsystemBase{
         .andThen(Commands.waitSeconds(1)) //tune wait seconds for note
         .finallyDo(this::stop);
     }
+    
     /**
      * 
      * @param velocity rps
