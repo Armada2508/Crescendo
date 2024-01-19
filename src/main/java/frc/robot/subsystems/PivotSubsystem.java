@@ -33,6 +33,11 @@ public class PivotSubsystem extends SubsystemBase {
         talon.setPosition(throughBoreEncoder.getDistance() + Pivot.boreEncoderOffset);
     }
 
+    /**
+     * 
+     * @param velocity rps
+     * @param acceleration rps/s
+     */
     public void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Pivot.gearRatio);
@@ -53,7 +58,14 @@ public class PivotSubsystem extends SubsystemBase {
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
         talon.setControl(request);
     }
-
+    
+    /**
+     * 
+     * @param degree degrees
+     * @param velocity rps
+     * @param acceleration rps/s
+     * @return
+     */
     public Command setAngleCommand(double degree, double velocity, double acceleration) {
         final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! test degree
         return runOnce(() -> {
