@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Drive;
 import frc.robot.lib.Encoder;
-import frc.robot.lib.drive.ButterySmoothDriveCommand;
+import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.util.Util;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -168,7 +168,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
-        return new ButterySmoothDriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
+        return new DriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
     }
 
 }

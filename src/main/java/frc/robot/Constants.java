@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.SlotConfigs;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
-import frc.robot.lib.drive.ButterySmoothDriveCommand.DriveConfig;
+import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
@@ -37,11 +37,7 @@ public class Constants {
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final double boreEncoderOffset = 0; //! Have to find this value
         public static final int stowAngle = 0; //! find angle for stow
-    }
-
-    public static class Vision {
-        public static final String cameraName = "LifeCam";
-        public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
+        public static final double shootAngle = 0; //! find angle for shoot
     }
 
     public static class Intake {
@@ -50,9 +46,12 @@ public class Constants {
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
     }
 
-    public static class CommandConstants {
-        //! Gotta find all of these
-        public static final double shootAngle = 0;
+    public static class Vision {
+        public static final String cameraName = "LifeCam";
+        public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
+    }
+
+    public static class Field {
         public static final double lowSpeakerHeight = Units.inchesToMeters(78);
     }
 
