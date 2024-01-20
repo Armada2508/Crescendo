@@ -3,6 +3,9 @@ package frc.robot;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -10,7 +13,7 @@ import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
-    public static final double gravity = 9.81;
+    public static final double GRAVITY = 9.81;
     
     public static class Drive {
         public static final int LID = 0;
@@ -37,7 +40,9 @@ public class Constants {
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final double boreEncoderOffset = 0; //! Have to find this value
         public static final int stowAngle = 0; //! find angle for stow
-        public static final double shootAngle = 0; //! find angle for shoot
+        public static final double speakerAngle = 0; //! find angle for base speaker
+        public static final double ampAngle = 0; //! find angle for amp
+        public static final double pickupAngle = 0; //! find angle for pickup
     }
 
     public static class Intake {
@@ -46,15 +51,20 @@ public class Constants {
         public static final int TimeOfFlightID = 8;
         public static final int fromSensorRange = 10; // mm
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final double speakerShootSpeed = 6380 / 60; // Max RPS of the Falcon 500
+        public static final double ampShootSpeed = 0; //! Find this
+        public static final double flywheelDiamter = Units.inchesToMeters(4); //! Find this
     }
 
     public static class Vision {
         public static final String cameraName = "LifeCam";
         public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
+        public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     }
 
     public static class Field {
         public static final double lowSpeakerHeight = Units.inchesToMeters(78);
+        public static final Pose2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d();
     }
 
 }

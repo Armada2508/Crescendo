@@ -66,7 +66,7 @@ public class DriveSubsystem extends SubsystemBase {
             /*,VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(45))*/);
         }   
         // System.out.println(getPose());
-        field2d.setRobotPose(getPose());
+        field2d.setRobotPose(getFieldPose());
     }
 
     private void configTalons() {
@@ -163,8 +163,8 @@ public class DriveSubsystem extends SubsystemBase {
         return Rotation2d.fromDegrees(pigeon.getYaw()); //? I think this is right
     }
 
-    public Pose2d getPose() {
-        return poseEstimator.getEstimatedPosition();
+    public Pose2d getFieldPose() {
+        return (poseEstimator == null) ? new Pose2d() : poseEstimator.getEstimatedPosition();
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
