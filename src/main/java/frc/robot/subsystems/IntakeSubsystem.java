@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,6 +15,7 @@ public class IntakeSubsystem extends SubsystemBase{
 
     private final TalonFX talonIntake = new TalonFX(Intake.INID); // intaking / index
     private final TalonFX talonShoot = new TalonFX(Intake.SID); // shooting
+    private final TimeOfFlight timeOfFlight = new TimeOfFlight(Intake.TimeOfFlightID);
 
     public IntakeSubsystem() {
         configTalons();
@@ -33,10 +35,12 @@ public class IntakeSubsystem extends SubsystemBase{
         talonIntake.setControl(new NeutralOut());
         talonShoot.setControl(new NeutralOut());
     }
-
+    /**
+     * time of flight range is in milimeters
+     * @return
+     */
     public boolean isSensorTripped() {
-        //fill in with sensor details
-        return false;
+        return Util.inRange(timeOfFlight.getRange(), Intake.fromSensorRange);
     }
 
     public Command intakeCommand() {

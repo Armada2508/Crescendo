@@ -43,6 +43,8 @@ public class Constants {
     public static class Intake {
         public static final int INID = 6;
         public static final int SID = 7;
+        public static final int TimeOfFlightID = 8;
+        public static final int fromSensorRange = 10; // mm
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
     }
 

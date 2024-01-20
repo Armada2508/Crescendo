@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Field;
@@ -15,13 +13,13 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(0, 0, 0) //pivot to ground
+        return pivotSubsystem.setAngleCommand(0, 0, 0) //pivot to ground, test velocity and acceleration values
         .andThen(intakeSubsystem.intakeCommand()) // intake
         .andThen(stowCommand(pivotSubsystem));
     }
 
     public static Command scoreAmp(PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(0, 0, 0) //angle to amp
+        return pivotSubsystem.setAngleCommand(0, 0, 0) //angle to amp, test velocity and acceleration values
         .andThen(intakeSubsystem.shootCommand(0)) //shoot slow into amp
         .andThen(stowCommand(pivotSubsystem));
     }
@@ -37,9 +35,6 @@ public class Routines {
     }
 
     private static Command stowCommand(PivotSubsystem pivotSubsystem) {
-        return runOnce(() -> {
-            pivotSubsystem.setAngleCommand(Pivot.stowAngle, 0, 0); //test values
-        });
+        return pivotSubsystem.setAngleCommand(Pivot.stowAngle, 0, 0); //test velocity and acceleration values
     }
-
 }
