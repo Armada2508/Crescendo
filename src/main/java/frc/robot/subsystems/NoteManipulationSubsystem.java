@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Millimeters;
+
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -11,13 +13,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
 import frc.robot.lib.util.Util;
 
-public class IntakeSubsystem extends SubsystemBase{
+public class NoteManipulationSubsystem extends SubsystemBase {
 
-    private final TalonFX talonIntake = new TalonFX(Intake.INID); // intaking / index
-    private final TalonFX talonShoot = new TalonFX(Intake.SID); // shooting
-    private final TimeOfFlight timeOfFlight = new TimeOfFlight(Intake.TimeOfFlightID);
+    private final TalonFX talonIntake = new TalonFX(Intake.intakeID);
+    private final TalonFX talonShoot = new TalonFX(Intake.shooterID); 
+    private final TimeOfFlight timeOfFlight = new TimeOfFlight(Intake.timeOfFlightID);
 
-    public IntakeSubsystem() {
+    public NoteManipulationSubsystem() {
         configTalons();
     }
 
@@ -27,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase{
         talonShoot.getConfigurator().apply(Intake.slot0Config);
     }
 
-    public void setSpeed(double speed) {
+    public void setIntakeSpeed(double speed) {
         talonIntake.set(speed);
     }
 
@@ -35,36 +37,38 @@ public class IntakeSubsystem extends SubsystemBase{
         talonIntake.setControl(new NeutralOut());
         talonShoot.setControl(new NeutralOut());
     }
+
     /**
      * time of flight range is in milimeters
      * @return
      */
     public boolean isSensorTripped() {
-        return Util.inRange(timeOfFlight.getRange(), Intake.fromSensorRange);
+        return Util.inRange(timeOfFlight.getRange(), Intake.noteDetectionRange.in(Millimeters));
     }
 
     public Command intakeCommand() {
         return runOnce(() -> {
-            setSpeed(0.5); //? possibly tune speed
+            setIntakeSpeed(0.5); //! Constant
         })
         .andThen(Commands.waitUntil(() -> isSensorTripped()))
-        .andThen(Commands.waitSeconds(1)) //tune wait seconds for note
+        .andThen(Commands.waitSeconds(1)) //! Constant
         .finallyDo(this::stop);
     }
     
     /**
      * 
-     * @param velocity rps
+     * @param velocity rotations per second
      * @return
      */
     public Command shootCommand(double velocity) {
         return runOnce(() -> {
-            final VelocityVoltage request = new VelocityVoltage(velocity).withSlot(0);
+            final VelocityVoltage request = new VelocityVoltage(velocity);
             talonShoot.setControl(request);
         })
-        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonShoot.getVelocity().getValueAsDouble(), velocity, 1))) //?maybe tune epi
-        .andThen(runOnce(() -> setSpeed(0.5)))
-        .andThen(Commands.waitSeconds(1))
+        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonShoot.getVelocity().getValueAsDouble(), velocity, 1))) //! Constant
+        .andThen(runOnce(() -> setIntakeSpeed(0.5))) //! Constant
+        .andThen(Commands.waitSeconds(1)) //! Constant
         .finallyDo(this::stop);
     }
+
 }

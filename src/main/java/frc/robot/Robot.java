@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.lib.logging.NTLogger;
 
 public class Robot extends TimedRobot {
     
@@ -16,11 +17,13 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         DriverStation.silenceJoystickConnectionWarning(true);
         robotContainer = new RobotContainer();
+        NTLogger.initDataLogger();
     }
     
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        NTLogger.log();
     }
 
     @Override

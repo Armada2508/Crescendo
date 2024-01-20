@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Millimeters;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 
@@ -9,6 +11,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
@@ -17,9 +21,9 @@ public class Constants {
     
     public static class Drive {
         public static final int LID = 0;
-        public static final int LFID = 1;
+        public static final int LFollowID = 1;
         public static final int RID = 2;
-        public static final int RFID = 3;
+        public static final int RFollowID = 3;
         public static final int pigeonID = 9;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
             1, 1, 1, 0.5, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
@@ -35,7 +39,7 @@ public class Constants {
 
     public static class Pivot {
         public static final int ID = 4;
-        public static final int FID = 5;
+        public static final int followID = 5;
         public static final double gearRatio = 100;
         public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final double boreEncoderOffset = 0; //! Have to find this value
@@ -46,10 +50,10 @@ public class Constants {
     }
 
     public static class Intake {
-        public static final int INID = 6;
-        public static final int SID = 7;
-        public static final int TimeOfFlightID = 8;
-        public static final int fromSensorRange = 10; // mm
+        public static final int intakeID = 6;
+        public static final int shooterID = 7;
+        public static final int timeOfFlightID = 8;
+        public static final Measure<Distance> noteDetectionRange = Millimeters.of(10);
         public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final double speakerShootSpeed = 6380 / 60; // Max RPS of the Falcon 500
         public static final double ampShootSpeed = 0; //! Find this

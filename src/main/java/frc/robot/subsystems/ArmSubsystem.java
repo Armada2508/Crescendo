@@ -17,20 +17,20 @@ import frc.robot.lib.Encoder;
 import frc.robot.lib.util.Util;
 
 
-public class PivotSubsystem extends SubsystemBase {
+public class ArmSubsystem extends SubsystemBase {
     
     private final TalonFX talon = new TalonFX(Pivot.ID);
-    private final TalonFX talonF = new TalonFX(Pivot.FID);
-    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(0);
+    private final TalonFX talonFollow = new TalonFX(Pivot.followID);
+    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(0); //! Constant
 
-    public PivotSubsystem() {
+    public ArmSubsystem() {
         configTalons();
     }
 
     private void configTalons() {
-        Util.factoryResetTalons(talon, talonF);
-        Util.brakeMode(talon, talonF);
-        talonF.setControl(new StrictFollower(talon.getDeviceID()));
+        Util.factoryResetTalons(talon, talonFollow);
+        Util.brakeMode(talon, talonFollow);
+        talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Pivot.slot0ConfigMotionMagic);
         talon.setPosition(throughBoreEncoder.getDistance() + Pivot.boreEncoderOffset);
     }
@@ -64,12 +64,12 @@ public class PivotSubsystem extends SubsystemBase {
     /**
      * 
      * @param degree degrees
-     * @param velocity rps
-     * @param acceleration rps/s
+     * @param velocity rotations per second
+     * @param acceleration rotations per second^2
      * @return
      */
     public Command setAngleCommand(DoubleSupplier degree, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! test degree
+        final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! Constant
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
             setAngle(degree);

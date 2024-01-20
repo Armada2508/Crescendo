@@ -7,40 +7,40 @@ import frc.robot.Constants.Field;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Pivot;
 import frc.robot.lib.logging.LogUtil;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.NoteManipulationSubsystem;
 
 //! Have to find out all the velocities, accelerations for this stuff
 public class Routines {
 
     private Routines() {}
    
-    public static Command groundIntake(PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(Pivot.pickupAngle, 0, 0) // pivot to ground
+    public static Command groundIntake(ArmSubsystem armSubsystem, NoteManipulationSubsystem intakeSubsystem) {
+        return armSubsystem.setAngleCommand(Pivot.pickupAngle, 0, 0) // pivot to ground
         .andThen(intakeSubsystem.intakeCommand()) // intake
-        .andThen(stowCommand(pivotSubsystem));
+        .andThen(stowCommand(armSubsystem));
     }
 
-    public static Command scoreAmp(PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(Pivot.ampAngle, 0, 0) // pivot to amp
+    public static Command scoreAmp(ArmSubsystem armSubsystem, NoteManipulationSubsystem intakeSubsystem) {
+        return armSubsystem.setAngleCommand(Pivot.ampAngle, 0, 0) // pivot to amp
         .andThen(intakeSubsystem.shootCommand(Intake.ampShootSpeed)) // shoot into amp
-        .andThen(stowCommand(pivotSubsystem));
+        .andThen(stowCommand(armSubsystem));
     }
 
-    public static Command scoreSpeakerBase(PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(Pivot.speakerAngle, 0, 0)
+    public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, NoteManipulationSubsystem intakeSubsystem) {
+        return armSubsystem.setAngleCommand(Pivot.speakerAngle, 0, 0)
         .andThen(intakeSubsystem.shootCommand(Intake.speakerShootSpeed))
-        .andThen(stowCommand(pivotSubsystem));
+        .andThen(stowCommand(armSubsystem));
     }
 
     /**
      * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
      */
-    public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, PivotSubsystem pivotSubsystem, IntakeSubsystem intakeSubsystem) {
-        return pivotSubsystem.setAngleCommand(() -> calcAngle(driveSubsystem), 0, 0)
+    public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, NoteManipulationSubsystem intakeSubsystem) {
+        return armSubsystem.setAngleCommand(() -> calcAngle(driveSubsystem), 0, 0)
         .andThen(intakeSubsystem.shootCommand(Intake.speakerShootSpeed))
-        .andThen(stowCommand(pivotSubsystem));
+        .andThen(stowCommand(armSubsystem));
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
@@ -69,7 +69,7 @@ public class Routines {
         return b;
     }   
 
-    private static Command stowCommand(PivotSubsystem pivotSubsystem) {
-        return pivotSubsystem.setAngleCommand(Pivot.stowAngle, 0, 0); //test velocity and acceleration values
+    private static Command stowCommand(ArmSubsystem armSubsystem) {
+        return armSubsystem.setAngleCommand(Pivot.stowAngle, 0, 0); //test velocity and acceleration values
     }
 }

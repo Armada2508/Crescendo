@@ -4,26 +4,26 @@
 
 package frc.robot;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.controller.SmartJoystick;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PivotSubsystem;
+import frc.robot.subsystems.NoteManipulationSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
     private final SmartJoystick joystick = new SmartJoystick(0);
     private final SmartJoystick buttonBoard = new SmartJoystick(1);
-    // private final VisionSubsystem visionSubsystem = new VisionSubsystem();
-    // private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getEstimatedGlobalPose);
-    private final DriveSubsystem driveSubsystem = new DriveSubsystem(Optional::empty);
-    private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
-    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getEstimatedGlobalPose);
+    // private final DriveSubsystem driveSubsystem = new DriveSubsystem(Optional::empty);
+    private final ArmSubsystem armSubsystem = new ArmSubsystem();
+    private final NoteManipulationSubsystem intakeSubsystem = new NoteManipulationSubsystem();
 
     public RobotContainer() {
         int reverseButton = 1;
@@ -38,19 +38,19 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
-        pivotSubsystem.stop();
+        armSubsystem.stop();
         intakeSubsystem.stop();
     }
     
     private void configureBindings() {
         // joystick.whileTrue(5, intakeSubsystem.runOnce(() -> intakeSubsystem.setSpeed(1)).finallyDo(intakeSubsystem::stop));
-        // joystick.whileTrue(6, pivotSubsystem.runOnce(() -> intakeSubsystem.setSpeed(.25)).finallyDo(pivotSubsystem::stop));
-        // joystick.whileTrue(4, pivotSubsystem.runOnce(() -> intakeSubsystem.setSpeed(-.25)).finallyDo(pivotSubsystem::stop));
+        // joystick.whileTrue(6, armSubsystem.runOnce(() -> intakeSubsystem.setSpeed(.25)).finallyDo(armSubsystem::stop));
+        // joystick.whileTrue(4, armSubsystem.runOnce(() -> intakeSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));
         // joystick.onTrue(8, driveSubsystem.turnCommand(-45));
         // joystick.onTrue(9, driveSubsystem.turnCommand(45));
         // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(-2, 2, 2));
         // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(-2, 2, 2));
-        joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, pivotSubsystem, intakeSubsystem));
+        joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeSubsystem));
     }
 
     public Command getAutonomousCommand() {

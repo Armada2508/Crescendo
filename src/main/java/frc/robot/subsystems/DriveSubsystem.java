@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -29,25 +30,28 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Drive;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.drive.DriveCommand;
+import frc.robot.lib.logging.Loggable;
+import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
 
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talonL = new TalonFX(Drive.LID);
     private final TalonFX talonR = new TalonFX(Drive.RID);
-    private final TalonFX talonLF = new TalonFX(Drive.LFID);
-    private final TalonFX talonRF = new TalonFX(Drive.RFID);
-    private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID);
+    private final TalonFX talonLFollow = new TalonFX(Drive.LFollowID);
+    private final TalonFX talonRFollow = new TalonFX(Drive.RFollowID);
+    private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private DifferentialDrivePoseEstimator poseEstimator;
     private final Supplier<Optional<EstimatedRobotPose>> visionEstimatedPose; 
     private final Field2d field2d = new Field2d();
-    
+
     public DriveSubsystem(Supplier<Optional<EstimatedRobotPose>> visionEstimator) {
         this.visionEstimatedPose = visionEstimator;
         turnPIDController.setTolerance(0.5); // degrees
         configTalons();
         SmartDashboard.putData("Field", field2d);
+        NTLogger.register(this);
     }
 
     @Override
@@ -72,14 +76,14 @@ public class DriveSubsystem extends SubsystemBase {
     private void configTalons() {
         pigeon.configFactoryDefault();
         pigeon.setYaw(0);
-        Util.factoryResetTalons(talonL, talonR, talonLF, talonRF);
-        Util.brakeMode(talonL, talonR, talonLF, talonRF);
+        Util.factoryResetTalons(talonL, talonR, talonLFollow, talonRFollow);
+        Util.brakeMode(talonL, talonR, talonLFollow, talonRFollow);
         talonL.setPosition(0);
         talonR.setPosition(0);
-        talonLF.setControl(new StrictFollower(talonL.getDeviceID()));
-        talonRF.setControl(new StrictFollower(talonR.getDeviceID()));
-        talonLF.setInverted(true);
-        talonRF.setInverted(true);
+        talonLFollow.setControl(new StrictFollower(talonL.getDeviceID()));
+        talonRFollow.setControl(new StrictFollower(talonR.getDeviceID()));
+        talonLFollow.setInverted(true);
+        talonRFollow.setInverted(true);
         talonL.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
         talonR.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
     }
@@ -169,6 +173,15 @@ public class DriveSubsystem extends SubsystemBase {
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
         return new DriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
+    }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        map.put("TalonL", NTLogger.getTalonLog(talonL));
+        map.put("TalonR", NTLogger.getTalonLog(talonR));
+        map.put("TalonLF", NTLogger.getTalonLog(talonLFollow));
+        map.put("TalonRF", NTLogger.getTalonLog(talonRFollow));
+        return map;
     }
 
 }
