@@ -6,8 +6,10 @@ import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -45,14 +47,14 @@ public class Constants {
             1, 0.5, 0.25, 0.2, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
-        public static final Measure<Distance> wheelDiameter = Inches.of(6);
-        public static final Measure<Distance> trackWidth = Inches.of(24.5);
-        public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); //! Find this
+        public static final Measure<Distance> wheelDiameter = Inches.of(6); 
+        public static final Measure<Distance> trackWidth = Inches.of(24.5); //! Find this
+        public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Measure<Distance> driveDeadband = Inches.of(0.5);
+        public static final Measure<Distance> driveDeadband = Inches.of(0.5); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Measure<Angle> turnDeadband = Degrees.of(0.5);
+        public static final Measure<Angle> turnDeadband = Degrees.of(0.5); //! Tune this
         public static final double maxTurnPIDSpeed = 0.25; //! Tune this
     }
 
@@ -61,7 +63,8 @@ public class Constants {
         public static final int followID = 5;
         public static final int throughBoreEncoderID = 0;
         public static final double gearRatio = 100;
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withRotorToSensorRatio(gearRatio); // ! Find this
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0).withKG(0).withGravityType(GravityTypeValue.Arm_Cosine); //! Have to tune for these values
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
         public static final double boreEncoderOffset = 0; //! Have to find this value
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
@@ -81,7 +84,7 @@ public class Constants {
         public static final double intakeSpeed = 0.5; //! Tune this
         public static final double indexSpeed = 0.5; //! Tune this
         public static final Measure<Velocity<Angle>> velocityDeadband = RotationsPerSecond.of(1); //! Tune this
-        public static final Measure<Time> timeToShoot = Seconds.of(1);
+        public static final Measure<Time> timeToShoot = Seconds.of(1); //! Tune this
         public static final Measure<Velocity<Angle>> speakerShootSpeed = RotationsPerSecond.of(0); //! Tune this
         public static final Measure<Velocity<Angle>> ampShootSpeed = RotationsPerSecond.of(0); //! Tune this
     }

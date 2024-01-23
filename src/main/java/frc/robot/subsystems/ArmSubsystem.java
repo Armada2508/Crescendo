@@ -35,6 +35,7 @@ public class ArmSubsystem extends SubsystemBase {
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
+        talon.getConfigurator().apply(Arm.feedbackConfigs);
         talon.setPosition(throughBoreEncoder.getDistance() + Arm.boreEncoderOffset);
     }
 
