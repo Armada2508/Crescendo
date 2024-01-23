@@ -1,8 +1,11 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
@@ -12,16 +15,16 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Pivot;
+import frc.robot.Constants.Arm;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.util.Util;
 
 
 public class ArmSubsystem extends SubsystemBase {
     
-    private final TalonFX talon = new TalonFX(Pivot.ID);
-    private final TalonFX talonFollow = new TalonFX(Pivot.followID);
-    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(0); //! Constant
+    private final TalonFX talon = new TalonFX(Arm.ID);
+    private final TalonFX talonFollow = new TalonFX(Arm.followID);
+    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
 
     public ArmSubsystem() {
         configTalons();
@@ -31,55 +34,53 @@ public class ArmSubsystem extends SubsystemBase {
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
-        talon.getConfigurator().apply(Pivot.slot0ConfigMotionMagic);
-        talon.setPosition(throughBoreEncoder.getDistance() + Pivot.boreEncoderOffset);
+        talon.getConfigurator().apply(Arm.motionMagicConfig);
+        talon.setPosition(throughBoreEncoder.getDistance() + Arm.boreEncoderOffset);
     }
 
     /**
-     * 
-     * @param velocity rps
-     * @param acceleration rps/s
+     * @param velocity rotations per second
+     * @param acceleration rotations per second^2
      */
     public void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
-        config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Pivot.gearRatio);
-        config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(velocity, Pivot.gearRatio);;
+        config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(velocity, Arm.gearRatio);
+        config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Arm.gearRatio);
         talon.getConfigurator().apply(config);
     }
 
     public void setSpeed(double speed) {
-        talon.set(speed);
+        talon.setControl(new DutyCycleOut(speed));
     }
 
     public void stop() {
         talon.setControl(new NeutralOut());
     }
     
-    public void setAngle(DoubleSupplier degree) {
-        double angleRots = Encoder.fromRotationalAngle(degree.getAsDouble(), Pivot.gearRatio);
+    public void setAngle(DoubleSupplier angle) {
+        double angleRots = Encoder.fromRotationalAngle(angle.getAsDouble(), Arm.gearRatio);
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
         talon.setControl(request);
     }
     
     /**
      * 
-     * @param degree degrees
+     * @param angle degrees
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      * @return
      */
-    public Command setAngleCommand(DoubleSupplier degree, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromRotationalAngle(0.5, Pivot.gearRatio); //! Constant
+    public Command setAngleCommand(DoubleSupplier angle, double velocity, double acceleration) {
+        final double deadbandRotations = Encoder.fromRotationalAngle(Arm.angleDeadband.in(Degrees), Arm.gearRatio); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
-            setAngle(degree);
+            setAngle(angle);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
-        .finallyDo(this::stop);
+        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)));
     }
 
-    public Command setAngleCommand(double degree, double velocity, double acceleration) {
-        return setAngleCommand(() -> degree, velocity, acceleration);
+    public Command setAngleCommand(double angle, double velocity, double acceleration) {
+        return setAngleCommand(() -> angle, velocity, acceleration);
     }
 
 }

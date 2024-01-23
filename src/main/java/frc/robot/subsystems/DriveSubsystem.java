@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -11,6 +14,7 @@ import org.photonvision.EstimatedRobotPose;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
@@ -21,7 +25,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -48,7 +51,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     public DriveSubsystem(Supplier<Optional<EstimatedRobotPose>> visionEstimator) {
         this.visionEstimatedPose = visionEstimator;
-        turnPIDController.setTolerance(0.5); // degrees
+        turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         configTalons();
         SmartDashboard.putData("Field", field2d);
         NTLogger.register(this);
@@ -75,17 +78,14 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private void configTalons() {
         pigeon.configFactoryDefault();
-        pigeon.setYaw(0);
         Util.factoryResetTalons(talonL, talonR, talonLFollow, talonRFollow);
         Util.brakeMode(talonL, talonR, talonLFollow, talonRFollow);
-        talonL.setPosition(0);
-        talonR.setPosition(0);
         talonLFollow.setControl(new StrictFollower(talonL.getDeviceID()));
         talonRFollow.setControl(new StrictFollower(talonR.getDeviceID()));
         talonLFollow.setInverted(true);
         talonRFollow.setInverted(true);
-        talonL.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
-        talonR.getConfigurator().apply(Drive.slot0ConfigMotionMagic);
+        talonL.getConfigurator().apply(Drive.motionMagicConfig);
+        talonR.getConfigurator().apply(Drive.motionMagicConfig);
     }
 
     /**
@@ -96,26 +96,26 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         // Time period is 1s
-        config.MotionMagicCruiseVelocity = Encoder.fromDistance(velocity, Drive.gearRatio, Drive.wheelDiameter);
-        config.MotionMagicAcceleration = Encoder.fromDistance(acceleration, Drive.gearRatio, Drive.wheelDiameter);
+        config.MotionMagicCruiseVelocity = Encoder.fromDistance(velocity, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
+        config.MotionMagicAcceleration = Encoder.fromDistance(acceleration, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
         talonL.getConfigurator().apply(config);
         talonR.getConfigurator().apply(config);
     }
 
     /**
      * Drives the robot a certain distance relative to itself using motion magic
-     * @param meters - distance to travel
+     * @param distance meters
      */
-    private void driveDistance(double meters) {
-        double distanceRots = Encoder.fromDistance(meters, Drive.gearRatio, Drive.wheelDiameter);
-        MotionMagicVoltage request = new MotionMagicVoltage(distanceRots);
-        talonL.setControl(request);
-        talonR.setControl(request);
+    private void driveDistance(double distance) {
+        MotionMagicVoltage request = new MotionMagicVoltage(0);
+        double distanceRots = Encoder.fromDistance(distance, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
+        talonL.setControl(request.withPosition(talonL.getPosition().getValueAsDouble() + distanceRots));
+        talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
 
     public void setSpeed(double leftSpeed, double rightSpeed) {
-        talonL.set(leftSpeed);
-        talonR.set(rightSpeed);
+        talonL.setControl(new DutyCycleOut(leftSpeed));
+        talonR.setControl(new DutyCycleOut(rightSpeed));
     }
 
     /**
@@ -126,12 +126,12 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @return Command for the robot to drive distance using motion magic
      */
     public Command driveDistanceCommand(double distance, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromDistance(Units.inchesToMeters(0.5), Drive.gearRatio, Drive.wheelDiameter); 
+        final double deadbandRotations = Encoder.fromDistance(Drive.driveDeadband.in(Meters), Drive.gearRatio, Drive.wheelDiameter.in(Meters)); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
             driveDistance(distance);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(talonL.getPosition().getValueAsDouble() - talonL.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
+        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonL.getPosition().getValueAsDouble(), talonL.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
         .finallyDo(this::stop);
     }
 
@@ -145,7 +145,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.setSetpoint(pigeon.getYaw() + angle);
         return runEnd(() -> {
             double speed = turnPIDController.calculate(pigeon.getYaw());
-            speed = MathUtil.clamp(speed, -Drive.maxTurnSpeed, Drive.maxTurnSpeed);
+            speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
             setSpeed(speed, -speed);
         }, this::stop).until(turnPIDController::atSetpoint);
     }
@@ -156,11 +156,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     private double getLeftPosition() {
-        return Encoder.toDistance(talonL.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter);
+        return Encoder.toDistance(talonL.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters));
     }
 
     private double getRightPosition() {
-        return Encoder.toDistance(talonR.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter);
+        return Encoder.toDistance(talonR.getPosition().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters));
     }
 
     private Rotation2d getAngle() {
@@ -181,6 +181,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         map.put("TalonR", NTLogger.getTalonLog(talonR));
         map.put("TalonLF", NTLogger.getTalonLog(talonLFollow));
         map.put("TalonRF", NTLogger.getTalonLog(talonRFollow));
+        map.put("Pigeon Yaw", pigeon.getYaw());
         return map;
     }
 

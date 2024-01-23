@@ -1,6 +1,10 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
@@ -10,64 +14,86 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
+import edu.wpi.first.units.Velocity;
 import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
     public static final double GRAVITY = 9.81;
+
+    public static class Joysticks {
+        // Ports
+        public static final int joystickPort = 0;
+        public static final int buttonBoardPort = 1;
+        // Joystick
+        public static final int driveSlowButton = 12;
+        // Button Board
+        public static final int driveReverseButton = 1;
+    }
     
     public static class Drive {
         public static final int LID = 0;
         public static final int LFollowID = 1;
         public static final int RID = 2;
         public static final int RFollowID = 3;
-        public static final int pigeonID = 9;
+        public static final int pigeonID = 8;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            1, 1, 1, 0.5, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
+            1, 0.5, 0.25, 0.2, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
-        public static final double wheelDiameter = Units.inchesToMeters(6);
-        public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(Units.inchesToMeters(24.5));   //? Double check when drivebase built
-        public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Measure<Distance> wheelDiameter = Inches.of(6);
+        public static final Measure<Distance> trackWidth = Inches.of(24.5);
+        public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); //! Find this
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Measure<Distance> driveDeadband = Inches.of(0.5);
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final double maxTurnSpeed = 0.25;
+        public static final Measure<Angle> turnDeadband = Degrees.of(0.5);
+        public static final double maxTurnPIDSpeed = 0.25; //! Tune this
     }
 
-    public static class Pivot {
+    public static class Arm {
         public static final int ID = 4;
         public static final int followID = 5;
+        public static final int throughBoreEncoderID = 0;
         public static final double gearRatio = 100;
-        public static final Slot0Configs slot0ConfigMotionMagic = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
         public static final double boreEncoderOffset = 0; //! Have to find this value
-        public static final int stowAngle = 0; //! find angle for stow
-        public static final double speakerAngle = 0; //! find angle for base speaker
-        public static final double ampAngle = 0; //! find angle for amp
-        public static final double pickupAngle = 0; //! find angle for pickup
+        public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
+        public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
+        public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
+        public static final Measure<Angle> speakerAngle = Degrees.of(0); //! Find angle for base speaker
     }
 
-    public static class Intake {
+    public static class IntakeShooter {
         public static final int intakeID = 6;
         public static final int shooterID = 7;
-        public static final int timeOfFlightID = 8;
-        public static final Measure<Distance> noteDetectionRange = Millimeters.of(10);
-        public static final Slot0Configs slot0Config = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final double speakerShootSpeed = 6380 / 60; // Max RPS of the Falcon 500
-        public static final double ampShootSpeed = 0; //! Find this
-        public static final double flywheelDiamter = Units.inchesToMeters(4); //! Find this
+        public static final int timeOfFlightID = 0;
+        public static final Measure<Distance> flywheelDiameter = Inches.of(4); //! Find this
+        public static final Slot0Configs shooterVelocityConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Measure<Distance> noteDetectionRange = Millimeters.of(10); //! Tune this
+        public static final Measure<Time> waitTimeAfterTrip = Seconds.of(1); //! Tune this
+        public static final double intakeSpeed = 0.5; //! Tune this
+        public static final double indexSpeed = 0.5; //! Tune this
+        public static final Measure<Velocity<Angle>> velocityDeadband = RotationsPerSecond.of(1); //! Tune this
+        public static final Measure<Time> timeToShoot = Seconds.of(1);
+        public static final Measure<Velocity<Angle>> speakerShootSpeed = RotationsPerSecond.of(0); //! Tune this
+        public static final Measure<Velocity<Angle>> ampShootSpeed = RotationsPerSecond.of(0); //! Tune this
     }
 
     public static class Vision {
         public static final String cameraName = "LifeCam";
-        public static final Transform3d robotToCamera = new Transform3d(); //! Have to configure
+        public static final Transform3d robotToCamera = new Transform3d(); //! Find this
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     }
 
     public static class Field {
-        public static final double lowSpeakerHeight = Units.inchesToMeters(78);
+        public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
         public static final Pose2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d();
     }
 

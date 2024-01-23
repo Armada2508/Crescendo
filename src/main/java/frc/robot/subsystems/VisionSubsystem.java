@@ -20,6 +20,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (!cam.isConnected()) return;
         result = cam.getLatestResult();
         if (result.hasTargets()) {
             var target = result.getBestTarget();
@@ -28,10 +29,12 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public boolean canSeeTag() {
+        if (!cam.isConnected()) return false;
         return result.hasTargets();
     }
 
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+        if (!cam.isConnected()) return Optional.empty();
         return photonPoseEstimator.update();
     }
 
