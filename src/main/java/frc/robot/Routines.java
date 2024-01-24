@@ -77,4 +77,24 @@ public class Routines {
         return armSubsystem.setAngleCommand(Arm.stowAngle.in(Degrees), 0, 0);
     }
 
+    public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return turnToSpeaker(driveSubsystem)
+        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
+        .andThen(driveSubsystem.turnCommand(0)) //? use vision for angle?
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?, tune velocity and acceleration
+    }
+
+    public static Command autoComplex(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return turnToSpeaker(driveSubsystem)
+        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
+        .andThen(driveSubsystem.turnCommand(0)) //? use vision for angle?
+        //? how to know how far away note is?
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0))
+        .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
+        //? use april tag to get distance to april tag?
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0))
+        .andThen(turnToSpeaker(driveSubsystem))
+        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?, tune velocity and acceleration
+    }
 }
