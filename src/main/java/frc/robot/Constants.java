@@ -7,18 +7,20 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Velocity;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
@@ -50,6 +52,8 @@ public class Constants {
         public static final Measure<Distance> trackWidth = Inches.of(24.5); //! Find this
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final int velocitySlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.5); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
@@ -99,8 +103,9 @@ public class Constants {
     }
 
     public static class Field {
+        public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
-        public static final Pose2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d();
+        public static final Translation2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d().getTranslation();
     }
 
 }

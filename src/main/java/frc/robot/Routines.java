@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Arm;
@@ -52,8 +51,8 @@ public class Routines {
     }
 
     private static double calcAngle(DriveSubsystem driveSubsystem) {
-        // double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos.getTranslation());
-        double x = new Translation2d(Field.speakerPos.getTranslation().getX(), Field.speakerPos.getTranslation().getY() + 2).getDistance(Field.speakerPos.getTranslation());
+        double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
+        // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);
         double y = Field.lowSpeakerHeight.in(Meters);
         double v = IntakeShooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * IntakeShooter.flywheelDiameter.in(Meters);
         double g = Constants.gravity;
