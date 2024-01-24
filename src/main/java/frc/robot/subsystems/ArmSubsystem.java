@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.Arm;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.util.Util;
@@ -35,19 +36,24 @@ public class ArmSubsystem extends SubsystemBase {
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
-        talon.getConfigurator().apply(Arm.feedbackConfigs);
-        talon.setPosition(throughBoreEncoder.getDistance() + Arm.boreEncoderOffset);
+        double encoderPos = throughBoreEncoder.getDistance() * Constants.degreesPerRotation / Arm.boreEncoderTicksPerRotation; 
+        double actualPos = encoderPos + Arm.boreEncoderOffset.in(Degrees);
+        talon.setPosition(Encoder.fromRotationalAngle(actualPos, Arm.gearRatio));
     }
 
     /**
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      */
-    public void configMotionMagic(double velocity, double acceleration) {
+    private void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(velocity, Arm.gearRatio);
         config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Arm.gearRatio);
         talon.getConfigurator().apply(config);
+    }
+
+    private double getFeedforward() {
+        return Arm.gravityFeedforward * Math.cos(getAngle());
     }
 
     public void setSpeed(double speed) {
@@ -57,10 +63,14 @@ public class ArmSubsystem extends SubsystemBase {
     public void stop() {
         talon.setControl(new NeutralOut());
     }
+
+    public double getAngle() {
+        return Encoder.toRotationalAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
+    }
     
     public void setAngle(DoubleSupplier angle) {
         double angleRots = Encoder.fromRotationalAngle(angle.getAsDouble(), Arm.gearRatio);
-        MotionMagicVoltage request = new MotionMagicVoltage(angleRots);
+        MotionMagicVoltage request = new MotionMagicVoltage(angleRots).withFeedForward(getFeedforward());
         talon.setControl(request);
     }
     

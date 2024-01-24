@@ -6,10 +6,8 @@ import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -25,7 +23,8 @@ import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
-    public static final double GRAVITY = 9.81;
+    public static final double gravity = 9.81;
+    public static final double degreesPerRotation = 360;
 
     public static class Joysticks {
         // Ports
@@ -63,10 +62,11 @@ public class Constants {
         public static final int followID = 5;
         public static final int throughBoreEncoderID = 0;
         public static final double gearRatio = 100;
-        public static final FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withRotorToSensorRatio(gearRatio); // ! Find this
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0).withKG(0).withGravityType(GravityTypeValue.Arm_Cosine); //! Have to tune for these values
+        public static final double gravityFeedforward = 0; //! Find this
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
-        public static final double boreEncoderOffset = 0; //! Have to find this value
+        public static final double boreEncoderTicksPerRotation = 1024;
+        public static final Measure<Angle> boreEncoderOffset = Degrees.of(0); //! Have to find this value
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
         public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
         public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp

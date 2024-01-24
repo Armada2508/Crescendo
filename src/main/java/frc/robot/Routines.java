@@ -56,7 +56,7 @@ public class Routines {
         double x = new Translation2d(Field.speakerPos.getTranslation().getX(), Field.speakerPos.getTranslation().getY() + 2).getDistance(Field.speakerPos.getTranslation());
         double y = Field.lowSpeakerHeight.in(Meters);
         double v = IntakeShooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * IntakeShooter.flywheelDiameter.in(Meters);
-        double g = Constants.GRAVITY;
+        double g = Constants.gravity;
         double angle1 = Units.radiansToDegrees(Math.atan( (v * v + inner(x, y, v, g)) / (g * x) ));
         double angle2 = Units.radiansToDegrees(Math.atan( (v * v - inner(x, y, v, g)) / (g * x) ));
         double angle = closer(angle1, angle2, 45);
