@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -11,6 +11,8 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -56,6 +58,15 @@ public class ArmSubsystem extends SubsystemBase {
         return Arm.gravityFeedforward * Math.cos(getAngle());
     }
 
+    private void setAngle(Supplier<Measure<Angle>> angleSupplier) {
+        Measure<Angle> angle = angleSupplier.get();
+        if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
+        if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
+        double angleRots = Encoder.fromRotationalAngle(angle.in(Degrees), Arm.gearRatio);
+        MotionMagicVoltage request = new MotionMagicVoltage(angleRots).withFeedForward(getFeedforward());
+        talon.setControl(request);
+    }
+
     public void setSpeed(double speed) {
         talon.setControl(new DutyCycleOut(speed));
     }
@@ -68,12 +79,6 @@ public class ArmSubsystem extends SubsystemBase {
         return Encoder.toRotationalAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
     }
     
-    public void setAngle(DoubleSupplier angle) {
-        double angleRots = Encoder.fromRotationalAngle(angle.getAsDouble(), Arm.gearRatio);
-        MotionMagicVoltage request = new MotionMagicVoltage(angleRots).withFeedForward(getFeedforward());
-        talon.setControl(request);
-    }
-    
     /**
      * 
      * @param angle degrees
@@ -81,7 +86,7 @@ public class ArmSubsystem extends SubsystemBase {
      * @param acceleration rotations per second^2
      * @return
      */
-    public Command setAngleCommand(DoubleSupplier angle, double velocity, double acceleration) {
+    public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration) {
         final double deadbandRotations = Encoder.fromRotationalAngle(Arm.angleDeadband.in(Degrees), Arm.gearRatio); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
@@ -90,7 +95,7 @@ public class ArmSubsystem extends SubsystemBase {
         .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)));
     }
 
-    public Command setAngleCommand(double angle, double velocity, double acceleration) {
+    public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration) {
         return setAngleCommand(() -> angle, velocity, acceleration);
     }
 

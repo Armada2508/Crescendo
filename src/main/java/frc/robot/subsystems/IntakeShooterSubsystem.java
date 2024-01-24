@@ -10,6 +10,9 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -61,12 +64,16 @@ public class IntakeShooterSubsystem extends SubsystemBase {
     /**
      * @param velocity rotations per second
      */
-    public Command shootCommand(double velocity) {
+    public Command shootCommand(Measure<Velocity<Angle>> velocity) {
+        double v = velocity.in(RotationsPerSecond);
         return runOnce(() -> {
-            final VelocityVoltage request = new VelocityVoltage(velocity);
+            final VelocityVoltage request = new VelocityVoltage(v);
             talonShooter.setControl(request);
         })
-        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonShooter.getVelocity().getValueAsDouble(), velocity, IntakeShooter.velocityDeadband.in(RotationsPerSecond))))
+        .andThen(
+            Commands.waitUntil(() -> Util.epsilonEquals(talonShooter.getVelocity().getValueAsDouble(), v, IntakeShooter.velocityDeadband.in(RotationsPerSecond)))
+            .withTimeout(IntakeShooter.flywheelVelocityTimeout.in(Seconds))
+        )
         .andThen(runOnce(() -> setIntakeSpeed(IntakeShooter.indexSpeed)))
         .andThen(Commands.waitSeconds(IntakeShooter.timeToShoot.in(Seconds))) 
         .finallyDo(this::stop);

@@ -21,20 +21,20 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.pickupAngle.in(Degrees), 0, 0)
+        return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0)
         .andThen(intakeSubsystem.intakeCommand()) 
         .andThen(stowCommand(armSubsystem));
     }
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle.in(Degrees), 0, 0) 
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.ampShootSpeed.in(RotationsPerSecond))) 
+        return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0) 
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.ampShootSpeed)) 
         .andThen(stowCommand(armSubsystem));
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle.in(Degrees), 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed.in(RotationsPerSecond)))
+        return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0)
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
         .andThen(stowCommand(armSubsystem));
     }
 
@@ -42,8 +42,8 @@ public class Routines {
      * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
      */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> calcAngle(driveSubsystem), 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed.in(RotationsPerSecond)))
+        return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0)
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
         .andThen(stowCommand(armSubsystem));
     }
 
@@ -74,7 +74,7 @@ public class Routines {
     }   
 
     private static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle.in(Degrees), 0, 0);
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0);
     }
 
 }

@@ -71,6 +71,8 @@ public class Constants {
         public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
         public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
         public static final Measure<Angle> speakerAngle = Degrees.of(0); //! Find angle for base speaker
+        public static final Measure<Angle> minAngle = Degrees.of(-10);
+        public static final Measure<Angle> maxAngle = Degrees.of(90);
     }
 
     public static class IntakeShooter {
@@ -83,6 +85,7 @@ public class Constants {
         public static final Measure<Time> waitTimeAfterTrip = Seconds.of(1); //! Tune this
         public static final double intakeSpeed = 0.5; //! Tune this
         public static final double indexSpeed = 0.5; //! Tune this
+        public static final Measure<Time> flywheelVelocityTimeout = Seconds.of(3);
         public static final Measure<Velocity<Angle>> velocityDeadband = RotationsPerSecond.of(1); //! Tune this
         public static final Measure<Time> timeToShoot = Seconds.of(1); //! Tune this
         public static final Measure<Velocity<Angle>> speakerShootSpeed = RotationsPerSecond.of(0); //! Tune this
