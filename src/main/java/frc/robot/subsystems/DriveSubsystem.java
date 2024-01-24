@@ -18,6 +18,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
@@ -25,12 +26,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Drive;
+import frc.robot.Constants.Field;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.logging.Loggable;
@@ -47,13 +47,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private DifferentialDrivePoseEstimator poseEstimator;
     private final Supplier<Optional<EstimatedRobotPose>> visionEstimatedPose; 
-    private final Field2d field2d = new Field2d();
 
     public DriveSubsystem(Supplier<Optional<EstimatedRobotPose>> visionEstimator) {
         this.visionEstimatedPose = visionEstimator;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         configTalons();
-        SmartDashboard.putData("Field", field2d);
         NTLogger.register(this);
     }
 
@@ -72,8 +70,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             poseEstimator.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), visionPose.get().timestampSeconds
             /*,VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(45))*/);
         }   
-        // System.out.println(getPose());
-        field2d.setRobotPose(getFieldPose());
+        // System.out.println(getFieldPose());
+        Field.simulatedField.setRobotPose(getFieldPose());
     }
 
     private void configTalons() {
@@ -86,6 +84,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonRFollow.setInverted(true);
         talonL.getConfigurator().apply(Drive.motionMagicConfig);
         talonR.getConfigurator().apply(Drive.motionMagicConfig);
+        talonL.getConfigurator().apply(Drive.velocityConfig);
+        talonR.getConfigurator().apply(Drive.velocityConfig);
     }
 
     /**
@@ -96,8 +96,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private void configMotionMagic(double velocity, double acceleration) {
         MotionMagicConfigs config = new MotionMagicConfigs();
         // Time period is 1s
-        config.MotionMagicCruiseVelocity = Encoder.fromDistance(velocity, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
-        config.MotionMagicAcceleration = Encoder.fromDistance(acceleration, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
+        config.MotionMagicCruiseVelocity = toRotations(velocity);
+        config.MotionMagicAcceleration = toRotations(acceleration);
         talonL.getConfigurator().apply(config);
         talonR.getConfigurator().apply(config);
     }
@@ -108,7 +108,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      */
     private void driveDistance(double distance) {
         MotionMagicVoltage request = new MotionMagicVoltage(0);
-        double distanceRots = Encoder.fromDistance(distance, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
+        double distanceRots = toRotations(distance);
         talonL.setControl(request.withPosition(talonL.getPosition().getValueAsDouble() + distanceRots));
         talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
@@ -119,6 +119,16 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
+     * @param leftVelocity meters/second
+     * @param rightVelocity meters/second
+     */
+    public void setVelocity(double leftVelocity, double rightVelocity) {
+        VelocityVoltage request = new VelocityVoltage(0).withSlot(Drive.velocitySlot);
+        talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
+        talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
+    }
+
+    /**
      * 
      * @param distance meters relative to robot
      * @param velocity meters/second
@@ -126,7 +136,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @return Command for the robot to drive distance using motion magic
      */
     public Command driveDistanceCommand(double distance, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromDistance(Drive.driveDeadband.in(Meters), Drive.gearRatio, Drive.wheelDiameter.in(Meters)); 
+        final double deadbandRotations = toRotations(Drive.driveDeadband.in(Meters)); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
             driveDistance(distance);
@@ -153,6 +163,13 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     public void stop() {
         talonL.setControl(new NeutralOut());
         talonR.setControl(new NeutralOut());
+    }
+
+    /**
+     * @param distance meters
+     */
+    private double toRotations(double distance) {
+        return Encoder.fromDistance(distance, Drive.gearRatio, Drive.wheelDiameter.in(Meters));
     }
 
     private double getLeftPosition() {

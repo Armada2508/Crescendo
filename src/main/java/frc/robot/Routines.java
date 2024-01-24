@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Arm;
@@ -21,20 +20,20 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.pickupAngle.in(Degrees), 0, 0)
+        return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0)
         .andThen(intakeSubsystem.intakeCommand()) 
         .andThen(stowCommand(armSubsystem));
     }
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle.in(Degrees), 0, 0) 
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.ampShootSpeed.in(RotationsPerSecond))) 
+        return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0) 
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.ampShootSpeed)) 
         .andThen(stowCommand(armSubsystem));
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle.in(Degrees), 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed.in(RotationsPerSecond)))
+        return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0)
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
         .andThen(stowCommand(armSubsystem));
     }
 
@@ -42,8 +41,8 @@ public class Routines {
      * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
      */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> calcAngle(driveSubsystem), 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed.in(RotationsPerSecond)))
+        return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0)
+        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
         .andThen(stowCommand(armSubsystem));
     }
 
@@ -52,11 +51,11 @@ public class Routines {
     }
 
     private static double calcAngle(DriveSubsystem driveSubsystem) {
-        // double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos.getTranslation());
-        double x = new Translation2d(Field.speakerPos.getTranslation().getX(), Field.speakerPos.getTranslation().getY() + 2).getDistance(Field.speakerPos.getTranslation());
+        double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
+        // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);
         double y = Field.lowSpeakerHeight.in(Meters);
         double v = IntakeShooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * IntakeShooter.flywheelDiameter.in(Meters);
-        double g = Constants.GRAVITY;
+        double g = Constants.gravity;
         double angle1 = Units.radiansToDegrees(Math.atan( (v * v + inner(x, y, v, g)) / (g * x) ));
         double angle2 = Units.radiansToDegrees(Math.atan( (v * v - inner(x, y, v, g)) / (g * x) ));
         double angle = closer(angle1, angle2, 45);
@@ -74,7 +73,7 @@ public class Routines {
     }   
 
     private static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle.in(Degrees), 0, 0);
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0);
     }
 
     public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
