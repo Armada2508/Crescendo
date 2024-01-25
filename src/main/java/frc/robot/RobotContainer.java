@@ -4,19 +4,10 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-
-import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -40,7 +31,7 @@ public class RobotContainer {
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
-        FollowTrajectory.config(0, 0, 0, 2.0, 0.7, Drive.trackWidth.in(Meters), new PIDController(0, 0, 0), 0); //! Constants!
+        FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
         joystick.bindButtons(Joysticks.driveSlowButton); 
         buttonBoard.bindButtons(Joysticks.driveReverseButton); 
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
@@ -67,17 +58,7 @@ public class RobotContainer {
         // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(-2, 2, 2));
         // joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Meters.of(5), Meters.of(5), Rotation2d.fromDegrees(0))));
-        joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Field.speakerPos, Rotation2d.fromDegrees(180))));
-    }
-
-    public Command getTrajectoryCommand(Pose2d targetPose) {
-        TrajectoryConfig config = new TrajectoryConfig(MetersPerSecond.of(0.75), MetersPerSecondPerSecond.of(0.5));
-        config.setKinematics(Drive.diffKinematics);
-        // Pose2d start = driveSubsystem.getFieldPose();
-        Pose2d start = new Pose2d(Meters.of(5), Meters.of(3), Rotation2d.fromDegrees(180));
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(start, new ArrayList<>(), targetPose, config);
-        Field.simulatedField.getObject("traj").setTrajectory(trajectory);
-        return FollowTrajectory.getCommandTalon(trajectory, new Pose2d(), driveSubsystem::getFieldPose, driveSubsystem::setVelocity, driveSubsystem);
+        joystick.onTrue(11, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Field.speakerPos, Rotation2d.fromDegrees(180))));
     }
 
     public Command getAutonomousCommand() {

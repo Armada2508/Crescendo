@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -26,6 +27,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,6 +38,7 @@ import frc.robot.lib.Encoder;
 import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
+import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.lib.util.Util;
 
 public class DriveSubsystem extends SubsystemBase implements Loggable {
@@ -113,19 +117,19 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
 
-    public void setSpeed(double leftSpeed, double rightSpeed) {
-        talonL.setControl(new DutyCycleOut(leftSpeed));
-        talonR.setControl(new DutyCycleOut(rightSpeed));
-    }
-
     /**
      * @param leftVelocity meters/second
      * @param rightVelocity meters/second
      */
-    public void setVelocity(double leftVelocity, double rightVelocity) {
+    private void setVelocity(double leftVelocity, double rightVelocity) {
         VelocityVoltage request = new VelocityVoltage(0).withSlot(Drive.velocitySlot);
         talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
+    }
+
+    public void setSpeed(double leftSpeed, double rightSpeed) {
+        talonL.setControl(new DutyCycleOut(leftSpeed));
+        talonR.setControl(new DutyCycleOut(rightSpeed));
     }
 
     /**
@@ -158,6 +162,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
             setSpeed(speed, -speed);
         }, this::stop).until(turnPIDController::atSetpoint);
+    }
+
+    public Command trajectoryToPoseCommand(Pose2d targetPose) {
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig);
+        return FollowTrajectory.getCommandTalon(trajectory, new Pose2d(), this::getFieldPose, this::setVelocity, this);
     }
 
     public void stop() {

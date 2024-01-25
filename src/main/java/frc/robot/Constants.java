@@ -2,6 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -15,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -52,13 +55,17 @@ public class Constants {
         public static final Measure<Distance> trackWidth = Inches.of(24.5); //! Find this
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0).withKV(0); //! Have to tune for these values
         public static final int velocitySlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.5); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
         public static final Measure<Angle> turnDeadband = Degrees.of(0.5); //! Tune this
         public static final double maxTurnPIDSpeed = 0.25; //! Tune this
+        // Trajectories
+        public static final double ramseteB = 2.0;
+        public static final double ramseteZeta = 0.7;
+        public static final TrajectoryConfig trajectoryConfig = new TrajectoryConfig(MetersPerSecond.of(0.75), MetersPerSecondPerSecond.of(0.5)).setKinematics(diffKinematics);
     }
 
     public static class Arm {
