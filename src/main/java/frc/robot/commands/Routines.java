@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.IntakeShooter;
@@ -50,6 +51,10 @@ public class Routines {
         return driveSubsystem.turnCommand(driveSubsystem.getFieldPose().getRotation().getDegrees() % 180); //? Probably have to fix this
     }
 
+    public static Command stowCommand(ArmSubsystem armSubsystem) {
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0);
+    }
+
     private static double calcAngle(DriveSubsystem driveSubsystem) {
         double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
         // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);
@@ -71,29 +76,5 @@ public class Routines {
         if (Math.abs(a - val) < Math.abs(b - val)) return a;
         return b;
     }   
-
-    private static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0);
-    }
-
-    public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return turnToSpeaker(driveSubsystem)
-        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.turnCommand(0)) //? use vision for angle?
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?, tune velocity and acceleration
-    }
-
-    public static Command autoComplex(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return turnToSpeaker(driveSubsystem)
-        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.turnCommand(0)) //? use vision for angle?
-        //? how to know how far away note is?
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0))
-        .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
-        //? use april tag to get distance to april tag?
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0))
-        .andThen(turnToSpeaker(driveSubsystem))
-        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?, tune velocity and acceleration
-    }
+    
 }
