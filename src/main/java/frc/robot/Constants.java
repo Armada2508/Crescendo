@@ -2,6 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
@@ -112,7 +113,7 @@ public class Constants {
     public static class Field {
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
-        public static final Translation2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d().getTranslation();
+        public static final Translation2d speakerPos = new Translation2d(Meters.of(0), Meters.of(5.55));
     }
 
 }
