@@ -112,7 +112,10 @@ public class Constants {
     public static class Field {
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
-        public static final Translation2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d().getTranslation();
+        public static final Translation2d speakerPos = Vision.aprilTagFieldLayout.getTagPose(7).get().toPose2d().getTranslation();        
+        public static final Translation2d lowerNoteCordinate = new Translation2d(Inches.of(161.5), Inches.of(114)); //note positions are based off of the blue cordinates
+        public static final Translation2d mediumNoteCordinate = new Translation2d(Inches.of(218.5), Inches.of(114));
+        public static final Translation2d upperNoteCordinate = new Translation2d(Inches.of(275.5), Inches.of(114));
+        
     }
-
 }

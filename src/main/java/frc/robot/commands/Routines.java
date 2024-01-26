@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -77,4 +80,7 @@ public class Routines {
         return b;
     }   
     
+    public static Pose2d translationToTrajectoryPose(Translation2d translation, double degrees) {
+        return new Pose2d(translation.getX(), translation.getY(), Rotation2d.fromDegrees(degrees));
+    }
 }
