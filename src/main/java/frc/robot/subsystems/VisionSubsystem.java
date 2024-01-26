@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -9,8 +11,13 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Field;
 import frc.robot.Constants.Vision;
 import frc.robot.lib.logging.Loggable;
 
@@ -34,6 +41,14 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         if (!cam.isConnected()) return Optional.empty();
         return photonPoseEstimator.update();
+    }
+
+    public boolean isValidPose(Pose2d pose) {
+        return (pose.getX() >= 0 && pose.getX() <= Field.fieldLength.in(Meters) && pose.getY() >= 0 && pose.getY() <= Field.fieldWidth.in(Meters));
+    }
+    
+    public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) { //! Should be actually implemented somehow
+        return Vision.poseStdDevs;
     }
 
     @Override

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
 
@@ -49,11 +48,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talonRFollow = new TalonFX(Drive.RFollowID);
     private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
+    private final VisionSubsystem vision; 
     private DifferentialDrivePoseEstimator poseEstimator;
-    private final Supplier<Optional<EstimatedRobotPose>> visionEstimatedPose; 
 
-    public DriveSubsystem(Supplier<Optional<EstimatedRobotPose>> visionEstimator) {
-        this.visionEstimatedPose = visionEstimator;
+    public DriveSubsystem(VisionSubsystem vision) {
+        this.vision = vision;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         configTalons();
         NTLogger.register(this);
@@ -62,7 +61,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     @Override
     public void periodic() {
         if (pigeon.getState() != PigeonState.Ready) return;
-        Optional<EstimatedRobotPose> visionPose = visionEstimatedPose.get();
+        Optional<EstimatedRobotPose> visionPose = vision.getEstimatedGlobalPose();
         if (poseEstimator == null) { // Initialize field pose
             if (visionPose.isPresent()) {
                 poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), visionPose.get().estimatedPose.toPose2d());
@@ -71,10 +70,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         }
         poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
         if (visionPose.isPresent()) {
-            poseEstimator.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), visionPose.get().timestampSeconds
-            /*,VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(45))*/);
+            Pose2d pose = visionPose.get().estimatedPose.toPose2d();
+            if (vision.isValidPose(pose)) {
+                poseEstimator.addVisionMeasurement(pose, visionPose.get().timestampSeconds, vision.getEstimationStdDevs(pose));
+            }
         }   
-        // System.out.println(getFieldPose());
         Field.simulatedField.setRobotPose(getFieldPose());
     }
 

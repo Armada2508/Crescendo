@@ -26,7 +26,7 @@ public class RobotContainer {
     private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
-    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getEstimatedGlobalPose);
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 

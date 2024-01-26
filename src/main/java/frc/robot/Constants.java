@@ -15,9 +15,13 @@ import com.ctre.phoenix6.configs.SlotConfigs;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -108,10 +112,15 @@ public class Constants {
         public static final String cameraName = "LifeCam";
         public static final Transform3d robotToCamera = new Transform3d(); //! Find this
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+        // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+        // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+        public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
 
     public static class Field {
         public static final Field2d simulatedField = new Field2d();
+        public static final Measure<Distance> fieldLength = Inches.of(651.25);
+        public static final Measure<Distance> fieldWidth = Inches.of(323.25);
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
         public static final Translation2d speakerPos = new Translation2d(Meters.of(0), Meters.of(5.55));
     }
