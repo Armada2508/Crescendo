@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -11,8 +12,9 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Vision;
+import frc.robot.lib.logging.Loggable;
 
-public class VisionSubsystem extends SubsystemBase {
+public class VisionSubsystem extends SubsystemBase implements Loggable {
 
     private final PhotonCamera cam = new PhotonCamera(Vision.cameraName); 
     private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(Vision.aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cam, Vision.robotToCamera);
@@ -22,10 +24,6 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         if (!cam.isConnected()) return;
         result = cam.getLatestResult();
-        if (result.hasTargets()) {
-            var target = result.getBestTarget();
-            System.out.println("Distance: " + Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm()));
-        }
     }
 
     public boolean canSeeTag() {
@@ -36,6 +34,17 @@ public class VisionSubsystem extends SubsystemBase {
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         if (!cam.isConnected()) return Optional.empty();
         return photonPoseEstimator.update();
+    }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        double distance = 0;
+        if (canSeeTag()) {
+            var target = result.getBestTarget();
+            distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
+        }
+        map.put("Distance", distance);
+        return map;
     }
 
 }

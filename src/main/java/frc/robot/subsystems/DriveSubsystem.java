@@ -165,8 +165,13 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command trajectoryToPoseCommand(Pose2d targetPose) {
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig);
-        return FollowTrajectory.getCommandTalon(trajectory, new Pose2d(), this::getFieldPose, this::setVelocity, this);
+        return runOnce(() -> {
+            System.out.println("Creating trajectory");
+            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig);
+            System.out.println("Done creating trajectory");
+            Field.simulatedField.getObject("traj").setTrajectory(trajectory);
+            FollowTrajectory.getCommandTalon(trajectory, new Pose2d(), this::getFieldPose, this::setVelocity, this).schedule();
+        });
     }
 
     public void stop() {
@@ -203,6 +208,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
+        String currentCommand = getCurrentCommand() == null ? null : getCurrentCommand().getName();
+        String defaultCommand = getDefaultCommand() == null ? null : getDefaultCommand().getName();
+        map.put("Current Command", currentCommand);
+        map.put("Default Command", defaultCommand);
         map.put("TalonL", NTLogger.getTalonLog(talonL));
         map.put("TalonR", NTLogger.getTalonLog(talonR));
         map.put("TalonLF", NTLogger.getTalonLog(talonLFollow));
