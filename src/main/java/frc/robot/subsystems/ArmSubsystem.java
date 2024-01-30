@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -20,10 +21,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Arm;
 import frc.robot.lib.Encoder;
+import frc.robot.lib.logging.Loggable;
+import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
 
 
-public class ArmSubsystem extends SubsystemBase {
+public class ArmSubsystem extends SubsystemBase implements Loggable {
     
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followID);
@@ -31,6 +34,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public ArmSubsystem() {
         configTalons();
+        NTLogger.register(this);
     }
 
     private void configTalons() {
@@ -38,9 +42,7 @@ public class ArmSubsystem extends SubsystemBase {
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
-        double encoderPos = throughBoreEncoder.getDistance() * Constants.degreesPerRotation / Arm.boreEncoderTicksPerRotation; 
-        double actualPos = encoderPos + Arm.boreEncoderOffset.in(Degrees);
-        talon.setPosition(Encoder.fromRotationalAngle(actualPos, Arm.gearRatio));
+        talon.setPosition(Encoder.fromRotationalAngle(getBoreEncoderAngle(), Arm.gearRatio));
     }
 
     /**
@@ -79,6 +81,12 @@ public class ArmSubsystem extends SubsystemBase {
         return Encoder.toRotationalAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
     }
     
+    public double getBoreEncoderAngle() {
+        double encoderPos = throughBoreEncoder.getDistance() * Constants.degreesPerRotation / Arm.boreEncoderTicksPerRotation; 
+        double actualPos = encoderPos + Arm.boreEncoderOffset.in(Degrees);
+        return actualPos;
+    }
+    
     /**
      * 
      * @param angle degrees
@@ -97,6 +105,12 @@ public class ArmSubsystem extends SubsystemBase {
 
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration) {
         return setAngleCommand(() -> angle, velocity, acceleration);
+    }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        map.put("Absolute Position Degrees", getBoreEncoderAngle());
+        return Util.mergeMaps(map, NTLogger.getTalonLog(talon), NTLogger.getTalonLog(talonFollow), NTLogger.getSubsystemLog(this));
     }
 
 }

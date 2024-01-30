@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
@@ -118,6 +119,7 @@ public class Constants {
     }
 
     public static class Field {
+        public static final Pose2d origin = new Pose2d();
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25);

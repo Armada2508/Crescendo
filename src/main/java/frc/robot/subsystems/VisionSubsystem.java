@@ -20,12 +20,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Vision;
 import frc.robot.lib.logging.Loggable;
+import frc.robot.lib.logging.NTLogger;
 
 public class VisionSubsystem extends SubsystemBase implements Loggable {
 
     private final PhotonCamera cam = new PhotonCamera(Vision.cameraName); 
     private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(Vision.aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cam, Vision.robotToCamera);
     private PhotonPipelineResult result;
+
+    public VisionSubsystem() {
+        NTLogger.register(this);
+    }
 
     @Override
     public void periodic() {
@@ -58,6 +63,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             var target = result.getBestTarget();
             distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
         }
+        map.put("Can See Tag", canSeeTag());
         map.put("Distance", distance);
         return map;
     }
