@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.Map;
+
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -17,9 +19,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeShooter;
+import frc.robot.lib.logging.Loggable;
+import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
 
-public class IntakeShooterSubsystem extends SubsystemBase {
+public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talonIntake = new TalonFX(IntakeShooter.intakeID);
     private final TalonFX talonShooter = new TalonFX(IntakeShooter.shooterID); 
@@ -27,6 +31,7 @@ public class IntakeShooterSubsystem extends SubsystemBase {
 
     public IntakeShooterSubsystem() {
         configTalons();
+        NTLogger.register(this);
     }
 
     private void configTalons() {
@@ -77,6 +82,13 @@ public class IntakeShooterSubsystem extends SubsystemBase {
         .andThen(runOnce(() -> setIntakeSpeed(IntakeShooter.indexSpeed)))
         .andThen(Commands.waitSeconds(IntakeShooter.timeToShoot.in(Seconds))) 
         .finallyDo(this::stop);
+    }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        map.put("TOF Distance MM", timeOfFlight.getRange());
+        map.put("Is TOF Tripped", isSensorTripped());
+        return Util.mergeMaps(NTLogger.getTalonLog(talonIntake), NTLogger.getTalonLog(talonShooter), NTLogger.getSubsystemLog(this));
     }
 
 }

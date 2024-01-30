@@ -120,6 +120,7 @@ public class Constants {
     }
 
     public static class Field {
+        public static final Pose2d origin = new Pose2d();
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25);

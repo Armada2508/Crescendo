@@ -170,7 +170,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig);
             System.out.println("Done creating trajectory");
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
-            FollowTrajectory.getCommandTalon(trajectory, new Pose2d(), this::getFieldPose, this::setVelocity, this).schedule();
+            FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
         });
     }
 
@@ -199,7 +199,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Pose2d getFieldPose() {
-        return (poseEstimator == null) ? new Pose2d() : poseEstimator.getEstimatedPosition();
+        return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
@@ -208,16 +208,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        String currentCommand = getCurrentCommand() == null ? null : getCurrentCommand().getName();
-        String defaultCommand = getDefaultCommand() == null ? null : getDefaultCommand().getName();
-        map.put("Current Command", currentCommand);
-        map.put("Default Command", defaultCommand);
-        map.put("TalonL", NTLogger.getTalonLog(talonL));
-        map.put("TalonR", NTLogger.getTalonLog(talonR));
-        map.put("TalonLF", NTLogger.getTalonLog(talonLFollow));
-        map.put("TalonRF", NTLogger.getTalonLog(talonRFollow));
         map.put("Pigeon Yaw", pigeon.getYaw());
-        return map;
+        return Util.mergeMaps(map, NTLogger.getTalonLog(talonL), NTLogger.getTalonLog(talonR), 
+            NTLogger.getTalonLog(talonLFollow), NTLogger.getTalonLog(talonRFollow), NTLogger.getSubsystemLog(this));
     }
 
 }
