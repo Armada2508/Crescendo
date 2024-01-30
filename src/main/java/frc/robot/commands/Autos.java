@@ -14,23 +14,21 @@ import frc.robot.subsystems.IntakeShooterSubsystem;
 public class Autos {
 
     private Autos() {}
-    
+    //! Have to tune accelerations and velocitys
     public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.turnCommand(0)) //? use vision for angle?
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?, tune velocity and acceleration
+        .andThen(driveSubsystem.turnCommand(0)) //turn to leave //? use vision for angle?
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //drive out //? use vision for distance?
     }
 
     public static Command autoComplex(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        //add turn command to turn to note if needed
-        .andThen(driveSubsystem.trajectoryToPoseCommand(translationToTrajectoryPose(Field.mediumNoteCordinate, 0))) //assume we go for medium note, tune angle
+        .andThen(driveSubsystem.trajectoryToPoseCommand(Field.lowerNotePickupLocation)) //assume we go for medium note
         .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
-        //add turn command to turn to speaker if needed
         .andThen(driveSubsystem.trajectoryToPoseCommand(translationToTrajectoryPose(Field.speakerPos, 0))) //tune angle
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //tune velocity and acceleration
+        .andThen(driveSubsystem.driveDistanceCommand(0, 0, 0)); //? use vision for distance?
     }
 }

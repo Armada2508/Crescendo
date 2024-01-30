@@ -57,7 +57,7 @@ public class RobotContainer {
         // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(-2, 2, 2));
         // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(-2, 2, 2));
         // joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        // joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Meters.of(5), Meters.of(5), Rotation2d.fromDegrees(0))));
+        // joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Meters.of(5), Meters.of(5), Rotation2`d.fromDegrees(0))));
         joystick.onTrue(11, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Field.speakerPos, Rotation2d.fromDegrees(180))));
     }
 

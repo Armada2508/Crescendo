@@ -51,7 +51,7 @@ public class Routines {
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.turnCommand(driveSubsystem.getFieldPose().getRotation().getDegrees() % 180); //?!This doesnt work at all
+        return driveSubsystem.turnCommand(Math.atan(Field.simulatedField.getRobotPose().getX() / (Field.simulatedField.getRobotPose().getY() - Field.speakerPos.getY())));
     }
 
     public static Command stowCommand(ArmSubsystem armSubsystem) {
