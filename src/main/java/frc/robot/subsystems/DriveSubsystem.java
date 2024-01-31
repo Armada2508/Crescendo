@@ -151,17 +151,24 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     /**
      * 
-     * @param angle - degrees relative to front of robot 
+     * @param angle - degrees in field frame 
      * @return Command for the robot to turn amount of degrees relative to front of robot
      */
     public Command turnCommand(double angle) {
         turnPIDController.reset();
-        turnPIDController.setSetpoint(pigeon.getYaw() + angle);
+        turnPIDController.setSetpoint(0);
         return runEnd(() -> {
-            double speed = turnPIDController.calculate(pigeon.getYaw());
+            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle));
             speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
-            setSpeed(speed, -speed);
+            setSpeed(-speed, speed);
         }, this::stop).until(turnPIDController::atSetpoint);
+    }
+
+    private double shortestPath(double current, double target) {
+        double error1 = 360 + target - current;
+        double error2 = target - current;
+        if (Math.abs(error1) < Math.abs(error2)) return error1;
+        return error2;
     }
 
     public Command trajectoryToPoseCommand(Pose2d targetPose) {
