@@ -2,11 +2,9 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -25,20 +23,30 @@ public class Routines {
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0)
-        .andThen(intakeSubsystem.intakeCommand()) 
-        .andThen(stowCommand(armSubsystem));
+        .andThen(
+            intakeSubsystem.intakeCommand(),
+            stowCommand(armSubsystem)
+        ).withName("Intake Ground Composition");
     }
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0) 
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.ampShootSpeed)) 
-        .andThen(stowCommand(armSubsystem));
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.ampShootSpeed))
+        .andThen(
+            shooterSubsystem.releaseNoteCommand(),
+            stowCommand(armSubsystem)
+        )    
+        .withName("Score Amp Composition");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
-        .andThen(stowCommand(armSubsystem));
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
+        .andThen(
+            shooterSubsystem.releaseNoteCommand(),
+            stowCommand(armSubsystem)
+        )    
+        .withName("Score Speaker Base Composition");
     }
 
     /**
@@ -46,16 +54,23 @@ public class Routines {
      */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0)
-        .andThen(shooterSubsystem.shootCommand(IntakeShooter.speakerShootSpeed))
-        .andThen(stowCommand(armSubsystem));
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
+        .andThen(
+            shooterSubsystem.releaseNoteCommand(),
+            stowCommand(armSubsystem)
+        )    
+        .withName("Score Speaker Vision Composition");
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.turnCommand(Math.atan(Field.simulatedField.getRobotPose().getX() / (Field.simulatedField.getRobotPose().getY() - Field.speakerPos.getY())));
+        return driveSubsystem.turnCommand(
+            Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX()))
+        )
+        .withName("Turn to Speaker Command");
     }
 
     public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0);
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0).withName("Stow Command");
     }
 
     private static double calcAngle(DriveSubsystem driveSubsystem) {
@@ -66,7 +81,7 @@ public class Routines {
         double g = Constants.gravity;
         double angle1 = Units.radiansToDegrees(Math.atan( (v * v + inner(x, y, v, g)) / (g * x) ));
         double angle2 = Units.radiansToDegrees(Math.atan( (v * v - inner(x, y, v, g)) / (g * x) ));
-        double angle = closer(angle1, angle2, 45);
+        double angle = closer(angle1, angle2, 45); //? Magic number also might be garbage
         LogUtil.printFormatted("X Y V G θ1 θ2 θ", x, y, v, g, angle1, angle2, angle);
         return angle;
     }
@@ -80,7 +95,4 @@ public class Routines {
         return b;
     }   
     
-    public static Pose2d translationToTrajectoryPose(Translation2d translation, double degrees) {
-        return new Pose2d(translation.getX(), translation.getY(), Rotation2d.fromDegrees(degrees));
-    }
 }

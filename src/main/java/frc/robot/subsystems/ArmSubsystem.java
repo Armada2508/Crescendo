@@ -100,7 +100,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
             configMotionMagic(velocity, acceleration);
             setAngle(angle);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)));
+        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
+        .withName("Set Angle Command");
     }
 
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration) {
