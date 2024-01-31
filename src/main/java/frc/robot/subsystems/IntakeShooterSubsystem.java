@@ -63,25 +63,33 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         })
         .andThen(Commands.waitUntil(this::isSensorTripped))
         .andThen(Commands.waitSeconds(IntakeShooter.waitTimeAfterTrip.in(Seconds)))
-        .finallyDo(this::stop);
+        .finallyDo(this::stop)
+        .withName("Intake Command");
     }
-    
-    /**
-     * @param velocity rotations per second
-     */
-    public Command shootCommand(Measure<Velocity<Angle>> velocity) {
-        double v = velocity.in(RotationsPerSecond);
+
+    public Command spinUpFlywheelCommand(Measure<Velocity<Angle>> velocity) {
         return runOnce(() -> {
-            final VelocityVoltage request = new VelocityVoltage(v);
+            final VelocityVoltage request = new VelocityVoltage(velocity.in(RotationsPerSecond));
             talonShooter.setControl(request);
         })
         .andThen(
-            Commands.waitUntil(() -> Util.epsilonEquals(talonShooter.getVelocity().getValueAsDouble(), v, IntakeShooter.velocityDeadband.in(RotationsPerSecond)))
+            Commands.waitUntil(() -> Util.epsilonEquals(talonShooter.getVelocity().getValueAsDouble(), velocity.in(RotationsPerSecond), IntakeShooter.velocityDeadband.in(RotationsPerSecond)))
             .withTimeout(IntakeShooter.flywheelVelocityTimeout.in(Seconds))
         )
-        .andThen(runOnce(() -> setIntakeSpeed(IntakeShooter.indexSpeed)))
+        .withName("Spin Up Flywheel Command");
+    }
+
+    public Command releaseNoteCommand() {
+        return runOnce(() -> setIntakeSpeed(IntakeShooter.indexSpeed))
         .andThen(Commands.waitSeconds(IntakeShooter.timeToShoot.in(Seconds))) 
-        .finallyDo(this::stop);
+        .finallyDo(this::stop)
+        .withName("Release Note Command");
+    }
+    
+    public Command shootCommand(Measure<Velocity<Angle>> velocity) {
+        return spinUpFlywheelCommand(velocity)
+        .andThen(releaseNoteCommand())
+        .withName("Shoot Command");
     }
 
     @Override

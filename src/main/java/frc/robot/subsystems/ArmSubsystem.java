@@ -42,17 +42,18 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
-        talon.setPosition(Encoder.fromRotationalAngle(getBoreEncoderAngle(), Arm.gearRatio));
+        talon.setPosition(Encoder.fromAngle(getBoreEncoderAngle(), Arm.gearRatio));
     }
 
     /**
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      */
-    private void configMotionMagic(double velocity, double acceleration) {
+    private void configMotionMagic(double velocity, double acceleration, double jerk) {
         MotionMagicConfigs config = new MotionMagicConfigs();
-        config.MotionMagicCruiseVelocity = Encoder.fromRotationalAngle(velocity, Arm.gearRatio);
-        config.MotionMagicAcceleration = Encoder.fromRotationalAngle(acceleration, Arm.gearRatio);
+        config.MotionMagicCruiseVelocity = Encoder.fromAngle(velocity, Arm.gearRatio);
+        config.MotionMagicAcceleration = Encoder.fromAngle(acceleration, Arm.gearRatio);
+        config.MotionMagicJerk = Encoder.fromAngle(jerk, Arm.gearRatio);
         talon.getConfigurator().apply(config);
     }
 
@@ -64,7 +65,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         Measure<Angle> angle = angleSupplier.get();
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
-        double angleRots = Encoder.fromRotationalAngle(angle.in(Degrees), Arm.gearRatio);
+        double angleRots = Encoder.fromAngle(angle.in(Degrees), Arm.gearRatio);
         MotionMagicVoltage request = new MotionMagicVoltage(angleRots).withFeedForward(getFeedforward());
         talon.setControl(request);
     }
@@ -78,7 +79,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     public double getAngle() {
-        return Encoder.toRotationalAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
+        return Encoder.toAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
     }
     
     public double getBoreEncoderAngle() {
@@ -94,17 +95,18 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
      * @param acceleration rotations per second^2
      * @return
      */
-    public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration) {
-        final double deadbandRotations = Encoder.fromRotationalAngle(Arm.angleDeadband.in(Degrees), Arm.gearRatio); 
+    public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration, double jerk) {
+        final double deadbandRotations = Encoder.fromAngle(Arm.angleDeadband.in(Degrees), Arm.gearRatio); 
         return runOnce(() -> {
-            configMotionMagic(velocity, acceleration);
+            configMotionMagic(velocity, acceleration, jerk);
             setAngle(angle);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)));
+        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
+        .withName("Set Angle Command");
     }
 
-    public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration) {
-        return setAngleCommand(() -> angle, velocity, acceleration);
+    public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration, double jerk) {
+        return setAngleCommand(() -> angle, velocity, acceleration, jerk);
     }
 
     @Override

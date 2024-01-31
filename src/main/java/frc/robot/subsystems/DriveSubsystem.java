@@ -34,6 +34,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.lib.Encoder;
@@ -149,7 +150,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             driveDistance(distance);
         })
         .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonL.getPosition().getValueAsDouble(), talonL.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
-        .finallyDo(this::stop);
+        .finallyDo(this::stop)
+        .withName("Drive Distance Command");
     }
 
     /**
@@ -164,11 +166,16 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.in(Degrees)));
             speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
             setSpeed(-speed, speed);
-        }, this::stop).until(turnPIDController::atSetpoint);
+        }, this::stop)
+        .until(turnPIDController::atSetpoint)
+        .withName("Turn Command");
     }
 
+    /**
+     * Returns the shorter error considering a wrap around bounded [-180, 180] degrees, CCW positive
+     */
     private double shortestPath(double current, double target) {
-        double error1 = 360 + target - current;
+        double error1 = Constants.degreesPerRotation + target - current;
         double error2 = target - current;
         if (Math.abs(error1) < Math.abs(error2)) return error1;
         return error2;
@@ -181,7 +188,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             System.out.println("Done creating trajectory");
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
-        });
+        }).withName("Generating Trajectory Command");
     }
 
     public void stop() {

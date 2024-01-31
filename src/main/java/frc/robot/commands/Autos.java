@@ -4,9 +4,11 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerVision;
-import static frc.robot.commands.Routines.translationToTrajectoryPose;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Field;
 import frc.robot.subsystems.ArmSubsystem;
@@ -32,4 +34,9 @@ public class Autos {
         .andThen(driveSubsystem.trajectoryToPoseCommand(translationToTrajectoryPose(Field.speakerPos, 0))) //tune angle
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
     }
+
+    private static Pose2d translationToTrajectoryPose(Translation2d translation, double degrees) {
+        return new Pose2d(translation.getX(), translation.getY(), Rotation2d.fromDegrees(degrees));
+    }
+
 }
