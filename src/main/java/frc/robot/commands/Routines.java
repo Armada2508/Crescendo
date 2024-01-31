@@ -22,7 +22,7 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0)
+        return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0, 0)
         .andThen(
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
@@ -30,7 +30,7 @@ public class Routines {
     }
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0) 
+        return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.ampShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -40,7 +40,7 @@ public class Routines {
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0)
+        return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0, 0)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -53,7 +53,7 @@ public class Routines {
      * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
      */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0)
+        return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0, 0)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -70,7 +70,7 @@ public class Routines {
     }
 
     public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0).withName("Stow Command");
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0, 0).withName("Stow Command");
     }
 
     private static double calcAngle(DriveSubsystem driveSubsystem) {
