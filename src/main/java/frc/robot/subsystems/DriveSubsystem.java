@@ -28,6 +28,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -111,9 +114,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * Drives the robot a certain distance relative to itself using motion magic
      * @param distance meters
      */
-    private void driveDistance(double distance) {
+    private void driveDistance(Measure<Distance> distance) {
         MotionMagicVoltage request = new MotionMagicVoltage(0);
-        double distanceRots = toRotations(distance);
+        double distanceRots = toRotations(distance.in(Meters));
         talonL.setControl(request.withPosition(talonL.getPosition().getValueAsDouble() + distanceRots));
         talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
@@ -140,7 +143,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param acceleration meters/second^2
      * @return Command for the robot to drive distance using motion magic
      */
-    public Command driveDistanceCommand(double distance, double velocity, double acceleration) {
+    public Command driveDistanceCommand(Measure<Distance> distance, double velocity, double acceleration) {
         final double deadbandRotations = toRotations(Drive.driveDeadband.in(Meters)); 
         return runOnce(() -> {
             configMotionMagic(velocity, acceleration);
@@ -156,11 +159,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param angle - degrees in field frame 
      * @return Command for the robot to turn amount of degrees relative to front of robot
      */
-    public Command turnCommand(double angle) {
+    public Command turnCommand(Measure<Angle> angle) {
         turnPIDController.reset();
         turnPIDController.setSetpoint(0);
         return runEnd(() -> {
-            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle));
+            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.in(Degrees)));
             speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
             setSpeed(-speed, speed);
         }, this::stop)
@@ -226,5 +229,4 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return Util.mergeMaps(map, NTLogger.getTalonLog(talonL), NTLogger.getTalonLog(talonR), 
             NTLogger.getTalonLog(talonLFollow), NTLogger.getTalonLog(talonRFollow), NTLogger.getSubsystemLog(this));
     }
-
 }
