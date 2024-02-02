@@ -4,23 +4,28 @@
 
 package frc.robot;
 
+import java.util.Map;
+
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.Field;
+import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements Loggable {
     
     private RobotContainer robotContainer;
     
     @Override
     public void robotInit() {
         DriverStation.silenceJoystickConnectionWarning(true);
-        robotContainer = new RobotContainer();
         NTLogger.initDataLogger();
         SmartDashboard.putData(Field.simulatedField);
+        NTLogger.register(this);
+        robotContainer = new RobotContainer();
     }
     
     @Override
@@ -47,6 +52,15 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
+    }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        map.put("Battery Voltage", RobotController.getBatteryVoltage() + " Volts");
+        map.put("RIO Voltage", RobotController.getInputVoltage() + " Volts");
+        map.put("RIO Current", RobotController.getInputCurrent() + " Amps");
+        map.put("CAN Bus Utilization", RobotController.getCANStatus().percentBusUtilization + "%");
+        return map;
     }
 
     @Override

@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
-import frc.robot.Constants.IntakeShooter;
+import frc.robot.Constants.Shooter;
 import frc.robot.lib.logging.LogUtil;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -31,7 +31,7 @@ public class Routines {
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.ampShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -41,7 +41,7 @@ public class Routines {
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0, 0)
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -54,7 +54,7 @@ public class Routines {
      */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(() -> Degrees.of(calcAngle(driveSubsystem)), 0, 0, 0)
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(IntakeShooter.speakerShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootSpeed))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -77,7 +77,7 @@ public class Routines {
         double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
         // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);
         double y = Field.lowSpeakerHeight.in(Meters);
-        double v = IntakeShooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * IntakeShooter.flywheelDiameter.in(Meters);
+        double v = Shooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * Shooter.flywheelDiameter.in(Meters);
         double g = Constants.gravity;
         double angle1 = Units.radiansToDegrees(Math.atan( (v * v + inner(x, y, v, g)) / (g * x) ));
         double angle2 = Units.radiansToDegrees(Math.atan( (v * v - inner(x, y, v, g)) / (g * x) ));
