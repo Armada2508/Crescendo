@@ -56,10 +56,10 @@ public class Robot extends TimedRobot implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Battery Voltage", RobotController.getBatteryVoltage() + " Volts");
-        map.put("RIO Voltage", RobotController.getInputVoltage() + " Volts");
-        map.put("RIO Current", RobotController.getInputCurrent() + " Amps");
-        map.put("CAN Bus Utilization", RobotController.getCANStatus().percentBusUtilization + "%");
+        map.put("Battery Voltage (V)", RobotController.getBatteryVoltage());
+        map.put("RIO Voltage (V)", RobotController.getInputVoltage());
+        map.put("RIO Current (A)", RobotController.getInputCurrent());
+        map.put("CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
         return map;
     }
 

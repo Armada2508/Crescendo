@@ -9,7 +9,7 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,17 +53,18 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        TalonFX follower = new TalonFX(8);
-        Util.factoryResetTalons(follower);
-        Util.coastMode(follower);
-        follower.setInverted(true);
-        DoubleEntry ratio = NetworkTableInstance.getDefault().getTable("Tuning").getDoubleTopic("!Ratio").getEntry(1, new PubSubOption[]{});
-        ratio.set(1);
-        intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
-            double val = joystick.getY();
-            intakeShooterSubsystem.setShooterSpeed(val);
-            follower.setControl(new DutyCycleOut(val * (ratio.get())));
-        }));
+        { // Testing shooter prototype
+            TalonFX follower = new TalonFX(8);
+            Util.factoryResetTalons(follower);
+            Util.coastMode(follower);
+            follower.setInverted(true);
+            var ratio = getTuner("Ratio", 1);
+            intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
+                double val = joystick.getY();
+                intakeShooterSubsystem.setShooterSpeed(val);
+                follower.setControl(new DutyCycleOut(val * ratio.get().getDouble()));
+            }));
+        }
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));
         // new Trigger(() -> true).onTrue(intakeShooterSubsystem.run(() -> {
@@ -87,6 +88,13 @@ public class RobotContainer {
 
     private DoubleSupplier reverseAxisIf(DoubleSupplier axis, int button) {
         return () -> buttonBoard.getRawButton(button) ? -axis.getAsDouble() : axis.getAsDouble();
+    }
+
+    public static GenericEntry getTuner(String name, Object defaultValue) {
+        GenericEntry entry = NetworkTableInstance.getDefault().getTable("Tuning")
+            .getTopic("Ratio").getGenericEntry(new PubSubOption[0]);
+        entry.setValue(defaultValue);
+        return entry;
     }
 
 }
