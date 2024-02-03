@@ -22,7 +22,7 @@ public class Robot extends TimedRobot implements Loggable {
     @Override
     public void robotInit() {
         DriverStation.silenceJoystickConnectionWarning(true);
-        NTLogger.initDataLogger();
+        // NTLogger.initDataLogger();
         SmartDashboard.putData(Field.simulatedField);
         NTLogger.register(this);
         robotContainer = new RobotContainer();

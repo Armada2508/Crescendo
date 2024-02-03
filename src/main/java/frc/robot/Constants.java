@@ -105,7 +105,7 @@ public class Constants {
         public static final int shooterID = 7;
         public static final double indexSpeed = 0.5; //! Tune this
         public static final Measure<Distance> flywheelDiameter = Inches.of(4); //! Find this
-        public static final Slot0Configs shooterVelocityConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Slot0Configs velocityConfig = new Slot0Configs().withKP(0).withKV(0).withKS(0); //! Have to tune for these values
         public static final Measure<Time> flywheelVelocityTimeout = Seconds.of(3);
         public static final Measure<Velocity<Angle>> velocityDeadband = RotationsPerSecond.of(1); //! Tune this
         public static final Measure<Time> timeToShoot = Seconds.of(1); //! Tune this

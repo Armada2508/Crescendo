@@ -6,6 +6,12 @@ package frc.robot;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,6 +19,7 @@ import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.lib.util.Util;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
@@ -46,8 +53,16 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
+        TalonFX follower = new TalonFX(8);
+        Util.factoryResetTalons(follower);
+        Util.coastMode(follower);
+        follower.setInverted(true);
+        DoubleEntry ratio = NetworkTableInstance.getDefault().getTable("Tuning").getDoubleTopic("!Ratio").getEntry(1, new PubSubOption[]{});
+        ratio.set(1);
         intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
-            intakeShooterSubsystem.setShooterSpeed(joystick.getY());
+            double val = joystick.getY();
+            intakeShooterSubsystem.setShooterSpeed(val);
+            follower.setControl(new DutyCycleOut(val * (ratio.get())));
         }));
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));

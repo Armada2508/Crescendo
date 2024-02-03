@@ -38,7 +38,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     private void configTalons() {
         Util.factoryResetTalons(talonIntake, talonShooter);
         Util.coastMode(talonIntake, talonShooter);
-        talonShooter.getConfigurator().apply(Shooter.shooterVelocityConfig);
+        talonShooter.getConfigurator().apply(Shooter.velocityConfig);
     }
 
     public void setIntakeSpeed(double speed) {
