@@ -102,7 +102,7 @@ public class Constants {
     }
 
     public static class Shooter {
-        public static final int shooterID = 7;
+        public static final int shooterID = 8;
         public static final double indexSpeed = 0.5; //! Tune this
         public static final Measure<Distance> flywheelDiameter = Inches.of(4); //! Find this
         public static final Slot0Configs velocityConfig = new Slot0Configs().withKP(0).withKV(0).withKS(0); //! Have to tune for these values
@@ -114,7 +114,7 @@ public class Constants {
     }
 
     public static class Vision {
-        public static final String cameraName = "LifeCam";
+        public static final String cameraName = "OV9281";
         public static final Transform3d robotToCamera = new Transform3d(); //! Find this
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
