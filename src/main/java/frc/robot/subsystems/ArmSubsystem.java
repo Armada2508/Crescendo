@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,6 +32,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
+    private final Relay holdingSolenoid = new Relay(Arm.relayChannel);
 
     public ArmSubsystem() {
         configTalons();

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
@@ -28,6 +29,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talonIntake = new TalonFX(Intake.intakeID);
     private final TalonFX talonShooter = new TalonFX(Shooter.shooterID); 
+    private final TalonFX talonFollowShooter = new TalonFX(Shooter.shooterFollowID); 
     private final TimeOfFlight timeOfFlight = new TimeOfFlight(Intake.timeOfFlightID);
 
     public IntakeShooterSubsystem() {
@@ -36,9 +38,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     private void configTalons() {
-        Util.factoryResetTalons(talonIntake, talonShooter);
-        Util.coastMode(talonIntake, talonShooter);
-        talonShooter.setInverted(true);
+        Util.factoryResetTalons(talonIntake, talonShooter, talonFollowShooter);
+        Util.coastMode(talonIntake, talonShooter, talonFollowShooter);
+        talonFollowShooter.setInverted(true);
+        talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
         talonShooter.getConfigurator().apply(Shooter.velocityConfig);
     }
 

@@ -79,6 +79,7 @@ public class Constants {
         public static final int ID = 4;
         public static final int followID = 5;
         public static final int throughBoreEncoderID = 0;
+        public static final int relayChannel = 0;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
@@ -102,7 +103,8 @@ public class Constants {
     }
 
     public static class Shooter {
-        public static final int shooterID = 8;
+        public static final int shooterID = 7;
+        public static final int shooterFollowID = 8;
         public static final double indexSpeed = 0.5; //! Tune this
         public static final Measure<Distance> flywheelDiameter = Inches.of(4); //! Find this
         public static final Slot0Configs velocityConfig = new Slot0Configs().withKP(0).withKV(0).withKS(0); //! Have to tune for these values

@@ -11,11 +11,12 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
+import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.lib.util.Util;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
@@ -49,16 +50,13 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        { // Testing shooter prototype
-            // TalonFX follower = new TalonFX(8);
-            // Util.factoryResetTalons(follower);
-            // Util.coastMode(follower);
-            // follower.setInverted(true);
-            // var ratio = getTuner("Ratio", 1);
+        {   // Testing shooter prototype
             intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
-                double val = -joystick.getY();
+                double val = joystick.getY();
+                if (Util.inRange(val, Drive.joystickDriveConfig.joystickDeadband())) {
+                    val = 0;
+                }
                 intakeShooterSubsystem.setShooterSpeed(val);
-                // follower.setControl(new DutyCycleOut(val * ratio.get().getDouble()));
             }));
         }
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
@@ -79,11 +77,11 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return Autos.leaveStartingZone(driveSubsystem);
     }
 
     private DoubleSupplier reverseAxisIf(DoubleSupplier axis, int button) {
-        return () -> buttonBoard.getRawButton(button) ? -axis.getAsDouble() : axis.getAsDouble();
+        return () -> buttonBoard.getRawButton(button) ? axis.getAsDouble() : -axis.getAsDouble();
     }
 
     public static GenericEntry getTuner(String name, Object defaultValue) {

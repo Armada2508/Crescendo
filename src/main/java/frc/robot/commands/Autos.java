@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerVision;
@@ -18,6 +19,11 @@ import frc.robot.subsystems.IntakeShooterSubsystem;
 public class Autos {
 
     private Autos() {}
+
+    public static Command leaveStartingZone(DriveSubsystem driveSubsystem) {
+        return driveSubsystem.driveDistanceCommand(Feet.of(5), 0, 0);
+    }
+
     //! Have to tune accelerations and velocitys for everything
     public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
