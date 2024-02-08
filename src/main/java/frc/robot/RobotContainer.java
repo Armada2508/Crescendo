@@ -31,7 +31,7 @@ public class RobotContainer {
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
         joystick.bindButtons(Joysticks.driveSlowButton); 
-        buttonBoard.bindButtons(Joysticks.driveReverseButton); 
+        buttonBoard.bindButtons(Joysticks.driveReverseButton);
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
             reverseAxisIf(joystick::getY, Joysticks.driveReverseButton), reverseAxisIf(joystick::getX, Joysticks.driveReverseButton), 
             reverseAxisIf(joystick::getZ, Joysticks.driveReverseButton), () -> joystick.getRawButton(Joysticks.driveSlowButton)
@@ -56,6 +56,8 @@ public class RobotContainer {
             //     intakeShooterSubsystem.setShooterSpeed(val);
             // }));
         }
+        buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
+        
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));
         // new Trigger(() -> true).onTrue(intakeShooterSubsystem.run(() -> {
@@ -74,8 +76,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Autos.leaveStartingZone(driveSubsystem);
-    }
+        return armSubsystem.relayStartOfMatchCommand()
+        .andThen(Autos.leaveStartingZone(driveSubsystem));
+    } 
 
     private DoubleSupplier reverseAxisIf(DoubleSupplier axis, int button) {
         return () -> buttonBoard.getRawButton(button) ? axis.getAsDouble() : -axis.getAsDouble();
