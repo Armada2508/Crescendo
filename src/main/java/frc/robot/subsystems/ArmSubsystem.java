@@ -12,6 +12,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -33,10 +34,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talonFollow = new TalonFX(Arm.followID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
     private final Relay holdingSolenoid = new Relay(Arm.relayChannel);
+    private InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); //! Have to fill this map
 
     public ArmSubsystem() {
         configTalons();
         NTLogger.register(this);
+        // interpolatingAngleMap.put(0.0, 0.0);
     }
 
     private void configTalons() {
@@ -44,7 +47,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
-        talon.setPosition(Encoder.fromAngle(getBoreEncoderAngle(), Arm.gearRatio));
+        // talon.setPosition(Encoder.fromAngle(getBoreEncoderAngle(), Arm.gearRatio));
     }
 
     /**
@@ -83,6 +86,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public double getAngle() {
         return Encoder.toAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
     }
+
+    public Measure<Angle> getTargetAngle(double distance) {
+        return Degrees.of(interpolatingAngleMap.get(distance));
+    }
     
     public double getBoreEncoderAngle() {
         double encoderPos = throughBoreEncoder.getDistance() * Constants.degreesPerRotation / Arm.boreEncoderTicksPerRotation; 
@@ -113,7 +120,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Absolute Position (Degrees)", getBoreEncoderAngle());
+        // map.put("Absolute Position (Degrees)", getBoreEncoderAngle());
         return Util.mergeMaps(map, NTLogger.getTalonLog(talon), NTLogger.getTalonLog(talonFollow), NTLogger.getSubsystemLog(this));
     }
 

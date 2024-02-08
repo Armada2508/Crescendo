@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -61,6 +62,10 @@ public class Robot extends TimedRobot implements Loggable {
         map.put("RIO Current (A)", RobotController.getInputCurrent());
         map.put("CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
         return map;
+    }
+
+    public static boolean onRedAlliance() {
+        return DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
     }
 
     @Override

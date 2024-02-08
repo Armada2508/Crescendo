@@ -28,7 +28,7 @@ public class Autos {
     public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.turnCommand(Degrees.of(180))) //turn to leave //? use vision for angle?
+        .andThen(driveSubsystem.turnCommand(Degrees.of(180))) //turn to leave 
         .andThen(driveSubsystem.driveDistanceCommand(Meters.of(1.5), 0, 0)); //drive out //? adjust distance to leave at week zero
     }
 

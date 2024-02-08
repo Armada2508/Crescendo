@@ -16,10 +16,7 @@ import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
-import frc.robot.lib.util.Util;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
@@ -28,8 +25,8 @@ public class RobotContainer {
     private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
-    private final ArmSubsystem armSubsystem = new ArmSubsystem();
-    private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    // private final ArmSubsystem armSubsystem = new ArmSubsystem();
+    // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
@@ -45,19 +42,19 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
-        armSubsystem.stop();
-        intakeShooterSubsystem.stop();
+        // armSubsystem.stop();
+        // intakeShooterSubsystem.stop();
     }
     
     private void configureBindings() {
         {   // Testing shooter prototype
-            intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
-                double val = joystick.getY();
-                if (Util.inRange(val, Drive.joystickDriveConfig.joystickDeadband())) {
-                    val = 0;
-                }
-                intakeShooterSubsystem.setShooterSpeed(val);
-            }));
+            // intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
+            //     double val = joystick.getY();
+            //     if (Util.inRange(val, Drive.joystickDriveConfig.joystickDeadband())) {
+            //         val = 0;
+            //     }
+            //     intakeShooterSubsystem.setShooterSpeed(val);
+            // }));
         }
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));
@@ -86,7 +83,7 @@ public class RobotContainer {
 
     public static GenericEntry getTuner(String name, Object defaultValue) {
         GenericEntry entry = NetworkTableInstance.getDefault().getTable("Tuning")
-            .getTopic("Ratio").getGenericEntry(new PubSubOption[0]);
+            .getTopic(name).getGenericEntry(new PubSubOption[0]);
         entry.setValue(defaultValue);
         return entry;
     }
