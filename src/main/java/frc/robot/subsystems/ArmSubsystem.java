@@ -16,6 +16,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +26,6 @@ import frc.robot.lib.Encoder;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
-
 
 public class ArmSubsystem extends SubsystemBase implements Loggable {
     
@@ -60,7 +60,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private double getFeedforward() {
-        return Arm.gravityFeedforward * Math.cos(getAngle());
+        return Arm.gravityFeedforward * Math.cos(getAngle().baseUnitMagnitude());
     }
 
     private void setAngle(Supplier<Measure<Angle>> angleSupplier) {
@@ -80,8 +80,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setControl(new NeutralOut());
     }
 
-    public double getAngle() {
-        return Encoder.toAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio);
+    public Measure<Angle> getAngle() {
+        return Degrees.of(Encoder.toAngle(talon.getPosition().getValueAsDouble(), Arm.gearRatio));
     }
     
     public double getBoreEncoderAngle() {
@@ -117,4 +117,21 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return Util.mergeMaps(map, NTLogger.getTalonLog(talon), NTLogger.getTalonLog(talonFollow), NTLogger.getSubsystemLog(this));
     }
 
+    public void switchRelay() {
+        if (holdingSolenoid.get() == Value.kOff) { //update true to find relay value
+            holdingSolenoid.set(Value.kForward);
+        } 
+        else {
+            holdingSolenoid.set(Value.kOff);
+        }
+    }
+
+    public Command relayStartOfMatchCommand() { //update name
+        return runOnce(() -> {
+            if (holdingSolenoid.get() == Value.kForward) {
+                switchRelay();
+            }
+        })
+        .andThen(setAngleCommand(getAngle(), 0, 0, 0)); //verify
+    }
 }

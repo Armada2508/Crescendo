@@ -46,6 +46,7 @@ public class Constants {
         public static final int driveSlowButton = 12;
         // Button Board
         public static final int driveReverseButton = 1;
+        public static final int solenoidButton = 2; //!temp, find right port
     }
     
     public static class Drive {
