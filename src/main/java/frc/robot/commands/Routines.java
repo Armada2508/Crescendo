@@ -61,7 +61,7 @@ public class Routines {
         return driveSubsystem.turnCommand(
             // Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX() - Field.speakerPos.getX()))
             () -> {
-                Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.speakerPosRed.getTranslation() : Field.speakerPosBlue.getTranslation();
+                Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
             }
         )
@@ -73,7 +73,7 @@ public class Routines {
     }
 
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.speakerPosRed.getTranslation() : Field.speakerPosBlue.getTranslation();
+        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
         double distance = driveSubsystem.getFieldPose().getTranslation().getDistance(speakerPos);
         return armSubsystem.getTargetAngle(distance);
     }

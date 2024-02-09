@@ -132,14 +132,14 @@ public class Constants {
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25);
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
-        public static final Pose2d speakerPosBlue = new Pose2d(Meters.of(0), Meters.of(5.55), Rotation2d.fromDegrees(0));
-        public static final Pose2d speakerPosRed = new Pose2d(Field.fieldLength, Meters.of(5.55), Rotation2d.fromDegrees(180));        
-        public static final Translation2d lowerNoteCordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); // note positions are based off of the blue cordinates
-        public static final Translation2d mediumNoteCordinate = new Translation2d(Inches.of(114), Inches.of(218.625)); 
-        public static final Translation2d upperNoteCordinate = new Translation2d(Inches.of(114), Inches.of(275.625)); 
-        public static final Pose2d lowerNotePickupLocation = new Pose2d(lowerNoteCordinate.getX(), lowerNoteCordinate.getY(), Rotation2d.fromDegrees(0));
-        public static final Pose2d mediumNotePickupLocation = new Pose2d(mediumNoteCordinate.getX(), mediumNoteCordinate.getY(), Rotation2d.fromDegrees(0));
-        public static final Pose2d upperNotePickupLocation = new Pose2d(upperNoteCordinate.getX(), upperNoteCordinate.getY(), Rotation2d.fromDegrees(0));
+        public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
+        public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));        
+        public static final Translation2d lowerNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); // note positions are based off of the blue cordinates
+        public static final Translation2d mediumNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(218.625)); 
+        public static final Translation2d upperNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(275.625)); 
+        public static final Pose2d lowerNotePickupLocation = new Pose2d(lowerNoteCoordinate.getX(), lowerNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
+        public static final Pose2d mediumNotePickupLocation = new Pose2d(mediumNoteCoordinate.getX(), mediumNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
+        public static final Pose2d upperNotePickupLocation = new Pose2d(upperNoteCoordinate.getX(), upperNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
 
         
     }
