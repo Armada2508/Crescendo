@@ -3,6 +3,7 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -62,11 +63,14 @@ public class Routines {
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
-
-        driveSubsystem.getFieldPose().getTranslation().minus(Field.speakerPos).getAngle();
-        
+        Translation2d speakerPos = Field.speakerPos.getTranslation();
+        if (Robot.onRedAlliance()) {
+            speakerPos = new Translation2d(Field.fieldLength.in(Meters) - speakerPos.getX(), speakerPos.getY());
+        }
+        Rotation2d angle = driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle();
         return driveSubsystem.turnCommand(
-            Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX() - Field.speakerPos.getX()))
+            // Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX() - Field.speakerPos.getX()))
+            Radians.of(angle.getRadians())
         )
         .withName("Turn to Speaker Command");
     }
@@ -76,7 +80,7 @@ public class Routines {
     }
 
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        Translation2d speakerPos = Field.speakerPos;
+        Translation2d speakerPos = Field.speakerPos.getTranslation();
         if (Robot.onRedAlliance()) {
             speakerPos = new Translation2d(Field.fieldLength.in(Meters) - speakerPos.getX(), speakerPos.getY());
         }

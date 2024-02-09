@@ -7,9 +7,6 @@ import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerVision;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Field;
 import frc.robot.subsystems.ArmSubsystem;
@@ -29,20 +26,16 @@ public class Autos {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.turnCommand(Degrees.of(180))) //turn to leave 
-        .andThen(driveSubsystem.driveDistanceCommand(Meters.of(1.5), 0, 0)); //drive out //? adjust distance to leave at week zero
+        .andThen(driveSubsystem.driveDistanceCommand(Meters.of(1.5), 0, 0)); //? adjust distance to leave at week zero
     }
 
     public static Command autoComplex(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.trajectoryToPoseCommand(Field.lowerNotePickupLocation)) //assume we go for medium note
+        .andThen(driveSubsystem.trajectoryToPoseCommand(Field.lowerNotePickupLocation)) 
         .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.trajectoryToPoseCommand(translationToTrajectoryPose(Field.speakerPos, 0))) //tune angle
+        .andThen(driveSubsystem.trajectoryToPoseCommand(Field.speakerPos)) 
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-    }
-
-    private static Pose2d translationToTrajectoryPose(Translation2d translation, double degrees) {
-        return new Pose2d(translation.getX(), translation.getY(), Rotation2d.fromDegrees(degrees));
     }
 
 }

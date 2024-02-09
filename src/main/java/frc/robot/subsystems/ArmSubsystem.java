@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -63,7 +64,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private double getFeedforward() {
-        return Arm.gravityFeedforward * Math.cos(getAngle().baseUnitMagnitude());
+        return Arm.gravityFeedforward * Math.cos(getAngle().in(Radians));
     }
 
     private void setAngle(Supplier<Measure<Angle>> angleSupplier) {
@@ -125,7 +126,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     public void switchRelay() {
-        if (holdingSolenoid.get() == Value.kOff) { //update true to find relay value
+        if (holdingSolenoid.get() == Value.kOff) {
             holdingSolenoid.set(Value.kForward);
         } 
         else {
@@ -133,12 +134,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         }
     }
 
-    public Command relayStartOfMatchCommand() { //update name
+    public Command retractRelayHoldCommand() { 
         return runOnce(() -> {
             if (holdingSolenoid.get() == Value.kForward) {
                 switchRelay();
             }
         })
-        .andThen(setAngleCommand(getAngle(), 0, 0, 0)); //verify
+        .andThen(setAngleCommand(getAngle(), 0, 0, 0)); 
     }
 }

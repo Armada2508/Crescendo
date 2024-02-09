@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Feet;
+
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -56,8 +58,7 @@ public class RobotContainer {
             //     intakeShooterSubsystem.setShooterSpeed(val);
             // }));
         }
-        buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
-        
+        // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
         // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));
         // new Trigger(() -> true).onTrue(intakeShooterSubsystem.run(() -> {
@@ -68,16 +69,16 @@ public class RobotContainer {
         // joystick.whileTrue(4, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));
         // joystick.onTrue(8, driveSubsystem.turnCommand(-45));
         // joystick.onTrue(9, driveSubsystem.turnCommand(45));
-        // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(-2, 2, 2));
-        // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(-2, 2, 2));
+        joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));
+        joystick.onTrue(11, driveSubsystem.driveDistanceCommand(Feet.of(2), 2, 2));
         // joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Meters.of(5), Meters.of(5), Rotation2`d.fromDegrees(0))));
         // joystick.onTrue(11, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Field.speakerPos, Rotation2d.fromDegrees(180))));
     }
 
     public Command getAutonomousCommand() {
-        return armSubsystem.relayStartOfMatchCommand()
-        .andThen(Autos.leaveStartingZone(driveSubsystem));
+        return /*armSubsystem.relayStartOfMatchCommand()
+        .andThen*/(Autos.leaveStartingZone(driveSubsystem));
     } 
 
     private DoubleSupplier reverseAxisIf(DoubleSupplier axis, int button) {
