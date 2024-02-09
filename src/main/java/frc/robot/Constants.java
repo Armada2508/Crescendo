@@ -45,8 +45,8 @@ public class Constants {
         // Joystick
         public static final int driveSlowButton = 12;
         // Button Board
-        public static final int driveReverseButton = 1;
-        public static final int solenoidButton = 2; //!temp, find right port
+        public static final int driveReverseButton = 9;
+        public static final int solenoidButton = 10;
     }
     
     public static class Drive {
@@ -62,13 +62,13 @@ public class Constants {
         public static final Measure<Distance> wheelDiameter = Inches.of(6); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0).withKV(0); //! Have to tune for these values
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
+        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int velocitySlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Measure<Angle> turnDeadband = Degrees.of(0.5); //! Tune this
+        public static final Measure<Angle> turnDeadband = Degrees.of(0.1); //! Tune this
         public static final double maxTurnPIDSpeed = 0.25; //! Tune this
         // Trajectories
         public static final double ramseteB = 2.0;
@@ -87,6 +87,7 @@ public class Constants {
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
         public static final double boreEncoderTicksPerRotation = 1024;
         public static final Measure<Angle> boreEncoderOffset = Degrees.of(0); //! Have to find this value
+        public static final Measure<Angle> startAngle = Degrees.of(0); //! Find angle at startup
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
         public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
         public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
@@ -131,7 +132,8 @@ public class Constants {
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25);
         public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
-        public static final Pose2d speakerPos = new Pose2d(Meters.of(0), Meters.of(5.55), Rotation2d.fromDegrees(0));        
+        public static final Pose2d speakerPosBlue = new Pose2d(Meters.of(0), Meters.of(5.55), Rotation2d.fromDegrees(0));
+        public static final Pose2d speakerPosRed = new Pose2d(Field.fieldLength, Meters.of(5.55), Rotation2d.fromDegrees(180));        
         public static final Translation2d lowerNoteCordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); // note positions are based off of the blue cordinates
         public static final Translation2d mediumNoteCordinate = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d upperNoteCordinate = new Translation2d(Inches.of(114), Inches.of(275.625)); 

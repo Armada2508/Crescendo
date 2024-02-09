@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
 
@@ -53,7 +54,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private final VisionSubsystem vision; 
-    private DifferentialDrivePoseEstimator poseEstimator;
+    // private DifferentialDrivePoseEstimator poseEstimator;
+    private DifferentialDrivePoseEstimator poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
 
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
@@ -88,7 +90,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         Util.brakeMode(talonL, talonR, talonLFollow, talonRFollow);
         talonLFollow.setControl(new StrictFollower(talonL.getDeviceID()));
         talonRFollow.setControl(new StrictFollower(talonR.getDeviceID()));
-        talonLFollow.setInverted(true);
+        talonR.setInverted(true);
         talonRFollow.setInverted(true);
         talonL.getConfigurator().apply(Drive.motionMagicConfig);
         talonR.getConfigurator().apply(Drive.motionMagicConfig);
@@ -155,20 +157,27 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
-     * 
-     * @param angle - degrees in field frame 
-     * @return Command for the robot to turn amount of degrees relative to front of robot
+     * @param angle - angle in field frame 
+     * @return Command for the robot to turn to angle in field frame
      */
-    public Command turnCommand(Measure<Angle> angle) {
+    public Command turnCommand(Supplier<Measure<Angle>> angle) {
         turnPIDController.reset();
         turnPIDController.setSetpoint(0);
         return runEnd(() -> {
-            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.in(Degrees)));
+            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.get().in(Degrees)));
             speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
             setSpeed(-speed, speed);
         }, this::stop)
         .until(turnPIDController::atSetpoint)
         .withName("Turn Command");
+    }
+
+    /**
+     * @param angle - angle in field frame 
+     * @return Command for the robot to turn to angle in field frame
+     */
+    public Command turnCommand(Measure<Angle> angle) {
+        return turnCommand(() -> angle);
     }
 
     /**
@@ -181,14 +190,18 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return error2;
     }
 
-    public Command trajectoryToPoseCommand(Pose2d targetPose) {
+    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose) {
         return runOnce(() -> {
             System.out.println("Creating trajectory");
-            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig);
+            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig);
             System.out.println("Done creating trajectory");
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
         }).withName("Generating Trajectory Command");
+    }
+
+    public Command trajectoryToPoseCommand(Pose2d targetPose) {
+        return trajectoryToPoseCommand(() -> targetPose);
     }
 
     public void stop() {

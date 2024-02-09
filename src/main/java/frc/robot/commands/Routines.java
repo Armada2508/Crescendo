@@ -1,9 +1,7 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -49,9 +47,6 @@ public class Routines {
         .withName("Score Speaker Base Composition");
     }
 
-    /**
-     * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
-     */
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(() -> getAngle(driveSubsystem, armSubsystem), 0, 0, 0)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootSpeed))
@@ -63,14 +58,12 @@ public class Routines {
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
-        Translation2d speakerPos = Field.speakerPos.getTranslation();
-        if (Robot.onRedAlliance()) {
-            speakerPos = new Translation2d(Field.fieldLength.in(Meters) - speakerPos.getX(), speakerPos.getY());
-        }
-        Rotation2d angle = driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle();
         return driveSubsystem.turnCommand(
             // Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX() - Field.speakerPos.getX()))
-            Radians.of(angle.getRadians())
+            () -> {
+                Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.speakerPosRed.getTranslation() : Field.speakerPosBlue.getTranslation();
+                return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
+            }
         )
         .withName("Turn to Speaker Command");
     }
@@ -80,14 +73,14 @@ public class Routines {
     }
 
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        Translation2d speakerPos = Field.speakerPos.getTranslation();
-        if (Robot.onRedAlliance()) {
-            speakerPos = new Translation2d(Field.fieldLength.in(Meters) - speakerPos.getX(), speakerPos.getY());
-        }
+        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.speakerPosRed.getTranslation() : Field.speakerPosBlue.getTranslation();
         double distance = driveSubsystem.getFieldPose().getTranslation().getDistance(speakerPos);
         return armSubsystem.getTargetAngle(distance);
     }
 
+    /**
+     * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
+     */
     // private static Measure<Angle> calcAngle(DriveSubsystem driveSubsystem) {
     //     double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
     //     // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);

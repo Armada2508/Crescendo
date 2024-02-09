@@ -49,6 +49,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         // talon.setPosition(Encoder.fromAngle(getBoreEncoderAngle(), Arm.gearRatio));
+        talon.setPosition(Encoder.fromAngle(Arm.startAngle.in(Degrees), Arm.gearRatio));
     }
 
     /**
