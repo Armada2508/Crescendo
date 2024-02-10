@@ -120,12 +120,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(() -> angle, velocity, acceleration, jerk);
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
-        // map.put("Absolute Position (Degrees)", getBoreEncoderAngle());
-        return Util.mergeMaps(map, NTLogger.getTalonLog(talon), NTLogger.getTalonLog(talonFollow), NTLogger.getSubsystemLog(this));
-    }
-
     public void switchRelay() {
         if (holdingSolenoid.get() == Value.kOff) {
             holdingSolenoid.set(Value.kForward);
@@ -143,4 +137,14 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         })
         .andThen(setAngleCommand(getAngle(), 0, 0, 0)); 
     }
+
+    @Override
+    public Map<String, Object> log(Map<String, Object> map) {
+        // map.put("Absolute Position (Degrees)", getBoreEncoderAngle());
+        NTLogger.putTalonLog(talon, map);
+        NTLogger.putTalonLog(talonFollow, map);
+        NTLogger.putSubsystemLog(this, map);
+        return map;
+    }
+
 }

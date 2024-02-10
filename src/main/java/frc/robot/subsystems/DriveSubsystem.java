@@ -239,7 +239,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Pigeon Yaw", pigeon.getYaw());
-        return Util.mergeMaps(map, NTLogger.getTalonLog(talonL), NTLogger.getTalonLog(talonR), 
-            NTLogger.getTalonLog(talonLFollow), NTLogger.getTalonLog(talonRFollow), NTLogger.getSubsystemLog(this));
+        NTLogger.putTalonLog(talonL, "Left TalonFX", map);
+        NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
+        NTLogger.putTalonLog(talonR, "Right TalonFX", map);
+        NTLogger.putTalonLog(talonRFollow, "Right Follow TalonFX", map);
+        NTLogger.putSubsystemLog(this, map);
+        return map;
     }
 }
