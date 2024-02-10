@@ -64,14 +64,9 @@ public class RobotContainer {
             // }));
         }
         // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
-        // joystick.onTrue(11, Routines.scoreAmp(armSubsystem, intakeShooterSubsystem));
-        // joystick.onTrue(10, Commands.runOnce(this::stopEverything, new Subsystem[]{}));
-        // new Trigger(() -> true).onTrue(intakeShooterSubsystem.run(() -> {
-        //     intakeShooterSubsystem.setShooterSpeed(-joystick.getY());
-        // }));
-        // joystick.whileTrue(5, intakeShooterSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(1)).finallyDo(intakeShooterSubsystem::stop));
-        // joystick.whileTrue(6, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(.25)).finallyDo(armSubsystem::stop));
-        // joystick.whileTrue(4, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));
+        // joystick.whileTrue(2, intakeShooterSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(1)).finallyDo(intakeShooterSubsystem::stop));
+        // joystick.whileTrue(3, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));
+        // joystick.whileTrue(5, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(.25)).finallyDo(armSubsystem::stop));
         joystick.onTrue(6, driveSubsystem.trajectoryToPoseCommand(
             () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
         ));
@@ -81,9 +76,6 @@ public class RobotContainer {
         joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));
         joystick.onTrue(11, driveSubsystem.driveDistanceCommand(Feet.of(2), 2, 2));
         joystick.onTrue(1, Commands.runOnce(this::stopEverything));
-        // joystick.onTrue(7, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        // joystick.onTrue(11, getTrajectoryCommand(new Pose2d(Meters.of(5), Meters.of(5), Rotation2`d.fromDegrees(0))));
-        // joystick.onTrue(11, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Field.speakerPos, Rotation2d.fromDegrees(180))));
     }
 
     public Command getAutonomousCommand() {
