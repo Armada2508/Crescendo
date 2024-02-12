@@ -20,10 +20,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Joysticks;
+import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
@@ -33,7 +35,7 @@ public class RobotContainer {
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     // private final ArmSubsystem armSubsystem = new ArmSubsystem();
-    // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
@@ -50,19 +52,11 @@ public class RobotContainer {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
         // armSubsystem.stop();
-        // intakeShooterSubsystem.stop();
+        intakeShooterSubsystem.stop();
     }
     
     private void configureBindings() {
-        {   // Testing shooter prototype
-            // intakeShooterSubsystem.setDefaultCommand(intakeShooterSubsystem.run(() -> {
-            //     double val = joystick.getY();
-            //     if (Util.inRange(val, Drive.joystickDriveConfig.joystickDeadband())) {
-            //         val = 0;
-            //     }
-            //     intakeShooterSubsystem.setShooterSpeed(val);
-            // }));
-        }
+        joystick.onTrue(2, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
         // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
         // joystick.whileTrue(2, intakeShooterSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(1)).finallyDo(intakeShooterSubsystem::stop));
         // joystick.whileTrue(3, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));

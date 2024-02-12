@@ -1,21 +1,20 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
-import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,9 +39,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     private void configTalons() {
         Util.factoryResetTalons(talonIntake, talonShooter, talonFollowShooter);
         Util.coastMode(talonIntake, talonShooter, talonFollowShooter);
-        talonFollowShooter.setInverted(true);
+        talonShooter.setInverted(true);
         talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
-        talonShooter.getConfigurator().apply(Shooter.velocityConfig);
     }
 
     public void setIntakeSpeed(double speed) {
@@ -51,6 +49,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public void setShooterSpeed(double speed) {
         talonShooter.setControl(new DutyCycleOut(speed));
+    }
+
+    public void setShooterVoltage(Measure<Voltage> volts) {
+        talonShooter.setControl(new VoltageOut(volts.in(Volts)));
     }
 
     public void stop() {
@@ -72,14 +74,12 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Intake Command");
     }
 
-    public Command spinUpFlywheelCommand(Measure<Velocity<Angle>> velocity) {
+    public Command spinUpFlywheelCommand(Measure<Voltage> voltage) {
         return runOnce(() -> {
-            final VelocityVoltage request = new VelocityVoltage(velocity.in(RotationsPerSecond));
-            talonShooter.setControl(request);
+            setShooterVoltage(voltage);
         })
         .andThen(
-            Commands.waitUntil(() -> Util.epsilonEquals(talonShooter.getVelocity().getValueAsDouble(), velocity.in(RotationsPerSecond), Shooter.velocityDeadband.in(RotationsPerSecond)))
-            .withTimeout(Shooter.flywheelVelocityTimeout.in(Seconds))
+            Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds))
         )
         .withName("Spin Up Flywheel Command");
     }
@@ -91,8 +91,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Release Note Command");
     }
     
-    public Command shootCommand(Measure<Velocity<Angle>> velocity) {
-        return spinUpFlywheelCommand(velocity)
+    public Command shootCommand(Measure<Voltage> voltage) {
+        return spinUpFlywheelCommand(voltage)
         .andThen(releaseNoteCommand())
         .withName("Shoot Command");
     }

@@ -86,6 +86,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private void configTalons() {
         pigeon.configFactoryDefault();
+        pigeon.setYaw(0);
         Util.factoryResetTalons(talonL, talonR, talonLFollow, talonRFollow);
         Util.brakeMode(talonL, talonR, talonLFollow, talonRFollow);
         talonLFollow.setControl(new StrictFollower(talonL.getDeviceID()));

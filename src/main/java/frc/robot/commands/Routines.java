@@ -29,7 +29,7 @@ public class Routines {
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -39,7 +39,7 @@ public class Routines {
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.speakerAngle, 0, 0, 0)
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -49,7 +49,7 @@ public class Routines {
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(() -> getAngle(driveSubsystem, armSubsystem), 0, 0, 0)
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootSpeed))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)

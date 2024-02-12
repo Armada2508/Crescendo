@@ -6,9 +6,10 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
@@ -29,7 +30,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
-import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
@@ -56,7 +57,7 @@ public class Constants {
         public static final int RFollowID = 3;
         public static final int pigeonID = 8;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            1, 0.5, 0.25, 0.2, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Slew Rate, Joystick Deadband
+            1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6); 
@@ -79,14 +80,12 @@ public class Constants {
     public static class Arm {
         public static final int ID = 4;
         public static final int followID = 5;
-        public static final int throughBoreEncoderID = 0;
         public static final int relayChannel = 0;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
-        public static final double boreEncoderTicksPerRotation = 1024;
-        public static final Measure<Angle> boreEncoderOffset = Degrees.of(0); //! Have to find this value
         public static final Measure<Angle> startAngle = Degrees.of(0); //! Find angle at startup
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
         public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
@@ -108,13 +107,10 @@ public class Constants {
         public static final int shooterID = 7;
         public static final int shooterFollowID = 8;
         public static final double indexSpeed = 0.5; //! Tune this
-        public static final Measure<Distance> flywheelDiameter = Inches.of(4); //! Find this
-        public static final Slot0Configs velocityConfig = new Slot0Configs().withKP(0).withKV(0).withKS(0); //! Have to tune for these values
-        public static final Measure<Time> flywheelVelocityTimeout = Seconds.of(3);
-        public static final Measure<Velocity<Angle>> velocityDeadband = RotationsPerSecond.of(1); //! Tune this
+        public static final Measure<Time> flywheelChargeTime = Seconds.of(1.5); //! Tune this
         public static final Measure<Time> timeToShoot = Seconds.of(1); //! Tune this
-        public static final Measure<Velocity<Angle>> speakerShootSpeed = RotationsPerSecond.of(0); //! Tune this
-        public static final Measure<Velocity<Angle>> ampShootSpeed = RotationsPerSecond.of(0); //! Tune this
+        public static final Measure<Voltage> speakerShootPower = Volts.of(8);
+        public static final Measure<Voltage> ampShootPower = Volts.of(2); //! Tune this
     }
 
     public static class Vision {
@@ -140,7 +136,6 @@ public class Constants {
         public static final Pose2d lowerNotePickupLocation = new Pose2d(lowerNoteCoordinate.getX(), lowerNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
         public static final Pose2d mediumNotePickupLocation = new Pose2d(mediumNoteCoordinate.getX(), mediumNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
         public static final Pose2d upperNotePickupLocation = new Pose2d(upperNoteCoordinate.getX(), upperNoteCoordinate.getY(), Rotation2d.fromDegrees(0));
-
-        
     }
+
 }
