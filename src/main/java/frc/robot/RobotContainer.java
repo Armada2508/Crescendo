@@ -20,12 +20,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Joysticks;
-import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
@@ -35,16 +33,16 @@ public class RobotContainer {
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     // private final ArmSubsystem armSubsystem = new ArmSubsystem();
-    private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
         joystick.bindButtons(Joysticks.driveSlowButton); 
         buttonBoard.bindButtons(Joysticks.driveReverseButton);
-        driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
-            reverseAxisIf(joystick::getY, Joysticks.driveReverseButton), reverseAxisIf(joystick::getX, Joysticks.driveReverseButton), 
-            reverseAxisIf(joystick::getZ, Joysticks.driveReverseButton), () -> joystick.getRawButton(Joysticks.driveSlowButton)
-        ));
+        // driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
+        //     reverseAxisIf(joystick::getY, Joysticks.driveReverseButton), reverseAxisIf(joystick::getX, Joysticks.driveReverseButton), 
+        //     reverseAxisIf(joystick::getZ, Joysticks.driveReverseButton), () -> joystick.getRawButton(Joysticks.driveSlowButton)
+        // ));
         configureBindings();
     }
 
@@ -52,19 +50,28 @@ public class RobotContainer {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
         // armSubsystem.stop();
-        intakeShooterSubsystem.stop();
+        // intakeShooterSubsystem.stop();
     }
     
     private void configureBindings() {
-        joystick.onTrue(2, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
+        // joystick.onTrue(2, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
         // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
         // joystick.whileTrue(2, intakeShooterSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(1)).finallyDo(intakeShooterSubsystem::stop));
         // joystick.whileTrue(3, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(-.25)).finallyDo(armSubsystem::stop));
         // joystick.whileTrue(5, armSubsystem.runOnce(() -> intakeShooterSubsystem.setSpeed(.25)).finallyDo(armSubsystem::stop));
+        joystick.onTrue(3, driveSubsystem.runOnce(() -> {
+            driveSubsystem.setVelocity(-.25, -.25);
+        }));
+        joystick.onTrue(4, driveSubsystem.runOnce(() -> {
+            driveSubsystem.resetFieldPose();
+        }));
+        joystick.onTrue(5, driveSubsystem.runOnce(() -> {
+            driveSubsystem.setVelocity(.25, .25);
+        }));
         joystick.onTrue(6, driveSubsystem.trajectoryToPoseCommand(
             () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
         ));
-        joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(new Pose2d(2, 0, Rotation2d.fromDegrees(0))));
+        joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Feet.of(5), Feet.of(0), Rotation2d.fromDegrees(0))));
         joystick.onTrue(8, driveSubsystem.turnCommand(Degrees.of(-45)));
         joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
         joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));

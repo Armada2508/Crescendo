@@ -95,8 +95,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonRFollow.setInverted(true);
         talonL.getConfigurator().apply(Drive.motionMagicConfig);
         talonR.getConfigurator().apply(Drive.motionMagicConfig);
-        talonL.getConfigurator().apply(Drive.velocityConfig);
-        talonR.getConfigurator().apply(Drive.velocityConfig);
+        talonL.getConfigurator().apply(Drive.velocityLeftConfig);
+        talonR.getConfigurator().apply(Drive.velocityRightConfig);
     }
 
     /**
@@ -118,7 +118,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param distance meters
      */
     private void driveDistance(Measure<Distance> distance) {
-        MotionMagicVoltage request = new MotionMagicVoltage(0);
+        MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(Drive.motionMagicSlot);
         double distanceRots = toRotations(distance.in(Meters));
         talonL.setControl(request.withPosition(talonL.getPosition().getValueAsDouble() + distanceRots));
         talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
@@ -128,8 +128,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param leftVelocity meters/second
      * @param rightVelocity meters/second
      */
-    private void setVelocity(double leftVelocity, double rightVelocity) {
-        VelocityVoltage request = new VelocityVoltage(0).withSlot(Drive.velocitySlot);
+    public void setVelocity(double leftVelocity, double rightVelocity) {
+        VelocityVoltage request = new VelocityVoltage(0);
         talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
     }
@@ -226,11 +226,17 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     private Rotation2d getAngle() {
-        return Rotation2d.fromDegrees(pigeon.getYaw()); //? I think this is right
+        return Rotation2d.fromDegrees(-pigeon.getYaw()); 
     }
 
     public Pose2d getFieldPose() {
         return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
+    }
+
+    public void resetFieldPose() {
+        if (poseEstimator != null) {
+            poseEstimator.resetPosition(getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
+        }
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
@@ -240,6 +246,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Pigeon Yaw", pigeon.getYaw());
+        map.put("Robot Angle", getFieldPose().getRotation().getDegrees());
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

@@ -63,9 +63,10 @@ public class Constants {
         public static final Measure<Distance> wheelDiameter = Inches.of(6); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
-        public static final Slot1Configs velocityConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
-        public static final int velocitySlot = 1;
+        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.14).withKV(0.1); //! Have to tune for these values
+        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.155).withKV(0.1); //! Have to tune for these values
+        public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
+        public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
