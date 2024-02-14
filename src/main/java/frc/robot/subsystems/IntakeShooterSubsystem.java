@@ -69,7 +69,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
             setIntakeSpeed(Intake.intakeSpeed);
         })
         .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(Commands.waitSeconds(Intake.waitTimeAfterTrip.in(Seconds)))
+        .andThen(() -> setIntakeSpeed(-Intake.intakeSpeed))
+        .andThen(Commands.waitUntil(() -> !isSensorTripped()))
         .finallyDo(this::stop)
         .withName("Intake Command");
     }
