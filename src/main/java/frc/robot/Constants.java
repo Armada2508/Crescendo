@@ -71,7 +71,7 @@ public class Constants {
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
         public static final Measure<Angle> turnDeadband = Degrees.of(0.1); //! Tune this
-        public static final double maxTurnPIDSpeed = 0.25; //! Tune this
+        public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(5); //! Tune this
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;

@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -20,6 +21,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
@@ -32,6 +34,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -134,6 +137,12 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
     }
 
+    public void setVoltage(Measure<Voltage> left, Measure<Voltage> right) {
+        VoltageOut request = new VoltageOut(0);
+        talonL.setControl(request.withOutput(left.in(Volts)));
+        talonR.setControl(request.withOutput(right.in(Volts)));
+    }
+
     public void setSpeed(double leftSpeed, double rightSpeed) {
         talonL.setControl(new DutyCycleOut(leftSpeed));
         talonR.setControl(new DutyCycleOut(rightSpeed));
@@ -165,9 +174,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.reset();
         turnPIDController.setSetpoint(0);
         return runEnd(() -> {
-            double speed = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.get().in(Degrees)));
-            speed = MathUtil.clamp(speed, -Drive.maxTurnPIDSpeed, Drive.maxTurnPIDSpeed);
-            setSpeed(-speed, speed);
+            double volts = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.get().in(Degrees)));
+            volts = MathUtil.clamp(volts, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
+            setVoltage(Volts.of(-volts), Volts.of(volts));
         }, this::stop)
         .until(turnPIDController::atSetpoint)
         .withName("Turn Command");
@@ -245,7 +254,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Pigeon Yaw", pigeon.getYaw());
+        if (pigeon.getState() == PigeonState.Ready) {
+            map.put("Pigeon Yaw", pigeon.getYaw());
+        }
         map.put("Robot Angle", getFieldPose().getRotation().getDegrees());
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
