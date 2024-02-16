@@ -59,7 +59,6 @@ public class Routines {
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(
-            // Radians.of(Math.atan2((driveSubsystem.getFieldPose().getY() - Field.speakerPos.getY()), -driveSubsystem.getFieldPose().getX() - Field.speakerPos.getX()))
             () -> {
                 Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
@@ -78,29 +77,4 @@ public class Routines {
         return armSubsystem.getTargetAngle(distance);
     }
 
-    /**
-     * https://en.wikipedia.org/wiki/Projectile_motion#Angle_%CE%B8_required_to_hit_coordinate_(x,_y)
-     */
-    // private static Measure<Angle> calcAngle(DriveSubsystem driveSubsystem) {
-    //     double x = driveSubsystem.getFieldPose().getTranslation().getDistance(Field.speakerPos);
-    //     // double x = new Translation2d(Field.speakerPos.getX(), Field.speakerPos.getY() + 2).getDistance(Field.speakerPos);
-    //     double y = Field.lowSpeakerHeight.in(Meters);
-    //     double v = Shooter.speakerShootSpeed.in(RotationsPerSecond) * Math.PI * Shooter.flywheelDiameter.in(Meters);
-    //     double g = Constants.gravity;
-    //     double angle1 = Units.radiansToDegrees(Math.atan( (v * v + inner(x, y, v, g)) / (g * x) ));
-    //     double angle2 = Units.radiansToDegrees(Math.atan( (v * v - inner(x, y, v, g)) / (g * x) ));
-    //     double angle = closer(angle1, angle2, 45); //? Magic number also might be garbage
-    //     LogUtil.printFormatted("X Y V G θ1 θ2 θ", x, y, v, g, angle1, angle2, angle);
-    //     return angle;
-    // }
-
-    // private static double inner(double x, double y, double v, double g) {
-    //     return Math.sqrt(Math.pow(v, 4) - g * (g * x * x + 2 * y * v * v));
-    // }
-
-    // private static double closer(double a, double b, double val) {
-    //     if (Math.abs(a - val) < Math.abs(b - val)) return a;
-    //     return b;
-    // }   
-    
 }

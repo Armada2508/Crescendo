@@ -40,6 +40,8 @@ public class Constants {
 
     public static final double gravity = 9.81;
     public static final double degreesPerRotation = 360;
+    public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Bumper width is 3 in.
+    public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
 
     public static class Joysticks {
         // Ports
@@ -121,20 +123,23 @@ public class Constants {
         public static final String noteCameraName = "LifeCam";
         public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-13.5), 0, 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-        // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-        // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
         public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
 
     public static class Field {
+        // Origin is always the blue alliance origin
         public static final Pose2d origin = new Pose2d();
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25);
-        public static final Measure<Distance> lowSpeakerHeight = Inches.of(78);
+        private static final Measure<Distance> subWooferLength = Inches.of(36.125);
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
-        public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));        
-        public static final Translation2d lowerNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); // note positions are based off of the blue cordinates
+        public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
+        // Position of the front of the base of the speaker, facing the speaker
+        public static final Pose2d blueSpeakerBaseScorePos = new Pose2d(subWooferLength.plus(halfRobotLength), Meters.of(5.55), Rotation2d.fromDegrees(180));    
+        public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength), Meters.of(5.55), Rotation2d.fromDegrees(0));    
+        // All note positions are notes for the BLUE alliance
+        public static final Translation2d lowerNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         public static final Translation2d mediumNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d upperNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(275.625)); 
         public static final Pose2d lowerNotePickupLocation = new Pose2d(lowerNoteCoordinate.getX(), lowerNoteCoordinate.getY(), Rotation2d.fromDegrees(0));

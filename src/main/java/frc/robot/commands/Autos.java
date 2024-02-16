@@ -43,7 +43,7 @@ public class Autos {
         )) 
         .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.trajectoryToPoseCommand(
-            () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
+            () -> (Robot.onRedAlliance()) ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos
         )) 
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
     }
