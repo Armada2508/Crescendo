@@ -57,8 +57,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private final VisionSubsystem vision; 
-    // private DifferentialDrivePoseEstimator poseEstimator;
-    private DifferentialDrivePoseEstimator poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
+    private DifferentialDrivePoseEstimator poseEstimator;
+    // private DifferentialDrivePoseEstimator poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
 
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
@@ -175,8 +175,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.setSetpoint(0);
         return runEnd(() -> {
             double volts = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.get().in(Degrees)));
-            volts = MathUtil.clamp(volts, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
-            setVoltage(Volts.of(-volts), Volts.of(volts));
+            double voltsL = volts + Drive.velocityLeftConfig.kS * Math.signum(volts);
+            double voltsR = volts + Drive.velocityRightConfig.kS * Math.signum(volts);
+            voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
+            voltsR = MathUtil.clamp(voltsR, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
+            setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
         }, this::stop)
         .until(turnPIDController::atSetpoint)
         .withName("Turn Command");

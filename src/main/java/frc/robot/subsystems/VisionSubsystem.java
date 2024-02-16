@@ -24,9 +24,11 @@ import frc.robot.lib.logging.NTLogger;
 
 public class VisionSubsystem extends SubsystemBase implements Loggable {
 
-    private final PhotonCamera cam = new PhotonCamera(Vision.cameraName); 
-    private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(Vision.aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cam, Vision.robotToCamera);
-    private PhotonPipelineResult result;
+    private final PhotonCamera tagCam = new PhotonCamera(Vision.tagCameraName); 
+    private final PhotonCamera noteCam = new PhotonCamera(Vision.noteCameraName); 
+    private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(Vision.aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, tagCam, Vision.robotToCamera);
+    private PhotonPipelineResult tagResult;
+    private PhotonPipelineResult noteResult;
 
     public VisionSubsystem() {
         NTLogger.register(this);
@@ -34,17 +36,40 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public void periodic() {
-        if (!cam.isConnected()) return;
-        result = cam.getLatestResult();
+        if (tagCam.isConnected()) {
+            tagResult = tagCam.getLatestResult();
+        }
+        if (noteCam.isConnected()) {
+            noteResult = noteCam.getLatestResult();
+        }
     }
 
     public boolean canSeeTag() {
-        if (!cam.isConnected()) return false;
-        return result.hasTargets();
+        if (!tagCam.isConnected()) return false;
+        return tagResult.hasTargets();
+    }
+
+    public boolean canSeeNote() {
+        if (!noteCam.isConnected()) return false;
+        return noteResult.hasTargets();
+    }
+
+    public double getNoteYaw() {
+        if (canSeeNote()) {
+            return noteResult.getBestTarget().getYaw();
+        }
+        return 0;
+    }
+
+    public double getNotePitch() {
+        if (canSeeNote()) {
+            return noteResult.getBestTarget().getPitch();
+        }
+        return 0;
     }
 
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-        if (!cam.isConnected()) return Optional.empty();
+        if (!tagCam.isConnected()) return Optional.empty();
         return photonPoseEstimator.update();
     }
 
@@ -58,13 +83,22 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        double distance = 0;
         if (canSeeTag()) {
-            var target = result.getBestTarget();
-            distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
+            var target = tagResult.getBestTarget();
+            int id = target.getFiducialId();
+            double distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
+            map.put("Best Tag ID", id);
+            map.put("Best Tag Distance", distance);
         }
+        if (canSeeNote()) {
+            var target = noteResult.getBestTarget();
+            map.put("Note Yaw", target.getYaw());
+            map.put("Note Pitch", target.getPitch());
+        }
+        map.put("Camera Connected Note", tagCam.isConnected());
+        map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());
-        map.put("Distance", distance);
+        map.put("Can See Note", canSeeNote());
         return map;
     }
 

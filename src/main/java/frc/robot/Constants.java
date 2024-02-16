@@ -20,12 +20,14 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -57,21 +59,21 @@ public class Constants {
         public static final int RFollowID = 3;
         public static final int pigeonID = 8;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
+            0.5, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.14).withKV(0.1); //! Have to tune for these values
-        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.155).withKV(0.1); //! Have to tune for these values
+        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.1); //! Have to tune for these values
+        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.1); //! Have to tune for these values
         public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0).withKD(0); //! Have to tune for these values
-        public static final Measure<Angle> turnDeadband = Degrees.of(0.1); //! Tune this
-        public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(5); //! Tune this
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.03).withKD(0);
+        public static final Measure<Angle> turnDeadband = Degrees.of(0.5);
+        public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(3); 
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
@@ -115,8 +117,9 @@ public class Constants {
     }
 
     public static class Vision {
-        public static final String cameraName = "OV9281";
-        public static final Transform3d robotToCamera = new Transform3d(); //! Find this
+        public static final String tagCameraName = "OV9281";
+        public static final String noteCameraName = "LifeCam";
+        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-13.5), 0, 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);

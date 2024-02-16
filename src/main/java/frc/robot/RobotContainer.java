@@ -4,8 +4,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
+
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
@@ -48,24 +53,33 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
+        joystick.onTrue(2, driveSubsystem.turnCommand(() -> {
+            return Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees() - visionSubsystem.getNoteYaw());
+        }));
+        joystick.onTrue(3, driveSubsystem.startEnd(() -> {
+            driveSubsystem.setSpeed(.15, .15);
+        }, driveSubsystem::stop).until(
+            () -> Math.abs(visionSubsystem.getNotePitch()) > 15
+        ));
         // joystick.onTrue(5, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
         // joystick.onTrue(3, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootPower));
         // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
         // joystick.onTrue(3, driveSubsystem.runOnce(() -> {
         //     driveSubsystem.setVelocity(-.25, -.25);
         // }));
-        // joystick.onTrue(4, driveSubsystem.runOnce(() -> {
-        //     driveSubsystem.resetFieldPose();
-        // }));
+        joystick.onTrue(4, driveSubsystem.runOnce(() -> {
+            driveSubsystem.resetFieldPose();
+        }));
         // joystick.onTrue(5, driveSubsystem.runOnce(() -> {
         //     driveSubsystem.setVelocity(.25, .25);
         // }));
         // joystick.onTrue(6, driveSubsystem.trajectoryToPoseCommand(
         //     () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
         // ));
-        // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Feet.of(5), Feet.of(0), Rotation2d.fromDegrees(0))));
-        // joystick.onTrue(8, driveSubsystem.turnCommand(Degrees.of(-45)));
-        // joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
+        joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(new Pose2d(Feet.of(5), Feet.of(3), Rotation2d.fromDegrees(0))));
+        joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
+        joystick.onTrue(10, driveSubsystem.turnCommand(Degrees.of(-45)));
+        joystick.onTrue(11, driveSubsystem.turnCommand(Degrees.of(90)));
         // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));
         // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(Feet.of(2), 2, 2));
         joystick.onTrue(1, Commands.runOnce(this::stopEverything));
