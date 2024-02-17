@@ -44,10 +44,22 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         // interpolatingAngleMap.put(0.0, 0.0);
     }
 
+    @Override
+    public void periodic() {
+        Measure<Angle> angle = getAngle();
+        if (angle.gte(Arm.solenoidAngle.minus(Arm.solenoidBounds)) && angle.lte(Arm.solenoidAngle.plus(Arm.solenoidBounds))) {
+            holdingSolenoid.set(Value.kOn);
+        }
+        else {
+            holdingSolenoid.set(Value.kOff);
+        }
+    }
+
     private void configTalons() {
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
+        talon.setInverted(true);
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
         talon.setPosition(Arm.startAngle.in(Rotations));
@@ -95,8 +107,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setControl(new NeutralOut());
     }
 
+    public void zeroArm() {
+        talon.setPosition(0);
+    }
+
     public Measure<Angle> getAngle() {
-        return Degrees.of(talon.getPosition().getValueAsDouble());
+        return Rotations.of(talon.getPosition().getValueAsDouble());
     }
 
     public Measure<Angle> getTargetAngle(double distance) {
@@ -104,37 +120,42 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
     
     /**
-     * 
      * @param angle degrees
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      * @return
      */
     public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration, double jerk) {
-        final double deadbandRotations = Arm.angleDeadband.in(Rotations); 
+        final double deadband = Arm.angleDeadband.in(Degrees); 
         return runOnce(() -> {
+            
             configMotionMagic(velocity, acceleration, jerk);
             setAngle(angle);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(talon.getPosition().getValueAsDouble() - talon.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
+        .andThen(Commands.waitUntil(() -> Util.inRange(getAngle().minus(angle.get()).in(Degrees), deadband)))
         .withName("Set Angle Command");
     }
 
+    /**
+     * @param angle degrees
+     * @param velocity rotations per second
+     * @param acceleration rotations per second^2
+     * @return
+     */
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration, double jerk) {
         return setAngleCommand(() -> angle, velocity, acceleration, jerk);
     }
 
     public Command retractRelayHoldCommand() { 
         return runOnce(() -> {
-            if (holdingSolenoid.get() == Value.kForward) {
-                switchRelay();
-            }
+            holdingSolenoid.set(Value.kOn);
         })
         .andThen(setAngleCommand(getAngle(), 0, 0, 0)); 
     }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
+        map.put("Arm Angle", getAngle().in(Degrees));
         NTLogger.putTalonLog(talon, map);
         NTLogger.putTalonLog(talonFollow, map);
         NTLogger.putSubsystemLog(this, map);

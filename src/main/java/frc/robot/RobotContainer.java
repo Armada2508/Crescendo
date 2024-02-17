@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -14,8 +12,8 @@ import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
-import frc.robot.Constants.Field;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
@@ -47,7 +45,7 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
-        // armSubsystem.stop();
+        armSubsystem.stop();
         // intakeShooterSubsystem.stop();
     }
     
@@ -66,20 +64,25 @@ public class RobotContainer {
         // joystick.onTrue(3, driveSubsystem.runOnce(() -> {
         //     driveSubsystem.setVelocity(-.25, -.25);
         // }));
-
-        joystick.onTrue(4, driveSubsystem.runOnce(() -> {
-            driveSubsystem.resetFieldPose();
-        }));
+        joystick.onTrue(5, armSubsystem.runOnce(() -> armSubsystem.setSpeed(.1)));
+        joystick.onTrue(3, armSubsystem.runOnce(() -> armSubsystem.setSpeed(-.1)));
+        joystick.onTrue(4, armSubsystem.runOnce(() -> armSubsystem.zeroArm()));
+        joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.speakerAngle, 60, 60, 0));
+        joystick.onTrue(8, armSubsystem.setAngleCommand(Arm.solenoidAngle, 60, 60, 0));
+        joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.startAngle, 60, 60, 0));
+        // joystick.onTrue(4, driveSubsystem.runOnce(() -> {
+        //     driveSubsystem.resetFieldPose();
+        // }));
         // joystick.onTrue(5, driveSubsystem.runOnce(() -> {
         //     driveSubsystem.setVelocity(.25, .25);
         // }));
         // joystick.onTrue(6, driveSubsystem.trajectoryToPoseCommand(
         //     () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
         // ));
-        joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos));
-        joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
-        joystick.onTrue(10, driveSubsystem.turnCommand(Degrees.of(-45)));
-        joystick.onTrue(11, driveSubsystem.turnCommand(Degrees.of(90)));
+        // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos));
+        // joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
+        // joystick.onTrue(10, driveSubsystem.turnCommand(Degrees.of(-45)));
+        // joystick.onTrue(11, driveSubsystem.turnCommand(Degrees.of(90)));
         // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));
         // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(Feet.of(2), 2, 2));
         joystick.onTrue(1, Commands.runOnce(this::stopEverything));

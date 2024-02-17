@@ -88,16 +88,18 @@ public class Constants {
         public static final int relayChannel = 0;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Have to tune for these values
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(1000).withKD(0); //! Have to tune for these values
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
         public static final Measure<Angle> startAngle = Degrees.of(0); //! Find angle at startup
+        public static final Measure<Angle> solenoidAngle = Degrees.of(100); //! Find angle of solenoid
+        public static final Measure<Angle> solenoidBounds = Degrees.of(20); //! Tune this
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
         public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
         public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
-        public static final Measure<Angle> speakerAngle = Degrees.of(0); //! Find angle for base speaker
-        public static final Measure<Angle> minAngle = Degrees.of(-10);
-        public static final Measure<Angle> maxAngle = Degrees.of(90);
+        public static final Measure<Angle> speakerAngle = Degrees.of(36);
+        public static final Measure<Angle> minAngle = Degrees.of(0);
+        public static final Measure<Angle> maxAngle = Degrees.of(110);
     }
 
     public static class Intake {
