@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public ArmSubsystem() {
         configTalons();
         NTLogger.register(this);
-        TalonMusic.addTalonFX(this, talon, talonFollow);
+        TalonMusic.addTalonFX(this, talon);
         // interpolatingAngleMap.put(0.0, 0.0);
     }
 
@@ -105,10 +105,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     public void stop() {
         talon.setControl(new NeutralOut());
-    }
-
-    public void zeroArm() {
-        talon.setPosition(0);
     }
 
     public Measure<Angle> getAngle() {

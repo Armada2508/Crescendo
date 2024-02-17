@@ -66,7 +66,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         configTalons();
         NTLogger.register(this);
-        TalonMusic.addTalonFX(this, talonL, talonLFollow, talonR, talonRFollow);
+        TalonMusic.addTalonFX(this, talonL, talonR);
     }
 
     @Override
@@ -92,6 +92,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private void configTalons() {
         pigeon.configFactoryDefault();
         pigeon.setYaw(0);
+        talonL.setPosition(0);
+        talonR.setPosition(0);
         Util.factoryResetTalons(talonL, talonR, talonLFollow, talonRFollow);
         Util.brakeMode(talonL, talonR, talonLFollow, talonRFollow);
         talonLFollow.setControl(new StrictFollower(talonL.getDeviceID()));
@@ -205,18 +207,18 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return error2;
     }
 
-    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose) {
+    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, boolean driveBackwards) {
         return runOnce(() -> {
             System.out.println("Creating trajectory");
-            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig);
+            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
             System.out.println("Done creating trajectory");
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
         }).withName("Generating Trajectory Command");
     }
 
-    public Command trajectoryToPoseCommand(Pose2d targetPose) {
-        return trajectoryToPoseCommand(() -> targetPose);
+    public Command trajectoryToPoseCommand(Pose2d targetPose, boolean driveBackwards) {
+        return trajectoryToPoseCommand(() -> targetPose, driveBackwards);
     }
 
     public void stop() {

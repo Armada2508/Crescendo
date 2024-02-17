@@ -61,14 +61,14 @@ public class Constants {
         public static final int RFollowID = 3;
         public static final int pigeonID = 8;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            0.5, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
+            0.25, 0.5, 0.1, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
-        public static final Measure<Distance> wheelDiameter = Inches.of(6); 
+        public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.1); //! Have to tune for these values
-        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.1); //! Have to tune for these values
+        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.11);
+        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.11);
         public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
@@ -79,7 +79,7 @@ public class Constants {
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
-        public static final TrajectoryConfig trajectoryConfig = new TrajectoryConfig(MetersPerSecond.of(0.75), MetersPerSecondPerSecond.of(0.5)).setKinematics(diffKinematics);
+        public static final TrajectoryConfig trajectoryConfig = new TrajectoryConfig(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(0.5)).setKinematics(diffKinematics);
     }
 
     public static class Arm {
@@ -88,10 +88,10 @@ public class Constants {
         public static final int relayChannel = 0;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(1000).withKD(0); //! Have to tune for these values
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0); //! Have to tune for these values
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
-        public static final Measure<Angle> startAngle = Degrees.of(0); //! Find angle at startup
+        public static final Measure<Angle> startAngle = Degrees.of(90); //! Find angle at startup
         public static final Measure<Angle> solenoidAngle = Degrees.of(100); //! Find angle of solenoid
         public static final Measure<Angle> solenoidBounds = Degrees.of(20); //! Tune this
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
@@ -138,8 +138,8 @@ public class Constants {
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
         public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
         // Position of the front of the base of the speaker, facing the speaker
-        public static final Pose2d blueSpeakerBaseScorePos = new Pose2d(subWooferLength.plus(halfRobotLength), Meters.of(5.55), Rotation2d.fromDegrees(180));    
-        public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength), Meters.of(5.55), Rotation2d.fromDegrees(0));    
+        public static final Pose2d blueSpeakerBaseScorePos = new Pose2d(subWooferLength.plus(halfRobotLength).plus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(0));    
+        public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength).minus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(180));    
         // All note positions are notes for the BLUE alliance
         public static final Translation2d lowerNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         public static final Translation2d mediumNoteCoordinate = new Translation2d(Inches.of(114), Inches.of(218.625)); 

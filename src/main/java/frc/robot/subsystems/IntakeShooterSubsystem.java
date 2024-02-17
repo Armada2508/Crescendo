@@ -35,7 +35,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public IntakeShooterSubsystem() {
         configTalons();
         NTLogger.register(this);
-        TalonMusic.addTalonFX(this, talonIntake, talonShooter, talonFollowShooter);
+        TalonMusic.addTalonFX(this, talonIntake, talonShooter);
     }
 
     private void configTalons() {
