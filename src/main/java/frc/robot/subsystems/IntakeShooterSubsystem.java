@@ -22,6 +22,7 @@ import frc.robot.Constants.Intake;
 import frc.robot.Constants.Shooter;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
+import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 
 public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
@@ -34,6 +35,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public IntakeShooterSubsystem() {
         configTalons();
         NTLogger.register(this);
+        TalonMusic.addTalonFX(this, talonIntake, talonShooter, talonFollowShooter);
     }
 
     private void configTalons() {

@@ -46,6 +46,7 @@ import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 
 public class DriveSubsystem extends SubsystemBase implements Loggable {
@@ -65,6 +66,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         configTalons();
         NTLogger.register(this);
+        TalonMusic.addTalonFX(this, talonL, talonLFollow, talonR, talonRFollow);
     }
 
     @Override
