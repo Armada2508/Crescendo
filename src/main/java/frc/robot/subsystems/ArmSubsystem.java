@@ -27,6 +27,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Arm;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
+import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 
 public class ArmSubsystem extends SubsystemBase implements Loggable {
@@ -39,6 +40,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public ArmSubsystem() {
         configTalons();
         NTLogger.register(this);
+        TalonMusic.addTalonFX(this, talon, talonFollow);
         // interpolatingAngleMap.put(0.0, 0.0);
     }
 
