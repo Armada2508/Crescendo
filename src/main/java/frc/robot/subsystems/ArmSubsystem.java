@@ -18,6 +18,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Relay.Direction;
 import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,7 +33,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followID);
-    private final Relay holdingSolenoid = new Relay(Arm.relayChannel);
+    private final Relay holdingSolenoid = new Relay(Arm.relayChannel, Direction.kForward);
     private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); //! Have to fill this map
 
     public ArmSubsystem() {
@@ -81,7 +82,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     public void switchRelay() {
         if (holdingSolenoid.get() == Value.kOff) {
-            holdingSolenoid.set(Value.kForward);
+            holdingSolenoid.set(Value.kOn);
         } 
         else {
             holdingSolenoid.set(Value.kOff);

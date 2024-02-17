@@ -20,6 +20,7 @@ import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
@@ -29,7 +30,7 @@ public class RobotContainer {
     private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
-    // private final ArmSubsystem armSubsystem = new ArmSubsystem();
+    private final ArmSubsystem armSubsystem = new ArmSubsystem();
     // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
@@ -51,20 +52,21 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(2, driveSubsystem.turnCommand(() -> {
-            return Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees() - visionSubsystem.getNoteYaw());
-        }));
-        joystick.onTrue(3, driveSubsystem.startEnd(() -> {
-            driveSubsystem.setSpeed(.15, .15);
-        }, driveSubsystem::stop).until(
-            () -> Math.abs(visionSubsystem.getNotePitch()) > 15
-        ));
+        // joystick.onTrue(2, driveSubsystem.turnCommand(() -> {
+        //     return Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees() - visionSubsystem.getNoteYaw());
+        // }));
+        // joystick.onTrue(3, driveSubsystem.startEnd(() -> {
+        //     driveSubsystem.setSpeed(.15, .15);
+        // }, driveSubsystem::stop).until(
+        //     () -> Math.abs(visionSubsystem.getNotePitch()) > 15
+        // ));
         // joystick.onTrue(5, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
         // joystick.onTrue(3, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootPower));
-        // buttonBoard.onTrue(Joysticks.solenoidButton, armSubsystem.runOnce(() -> armSubsystem.switchRelay()));
+        joystick.onTrue(2, armSubsystem.runOnce(() -> armSubsystem.switchRelay()).ignoringDisable(true));
         // joystick.onTrue(3, driveSubsystem.runOnce(() -> {
         //     driveSubsystem.setVelocity(-.25, -.25);
         // }));
+
         joystick.onTrue(4, driveSubsystem.runOnce(() -> {
             driveSubsystem.resetFieldPose();
         }));
