@@ -17,9 +17,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Relay.Direction;
-import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,26 +30,13 @@ import frc.robot.lib.util.Util;
 public class ArmSubsystem extends SubsystemBase implements Loggable {
     
     private final TalonFX talon = new TalonFX(Arm.ID);
-    private final TalonFX talonFollow = new TalonFX(Arm.followID);
-    private final Relay holdingSolenoid = new Relay(Arm.relayChannel, Direction.kForward);
+    private final TalonFX talonFollow = new TalonFX(Arm.followerID);
     private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); //! Have to fill this map
 
     public ArmSubsystem() {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
-        // interpolatingAngleMap.put(0.0, 0.0);
-    }
-
-    @Override
-    public void periodic() {
-        Measure<Angle> angle = getAngle();
-        if (angle.gte(Arm.solenoidAngle.minus(Arm.solenoidBounds)) && angle.lte(Arm.solenoidAngle.plus(Arm.solenoidBounds))) {
-            holdingSolenoid.set(Value.kOn);
-        }
-        else {
-            holdingSolenoid.set(Value.kOff);
-        }
     }
 
     private void configTalons() {
@@ -90,17 +74,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setControl(request);
     }
 
-    public void setSpeed(double speed) {
-        talon.setControl(new DutyCycleOut(speed));
-    }
-
-    public void switchRelay() {
-        if (holdingSolenoid.get() == Value.kOff) {
-            holdingSolenoid.set(Value.kOn);
-        } 
-        else {
-            holdingSolenoid.set(Value.kOff);
-        }
+    public Command setSpeed(double speed) {
+        return runOnce(() -> talon.setControl(new DutyCycleOut(speed)));
     }
 
     public void stop() {
@@ -124,7 +99,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration, double jerk) {
         final double deadband = Arm.angleDeadband.in(Degrees); 
         return runOnce(() -> {
-            
             configMotionMagic(velocity, acceleration, jerk);
             setAngle(angle);
         })
@@ -140,13 +114,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
      */
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration, double jerk) {
         return setAngleCommand(() -> angle, velocity, acceleration, jerk);
-    }
-
-    public Command retractRelayHoldCommand() { 
-        return runOnce(() -> {
-            holdingSolenoid.set(Value.kOn);
-        })
-        .andThen(setAngleCommand(getAngle(), 0, 0, 0)); 
     }
 
     @Override

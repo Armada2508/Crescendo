@@ -39,7 +39,7 @@ public class Autos {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.trajectoryToPoseCommand(
-            () -> (Robot.onRedAlliance()) ? getRedPosition(Field.lowerNotePickupLocation) : Field.lowerNotePickupLocation, false
+            () -> (Robot.onRedAlliance()) ? getRedPosition(Field.blueLowNotePickupPos) : Field.blueLowNotePickupPos, false
         )) 
         .andThen(groundIntake(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.trajectoryToPoseCommand(

@@ -22,6 +22,7 @@ import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
@@ -31,7 +32,7 @@ public class RobotContainer {
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
-    // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
@@ -48,39 +49,10 @@ public class RobotContainer {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
         armSubsystem.stop();
-        // intakeShooterSubsystem.stop();
+        intakeShooterSubsystem.stop();
     }
     
     private void configureBindings() {
-        // joystick.onTrue(2, driveSubsystem.turnCommand(() -> {
-        //     return Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees() - visionSubsystem.getNoteYaw());
-        // }));
-        // joystick.onTrue(3, driveSubsystem.startEnd(() -> {
-        //     driveSubsystem.setSpeed(.15, .15);
-        // }, driveSubsystem::stop).until(
-        //     () -> Math.abs(visionSubsystem.getNotePitch()) > 15
-        // ));
-        // joystick.onTrue(5, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower));
-        // joystick.onTrue(3, intakeShooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootPower));
-        // joystick.onTrue(2, armSubsystem.runOnce(() -> armSubsystem.switchRelay()).ignoringDisable(true));
-        // joystick.onTrue(3, driveSubsystem.runOnce(() -> {
-        //     driveSubsystem.setVelocity(-.25, -.25);
-        // }));
-        // joystick.onTrue(5, armSubsystem.runOnce(() -> armSubsystem.setSpeed(.1)));
-        // joystick.onTrue(3, armSubsystem.runOnce(() -> armSubsystem.setSpeed(-.1)));
-        // joystick.onTrue(4, armSubsystem.runOnce(() -> armSubsystem.zeroArm()));
-        // joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.speakerAngle, 60, 60, 0));
-        // joystick.onTrue(8, armSubsystem.setAngleCommand(Arm.solenoidAngle, 60, 60, 0));
-        // joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.startAngle, 60, 60, 0));
-        // joystick.onTrue(4, driveSubsystem.runOnce(() -> {
-        //     driveSubsystem.resetFieldPose();
-        // }));
-        // joystick.onTrue(5, driveSubsystem.runOnce(() -> {
-        //     driveSubsystem.setVelocity(.25, .25);
-        // }));
-        // joystick.onTrue(6, driveSubsystem.trajectoryToPoseCommand(
-        //     () -> (Robot.onRedAlliance()) ? new Pose2d(Field.redSpeakerPosition, Rotation2d.fromDegrees(0)) : new Pose2d(Field.blueSpeakerPosition, Rotation2d.fromDegrees(180))
-        // ));
         joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));
         joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
         joystick.onTrue(10, driveSubsystem.turnCommand(Degrees.of(-45)));
@@ -91,8 +63,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return /*armSubsystem.relayStartOfMatchCommand()
-        .andThen*/(Autos.leaveStartingZone(driveSubsystem));
+        return Autos.leaveStartingZone(driveSubsystem);
     } 
 
     private DoubleSupplier reverseAxisIf(DoubleSupplier axis, int button) {

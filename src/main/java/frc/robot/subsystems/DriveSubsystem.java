@@ -53,13 +53,12 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talonL = new TalonFX(Drive.LID);
     private final TalonFX talonR = new TalonFX(Drive.RID);
-    private final TalonFX talonLFollow = new TalonFX(Drive.LFollowID);
-    private final TalonFX talonRFollow = new TalonFX(Drive.RFollowID);
+    private final TalonFX talonLFollow = new TalonFX(Drive.LFollowerID);
+    private final TalonFX talonRFollow = new TalonFX(Drive.RFollowerID);
     private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private final VisionSubsystem vision; 
     private DifferentialDrivePoseEstimator poseEstimator;
-    // private DifferentialDrivePoseEstimator poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
 
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
@@ -107,7 +106,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
-     * 
      * @param velocity meters/second
      * @param acceleration meters/second^2
      */
@@ -131,30 +129,30 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
 
-    /**
-     * @param leftVelocity meters/second
-     * @param rightVelocity meters/second
-     */
-    public void setVelocity(double leftVelocity, double rightVelocity) {
-        VelocityVoltage request = new VelocityVoltage(0);
-        talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
-        talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
+    private void setSpeed(double leftSpeed, double rightSpeed) {
+        talonL.setControl(new DutyCycleOut(leftSpeed));
+        talonR.setControl(new DutyCycleOut(rightSpeed));
     }
 
-    public void setVoltage(Measure<Voltage> left, Measure<Voltage> right) {
+    private void setVoltage(Measure<Voltage> left, Measure<Voltage> right) {
         VoltageOut request = new VoltageOut(0);
         talonL.setControl(request.withOutput(left.in(Volts)));
         talonR.setControl(request.withOutput(right.in(Volts)));
     }
 
-    public void setSpeed(double leftSpeed, double rightSpeed) {
-        talonL.setControl(new DutyCycleOut(leftSpeed));
-        talonR.setControl(new DutyCycleOut(rightSpeed));
+    /**
+     * @param leftVelocity meters/second
+     * @param rightVelocity meters/second
+     */
+    private void setVelocity(double leftVelocity, double rightVelocity) {
+        VelocityVoltage request = new VelocityVoltage(0);
+        talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
+        talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
     }
 
     /**
      * 
-     * @param distance meters relative to robot
+     * @param distance distance relative to the robot
      * @param velocity meters/second
      * @param acceleration meters/second^2
      * @return Command for the robot to drive distance using motion magic
@@ -247,12 +245,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     public Pose2d getFieldPose() {
         return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
-    }
-
-    public void resetFieldPose() {
-        if (poseEstimator != null) {
-            poseEstimator.resetPosition(getAngle(), getLeftPosition(), getRightPosition(), new Pose2d());
-        }
     }
 
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {

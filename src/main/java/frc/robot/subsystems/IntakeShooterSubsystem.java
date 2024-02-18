@@ -29,7 +29,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talonIntake = new TalonFX(Intake.intakeID);
     private final TalonFX talonShooter = new TalonFX(Shooter.shooterID); 
-    private final TalonFX talonFollowShooter = new TalonFX(Shooter.shooterFollowID); 
+    private final TalonFX talonFollowShooter = new TalonFX(Shooter.shooterFollowerID); 
     private final TimeOfFlight timeOfFlight = new TimeOfFlight(Intake.timeOfFlightID);
 
     public IntakeShooterSubsystem() {
@@ -45,16 +45,16 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
     }
 
-    public void setIntakeSpeed(double speed) {
-        talonIntake.setControl(new DutyCycleOut(speed));
+    public Command setIntakeSpeed(double speed) {
+        return runOnce(() -> talonIntake.setControl(new DutyCycleOut(speed)));
     }
 
-    public void setShooterSpeed(double speed) {
-        talonShooter.setControl(new DutyCycleOut(speed));
+    public Command setIntakeVoltage(Measure<Voltage> voltage) {
+        return runOnce(() -> talonIntake.setControl(new VoltageOut(voltage.in(Volts))));
     }
 
-    public void setShooterVoltage(Measure<Voltage> volts) {
-        talonShooter.setControl(new VoltageOut(volts.in(Volts)));
+    public Command setShooterVoltage(Measure<Voltage> voltage) {
+        return runOnce(() -> talonShooter.setControl(new VoltageOut(voltage.in(Volts))));
     }
 
     public void stop() {
@@ -67,37 +67,31 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command intakeCommand() {
-        return runOnce(() -> {
-            setIntakeSpeed(Intake.intakeSpeed);
-        })
+        return setIntakeSpeed(Intake.intakeSpeed)
         .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(() -> setIntakeSpeed(-Intake.intakeSpeed))
+        .andThen(setIntakeSpeed(-Intake.intakeSpeed))
         .andThen(Commands.waitUntil(() -> !isSensorTripped()))
         .finallyDo(this::stop)
-        .withName("Intake Command");
+        .withName("Intake");
     }
 
     public Command spinUpFlywheelCommand(Measure<Voltage> voltage) {
-        return runOnce(() -> {
-            setShooterVoltage(voltage);
-        })
-        .andThen(
-            Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds))
-        )
-        .withName("Spin Up Flywheel Command");
+        return setShooterVoltage(voltage)
+        .andThen(Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds)))
+        .withName("Spin Up Flywheel");
     }
 
     public Command releaseNoteCommand() {
-        return runOnce(() -> setIntakeSpeed(Shooter.indexSpeed))
+        return setIntakeSpeed(Shooter.indexSpeed)
         .andThen(Commands.waitSeconds(Shooter.timeToShoot.in(Seconds))) 
         .finallyDo(this::stop)
-        .withName("Release Note Command");
+        .withName("Release Note");
     }
     
     public Command shootCommand(Measure<Voltage> voltage) {
         return spinUpFlywheelCommand(voltage)
         .andThen(releaseNoteCommand())
-        .withName("Shoot Command");
+        .withName("Shoot");
     }
 
     @Override

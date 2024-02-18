@@ -8,6 +8,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
+import frc.robot.Constants.Intake;
 import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
@@ -29,7 +30,7 @@ public class Routines {
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.ampShootPower))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Intake.ampShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
