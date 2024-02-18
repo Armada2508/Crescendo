@@ -105,7 +105,8 @@ public class Constants {
         public static final Measure<Distance> noteDetectionRange = Millimeters.of(10); //! Tune this
         public static final double intakeSpeed = 0.5; //! Tune this
         public static final Measure<Time> waitTimeAfterTrip = Seconds.of(1); //! Tune this
-        public static final Measure<Voltage> ampShootPower = Volts.of(4);
+        public static final Measure<Time> ampTimeToShoot = Seconds.of(2.5); //! Tune this
+        public static final Measure<Voltage> ampShootPower = Volts.of(-4); //! Tune this
     }
 
     public static class Shooter {
@@ -113,7 +114,7 @@ public class Constants {
         public static final int shooterFollowerID = 8;
         public static final double indexSpeed = 0.5; //! Tune this
         public static final Measure<Time> flywheelChargeTime = Seconds.of(1.5); //! Tune this
-        public static final Measure<Time> timeToShoot = Seconds.of(1); //! Tune this
+        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1); //! Tune this
         public static final Measure<Voltage> speakerShootPower = Volts.of(8);
     }
 

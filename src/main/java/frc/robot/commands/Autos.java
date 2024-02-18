@@ -2,8 +2,10 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.commands.Routines.groundIntake;
+import static frc.robot.commands.Routines.scoreSpeakerBase;
 import static frc.robot.commands.Routines.scoreSpeakerVision;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
@@ -16,26 +18,46 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 
-public class Autos {
+public class Autos { //! Have to tune accelerations and velocities for everything
 
     private Autos() {}
 
+    /**
+     * Leaves the ROBOT STARTING ZONE
+     */
     public static Command leaveStartingZone(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.driveDistanceCommand(Feet.of(5), 0, 0);
+        return driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5));
     }
 
-    //! Have to tune accelerations and velocities for everything
-    public static Command autoSimple(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+    /**
+     * Scores a preloaded NOTE at the SUBWOOFER and leaves the ROBOT STARTING ZONE
+     * @param driveSubsystem
+     * @param armSubsystem
+     * @param intakeShooterSubsystem
+     * @return
+     */
+    public static Command scoreSpeakerBaseAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return scoreSpeakerBase(armSubsystem, intakeShooterSubsystem)
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(4), FeetPerSecond.of(2)));
+    }
+    
+    /**
+     * Scores a preloaded NOTE into the speaker within reasonable distance, turns, and leaves the ROBOT STARTING ZONE
+     */
+    public static Command scoreSpeakerAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.turnCommand(
-            () -> (Robot.onRedAlliance()) ? Degrees.of(0) : Degrees.of(180) // Turn to face alliance wall
+            () -> (Robot.onRedAlliance()) ? Degrees.of(0) : Degrees.of(180)
         ))
-        .andThen(driveSubsystem.driveDistanceCommand(Meters.of(-1.5), 0, 0)); //? adjust distance to leave at week zero
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
     }
 
     // Lot of on the fly trajectory generation might be poor
-    public static Command autoComplex(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+    /**
+     * Scores a preloaded NOTE into the speaker, grabs another NOTE on the field and then scores it.
+     */
+    public static Command scoreSpeakerTwice(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.trajectoryToPoseCommand(

@@ -83,7 +83,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public Command releaseNoteCommand() {
         return setIntakeSpeed(Shooter.indexSpeed)
-        .andThen(Commands.waitSeconds(Shooter.timeToShoot.in(Seconds))) 
+        .andThen(Commands.waitSeconds(Shooter.speakerTimeToShoot.in(Seconds))) 
         .finallyDo(this::stop)
         .withName("Release Note");
     }

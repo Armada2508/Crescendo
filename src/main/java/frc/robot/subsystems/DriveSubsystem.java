@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -151,7 +153,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
-     * 
      * @param distance distance relative to the robot
      * @param velocity meters/second
      * @param acceleration meters/second^2
@@ -165,7 +166,21 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         })
         .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonL.getPosition().getValueAsDouble(), talonL.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
         .finallyDo(this::stop)
-        .withName("Drive Distance Command");
+        .withName("Drive Distance");
+    }
+
+    /**
+     * @param distance distance relative to the robot
+     * @param velocity meters/second
+     * @return Command for the robot to drive a distance using velocity control and waiting
+     */
+    public Command driveDistanceVelCommand(Measure<Distance> distance, Measure<Velocity<Distance>> velocity) {
+        double dist = distance.in(Meters);
+        double vel = Math.abs(velocity.in(MetersPerSecond));
+        return runOnce(() -> setVelocity(vel * Math.signum(dist), vel * Math.signum(dist)))
+        .andThen(Commands.waitSeconds(dist / vel))
+        .finallyDo(this::stop)
+        .withName("Drive Distance Velocity");
     }
 
     /**
@@ -184,7 +199,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
         }, this::stop)
         .until(turnPIDController::atSetpoint)
-        .withName("Turn Command");
+        .withName("Turn");
     }
 
     /**
@@ -207,12 +222,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, boolean driveBackwards) {
         return runOnce(() -> {
-            System.out.println("Creating trajectory");
             Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
-            System.out.println("Done creating trajectory");
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
-        }).withName("Generating Trajectory Command");
+        }).withName("Generating Trajectory");
     }
 
     public Command trajectoryToPoseCommand(Pose2d targetPose, boolean driveBackwards) {

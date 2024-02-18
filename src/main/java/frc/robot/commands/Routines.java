@@ -1,11 +1,13 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Intake;
@@ -25,17 +27,17 @@ public class Routines {
         .andThen(
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
-        ).withName("Intake Ground Composition");
+        ).withName("Intake Ground");
     }
 
-    public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+    public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Intake.ampShootPower))
         .andThen(
-            shooterSubsystem.releaseNoteCommand(),
+            intakeSubsystem.setIntakeVoltage(Intake.ampShootPower),
+            Commands.waitSeconds(Intake.ampTimeToShoot.in(Seconds)),
             stowCommand(armSubsystem)
         )    
-        .withName("Score Amp Composition");
+        .withName("Score Amp");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
@@ -45,7 +47,7 @@ public class Routines {
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
         )    
-        .withName("Score Speaker Base Composition");
+        .withName("Score Speaker Base");
     }
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
@@ -55,7 +57,7 @@ public class Routines {
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
         )    
-        .withName("Score Speaker Vision Composition");
+        .withName("Score Speaker Vision");
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
@@ -65,11 +67,11 @@ public class Routines {
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
             }
         )
-        .withName("Turn to Speaker Command");
+        .withName("Turn to Speaker");
     }
 
     public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0, 0).withName("Stow Command");
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0, 0).withName("Stow");
     }
 
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {

@@ -103,7 +103,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
             setAngle(angle);
         })
         .andThen(Commands.waitUntil(() -> Util.inRange(getAngle().minus(angle.get()).in(Degrees), deadband)))
-        .withName("Set Angle Command");
+        .withName("Set Angle");
     }
 
     /**
