@@ -65,7 +65,11 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public Command intakeCommand() {
         return setIntakeSpeed(Intake.intakeSpeed)
         .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(Commands.waitSeconds(Intake.waitTimeAfterTrip.in(Seconds)))
+        .andThen(Commands.waitSeconds(0.1))
+        .andThen(this::stop)
+        .andThen(Commands.waitSeconds(0.25))
+        .andThen(setIntakeSpeed(-.3))
+        .andThen(Commands.waitSeconds(0.15))
         .finallyDo(this::stop)
         .withName("Intake");
     }
@@ -89,14 +93,21 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Shoot");
     }
 
+    public Command shootAmpCommand(double speed) {
+        return setIntakeSpeed(Shooter.ampShootPower)
+        .andThen(Commands.waitSeconds(Shooter.ampTimeToShoot.in(Seconds)))
+        .finallyDo(this::stop);
+    }
+
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("TOF Distance MM", timeOfFlight.getRange());
         map.put("Is TOF Tripped", isSensorTripped());
         map.put("Shooter RPM", talonShooter.getVelocity().getValueAsDouble() * 60);
-        NTLogger.putTalonLog(talonIntake, map);
-        NTLogger.putTalonLog(talonShooter, map);
-        NTLogger.putTalonLog(talonFollowShooter, map);
+        map.put("Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
+        NTLogger.putTalonLog(talonIntake, "Intake TalonFX", map);
+        NTLogger.putTalonLog(talonShooter, "Shooter TalonFX", map);
+        NTLogger.putTalonLog(talonFollowShooter, "Shooter Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
         return map;
     }

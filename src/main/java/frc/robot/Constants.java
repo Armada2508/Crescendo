@@ -89,15 +89,15 @@ public class Constants {
         public static final int followerID = 5;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
-        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0); //! Have to tune for these values
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
-        public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
-        public static final Measure<Angle> startAngle = Degrees.of(90); //! Find angle at startup
-        public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
-        public static final Measure<Angle> intakeAngle = Degrees.of(0); //! Find angle for pickup
-        public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
+        public static final Measure<Angle> angleDeadband = Degrees.of(0.5); 
+        public static final Measure<Angle> startAngle = Degrees.of(17); 
+        public static final Measure<Angle> stowAngle = Degrees.of(25); 
+        public static final Measure<Angle> intakeAngle = Degrees.of(18); 
+        public static final Measure<Angle> ampAngle = Degrees.of(110);
         public static final Measure<Angle> speakerAngle = Degrees.of(36);
-        public static final Measure<Angle> minAngle = Degrees.of(0);
+        public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(90);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
@@ -109,18 +109,17 @@ public class Constants {
         public static final int timeOfFlightID = 0;
         public static final Measure<Distance> noteDetectionRange = Millimeters.of(100); 
         public static final double intakeSpeed = 1; 
-        public static final Measure<Time> waitTimeAfterTrip = Seconds.of(0.2); 
-        public static final Measure<Time> ampTimeToShoot = Seconds.of(2.5); //! Tune this
-        public static final double ampShootPower = -1; 
     }
 
     public static class Shooter {
         public static final int shooterID = 7;
         public static final int shooterFollowerID = 8;
         public static final double indexSpeed = 1;
-        public static final Measure<Time> flywheelChargeTime = Seconds.of(1.0);
-        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.5);
+        public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
+        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
         public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
+        public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
+        public static final double ampShootPower = -0.3; 
     }
 
     public static class Vision {
