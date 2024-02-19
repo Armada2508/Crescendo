@@ -23,7 +23,7 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.pickupAngle, 0, 0, 0)
+        return armSubsystem.setAngleCommand(Arm.intakeAngle, 0, 0, 0)
         .andThen(
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
@@ -33,7 +33,7 @@ public class Routines {
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
         .andThen(
-            intakeSubsystem.setIntakeVoltage(Intake.ampShootPower),
+            intakeSubsystem.setIntakeSpeed(Intake.ampShootPower),
             Commands.waitSeconds(Intake.ampTimeToShoot.in(Seconds)),
             stowCommand(armSubsystem)
         )    

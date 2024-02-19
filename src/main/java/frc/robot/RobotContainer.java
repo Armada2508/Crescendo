@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -15,12 +13,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Drive;
-import frc.robot.Constants.Field;
+import frc.robot.Constants.Intake;
 import frc.robot.Constants.Joysticks;
+import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -31,7 +29,7 @@ public class RobotContainer {
     private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
-    private final ArmSubsystem armSubsystem = new ArmSubsystem();
+    // private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
 
     public RobotContainer() {
@@ -48,17 +46,18 @@ public class RobotContainer {
     public void stopEverything() {
         CommandScheduler.getInstance().cancelAll();
         driveSubsystem.stop();
-        armSubsystem.stop();
+        // armSubsystem.stop();
         intakeShooterSubsystem.stop();
     }
     
     private void configureBindings() {
-        joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));
-        joystick.onTrue(9, driveSubsystem.turnCommand(Degrees.of(45)));
-        joystick.onTrue(10, driveSubsystem.turnCommand(Degrees.of(-45)));
-        joystick.onTrue(11, driveSubsystem.turnCommand(Degrees.of(90)));
-        // joystick.onTrue(10, driveSubsystem.driveDistanceCommand(Feet.of(-2), 2, 2));
-        // joystick.onTrue(11, driveSubsystem.driveDistanceCommand(Feet.of(2), 2, 2));
+        // joystick.onTrue(6, armSubsystem.setSpeed(0.1));
+        // joystick.onTrue(4, armSubsystem.setSpeed(-0.1));
+        // joystick.onTrue(11, intakeShooterSubsystem.setIntakeSpeed(1).andThen(intakeShooterSubsystem.setShooterVoltage(Shooter.speakerShootPower)));
+        joystick.onTrue(5, intakeShooterSubsystem.shootCommand(Shooter.speakerShootPower));
+        joystick.onTrue(3, intakeShooterSubsystem.setIntakeSpeed(Intake.ampShootPower));
+        joystick.onTrue(2, intakeShooterSubsystem.intakeCommand());
+        // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));
         joystick.onTrue(1, Commands.runOnce(this::stopEverything));
     }
 

@@ -49,10 +49,6 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         return runOnce(() -> talonIntake.setControl(new DutyCycleOut(speed)));
     }
 
-    public Command setIntakeVoltage(Measure<Voltage> voltage) {
-        return runOnce(() -> talonIntake.setControl(new VoltageOut(voltage.in(Volts))));
-    }
-
     public Command setShooterVoltage(Measure<Voltage> voltage) {
         return runOnce(() -> talonShooter.setControl(new VoltageOut(voltage.in(Volts))));
     }
@@ -69,8 +65,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public Command intakeCommand() {
         return setIntakeSpeed(Intake.intakeSpeed)
         .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(setIntakeSpeed(-Intake.intakeSpeed))
-        .andThen(Commands.waitUntil(() -> !isSensorTripped()))
+        .andThen(Commands.waitSeconds(Intake.waitTimeAfterTrip.in(Seconds)))
         .finallyDo(this::stop)
         .withName("Intake");
     }

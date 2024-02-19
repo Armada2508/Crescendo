@@ -46,6 +46,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setInverted(true);
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
+        talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
         talon.setPosition(Arm.startAngle.in(Rotations));
     }
 

@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -13,6 +14,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -58,7 +60,7 @@ public class Constants {
         public static final int LFollowerID = 1;
         public static final int RID = 2;
         public static final int RFollowerID = 3;
-        public static final int pigeonID = 8;
+        public static final int pigeonID = 9;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
             0.25, 0.5, 0.1, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
@@ -68,7 +70,7 @@ public class Constants {
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
         public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.11);
         public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.11);
-        // Motion Magic
+        // Motion Magic, not using currently
         public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
@@ -92,30 +94,33 @@ public class Constants {
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); //! Tune this
         public static final Measure<Angle> startAngle = Degrees.of(90); //! Find angle at startup
         public static final Measure<Angle> stowAngle = Degrees.of(0); //! Find angle for stow
-        public static final Measure<Angle> pickupAngle = Degrees.of(0); //! Find angle for pickup
+        public static final Measure<Angle> intakeAngle = Degrees.of(0); //! Find angle for pickup
         public static final Measure<Angle> ampAngle = Degrees.of(0); //! Find angle for amp
         public static final Measure<Angle> speakerAngle = Degrees.of(36);
         public static final Measure<Angle> minAngle = Degrees.of(0);
         public static final Measure<Angle> maxAngle = Degrees.of(90);
+        public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(maxAngle.in(Rotations)).withReverseSoftLimitThreshold(minAngle.in(Rotations));
     }
 
     public static class Intake {
         public static final int intakeID = 6;
         public static final int timeOfFlightID = 0;
-        public static final Measure<Distance> noteDetectionRange = Millimeters.of(10); //! Tune this
-        public static final double intakeSpeed = 0.5; //! Tune this
-        public static final Measure<Time> waitTimeAfterTrip = Seconds.of(1); //! Tune this
+        public static final Measure<Distance> noteDetectionRange = Millimeters.of(100); 
+        public static final double intakeSpeed = 1; 
+        public static final Measure<Time> waitTimeAfterTrip = Seconds.of(0.2); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(2.5); //! Tune this
-        public static final Measure<Voltage> ampShootPower = Volts.of(-4); //! Tune this
+        public static final double ampShootPower = -1; 
     }
 
     public static class Shooter {
         public static final int shooterID = 7;
         public static final int shooterFollowerID = 8;
-        public static final double indexSpeed = 0.5; //! Tune this
-        public static final Measure<Time> flywheelChargeTime = Seconds.of(1.5); //! Tune this
-        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1); //! Tune this
-        public static final Measure<Voltage> speakerShootPower = Volts.of(8);
+        public static final double indexSpeed = 1;
+        public static final Measure<Time> flywheelChargeTime = Seconds.of(1.0);
+        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.5);
+        public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
     }
 
     public static class Vision {
