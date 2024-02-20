@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.Field;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
-import frc.robot.lib.music.TalonMusic;
 
 public class Robot extends TimedRobot implements Loggable {
     
@@ -28,7 +27,7 @@ public class Robot extends TimedRobot implements Loggable {
         SmartDashboard.putData(Field.simulatedField);
         NTLogger.register(this);
         robotContainer = new RobotContainer();
-        TalonMusic.playStartupTune();
+        // TalonMusic.playStartupTune();
     }
     
     @Override
