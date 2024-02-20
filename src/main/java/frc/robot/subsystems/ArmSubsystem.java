@@ -17,6 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,9 +32,11 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
+    private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
     private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); //! Have to fill this map
 
     public ArmSubsystem() {
+        throughBoreEncoder.setPositionOffset(Arm.encoderOffset.in(Rotations));
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
@@ -47,6 +50,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
         talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
+        // talon.setPosition(throughBoreEncoder.getAbsolutePosition());
         talon.setPosition(Arm.startAngle.in(Rotations));
     }
 
@@ -90,7 +94,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public Measure<Angle> getTargetAngle(double distance) {
         return Degrees.of(interpolatingAngleMap.get(distance));
     }
-    
+
     /**
      * @param angle degrees
      * @param velocity rotations per second
@@ -120,6 +124,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Arm Angle", getAngle().in(Degrees));
+        map.put("Bore Encoder Angle", throughBoreEncoder.getAbsolutePosition());
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);

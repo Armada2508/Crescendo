@@ -86,10 +86,12 @@ public class Constants {
     public static class Arm {
         public static final int ID = 4;
         public static final int followerID = 5;
+        public static final int throughBoreEncoderID = 0;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
+        public static final Measure<Angle> encoderOffset = Degrees.of(0); //! Find this
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); 
         public static final Measure<Angle> startAngle = Degrees.of(17); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
