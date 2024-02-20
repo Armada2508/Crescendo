@@ -95,7 +95,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
      * @param angle degrees
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
-     * @return
+     * @param jerk rotations per second^3
      */
     public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration, double jerk) {
         final double deadband = Arm.angleDeadband.in(Degrees); 
@@ -111,7 +111,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
      * @param angle degrees
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
-     * @return
+     * @param jerk rotations per second^3
      */
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration, double jerk) {
         return setAngleCommand(() -> angle, velocity, acceleration, jerk);
@@ -120,8 +120,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Arm Angle", getAngle().in(Degrees));
-        NTLogger.putTalonLog(talon, map);
-        NTLogger.putTalonLog(talonFollow, map);
+        NTLogger.putTalonLog(talon, "Arm TalonFX", map);
+        NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
         return map;
     }

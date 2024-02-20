@@ -56,10 +56,10 @@ public class RobotContainer {
         joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0));
         joystick.onTrue(11, armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0));
         joystick.onTrue(1, intakeShooterSubsystem.intakeCommand());
-        joystick.onTrue(2, intakeShooterSubsystem.shootCommand(Shooter.speakerShootPower));
-        // joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand(Shooter.ampShootPower));
-        joystick.onTrue(3, intakeShooterSubsystem.setIntakeSpeed(1)
-        .andThen(intakeShooterSubsystem.setShooterVoltage(Shooter.speakerShootPower)));
+        joystick.onTrue(2, intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower));
+        joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
+        // joystick.onTrue(3, intakeShooterSubsystem.setIntakeSpeed(1)
+        // .andThen(intakeShooterSubsystem.setShooterVoltage(Shooter.speakerShootPower)));
         // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));
         joystick.onTrue(8, Commands.runOnce(this::stopEverything));
     }

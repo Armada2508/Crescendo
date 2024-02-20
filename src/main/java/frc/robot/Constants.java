@@ -40,7 +40,6 @@ import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
-    public static final double gravity = 9.81;
     public static final double degreesPerRotation = 360;
     public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Bumper width is 3 in.
     public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
@@ -93,10 +92,10 @@ public class Constants {
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); 
         public static final Measure<Angle> startAngle = Degrees.of(17); 
-        public static final Measure<Angle> stowAngle = Degrees.of(25); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
-        public static final Measure<Angle> ampAngle = Degrees.of(110);
+        public static final Measure<Angle> stowAngle = Degrees.of(25); 
         public static final Measure<Angle> speakerAngle = Degrees.of(36);
+        public static final Measure<Angle> ampAngle = Degrees.of(75);
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(90);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -107,8 +106,12 @@ public class Constants {
     public static class Intake {
         public static final int intakeID = 6;
         public static final int timeOfFlightID = 0;
-        public static final Measure<Distance> noteDetectionRange = Millimeters.of(100); 
         public static final double intakeSpeed = 1; 
+        public static final Measure<Distance> noteDetectionRange = Millimeters.of(100); 
+        public static final Measure<Time> waitAfterTrip = Seconds.of(0.1);
+        public static final Measure<Time> noteSettleTime = Seconds.of(0.25);
+        public static final Measure<Time> backOffNoteTime = Seconds.of(0.15);
+        public static final double backOffSpeed = -0.3;
     }
 
     public static class Shooter {
@@ -116,10 +119,10 @@ public class Constants {
         public static final int shooterFollowerID = 8;
         public static final double indexSpeed = 1;
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
-        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
         public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
+        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
+        public static final Measure<Voltage> ampShootPower = Volts.of(3.5); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
-        public static final double ampShootPower = -0.3; 
     }
 
     public static class Vision {

@@ -20,7 +20,7 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.intakeAngle, 20, 20, 0)
+        return armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0)
         .andThen(
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
@@ -28,16 +28,16 @@ public class Routines {
     }
 
     public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle, 0, 0, 0) 
+        return armSubsystem.setAngleCommand(Arm.ampAngle, 100, 100, 0) 
         .andThen(
-            intakeSubsystem.shootAmpCommand(Shooter.ampShootPower),       
-            stowCommand(armSubsystem)
+            intakeSubsystem.shootAmpCommand()      
+            //? stowCommand(armSubsystem) Need to move back before doing this
         )    
         .withName("Score Amp");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle, 60, 60, 0)
+        return armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -47,7 +47,7 @@ public class Routines {
     }
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> getAngle(driveSubsystem, armSubsystem), 0, 0, 0)
+        return armSubsystem.setAngleCommand(() -> getAngle(driveSubsystem, armSubsystem), 100, 100, 0)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -67,7 +67,7 @@ public class Routines {
     }
 
     public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 0, 0, 0).withName("Stow");
+        return armSubsystem.setAngleCommand(Arm.stowAngle, 100, 100, 0).withName("Stow");
     }
 
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {

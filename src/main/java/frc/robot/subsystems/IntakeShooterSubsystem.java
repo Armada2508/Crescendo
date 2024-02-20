@@ -49,6 +49,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         return runOnce(() -> talonIntake.setControl(new DutyCycleOut(speed)));
     }
 
+    public Command setIntakeVoltage(Measure<Voltage> volts) {
+        return runOnce(() -> talonIntake.setControl(new VoltageOut(volts.in(Volts))));
+    }
+
     public Command setShooterVoltage(Measure<Voltage> voltage) {
         return runOnce(() -> talonShooter.setControl(new VoltageOut(voltage.in(Volts))));
     }
@@ -65,11 +69,11 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public Command intakeCommand() {
         return setIntakeSpeed(Intake.intakeSpeed)
         .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(Commands.waitSeconds(0.1))
+        .andThen(Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)))
         .andThen(this::stop)
-        .andThen(Commands.waitSeconds(0.25))
-        .andThen(setIntakeSpeed(-.3))
-        .andThen(Commands.waitSeconds(0.15))
+        .andThen(Commands.waitSeconds(Intake.noteSettleTime.in(Seconds)))
+        .andThen(setIntakeSpeed(Intake.backOffSpeed))
+        .andThen(Commands.waitSeconds(Intake.backOffNoteTime.in(Seconds)))
         .finallyDo(this::stop)
         .withName("Intake");
     }
@@ -87,14 +91,14 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Release Note");
     }
     
-    public Command shootCommand(Measure<Voltage> voltage) {
+    public Command shootSpeakerCommand(Measure<Voltage> voltage) {
         return spinUpFlywheelCommand(voltage)
         .andThen(releaseNoteCommand())
         .withName("Shoot");
     }
 
-    public Command shootAmpCommand(double speed) {
-        return setIntakeSpeed(Shooter.ampShootPower)
+    public Command shootAmpCommand() {
+        return setIntakeVoltage(Shooter.ampShootPower)
         .andThen(Commands.waitSeconds(Shooter.ampTimeToShoot.in(Seconds)))
         .finallyDo(this::stop);
     }
