@@ -123,14 +123,14 @@ public class Constants {
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
         public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
-        public static final Measure<Voltage> ampShootPower = Volts.of(3.5); 
+        public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
     }
 
     public static class Vision {
         public static final String tagCameraName = "OV9281";
         public static final String noteCameraName = "LifeCam";
-        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-13.5), 0, 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
+        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(-5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1); // Meters, Meters, Radians
     }

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -54,6 +56,7 @@ public class RobotContainer {
     private void configureBindings() {
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle, 100, 100, 0));
         joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0));
+        joystick.onTrue(10, armSubsystem.setAngleCommand(Degrees.of(41), 100, 100, 0));
         joystick.onTrue(11, armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0));
         joystick.onTrue(1, intakeShooterSubsystem.intakeCommand());
         joystick.onTrue(2, intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower));

@@ -41,7 +41,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     private void configTalons() {
         Util.factoryResetTalons(talonIntake, talonShooter, talonFollowShooter);
         Util.coastMode(talonIntake, talonShooter, talonFollowShooter);
-        talonShooter.setInverted(true);
+        talonFollowShooter.setInverted(true);
         talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
     }
 

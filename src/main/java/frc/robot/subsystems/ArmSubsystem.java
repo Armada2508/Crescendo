@@ -124,6 +124,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Arm Angle", getAngle().in(Degrees));
+        map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
         map.put("Bore Encoder Angle", throughBoreEncoder.getAbsolutePosition());
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);

@@ -30,8 +30,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -43,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
+import frc.robot.Robot;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.logging.Loggable;
@@ -270,6 +273,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             map.put("Pigeon Yaw", pigeon.getYaw());
         }
         map.put("Robot Angle", getFieldPose().getRotation().getDegrees());
+        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
+        double distance = getFieldPose().getTranslation().getDistance(speakerPos);
+        map.put("Distance to Speaker", Units.metersToInches(distance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);
