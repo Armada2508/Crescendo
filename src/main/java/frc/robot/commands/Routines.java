@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -73,7 +74,7 @@ public class Routines {
     private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
         Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
         double distance = driveSubsystem.getFieldPose().getTranslation().getDistance(speakerPos);
-        return armSubsystem.getTargetAngle(distance);
+        return armSubsystem.getPredictedAngle(Meters.of(distance));
     }
 
 }

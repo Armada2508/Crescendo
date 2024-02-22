@@ -16,6 +16,7 @@ import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
@@ -75,6 +76,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .andThen(setIntakeSpeed(Intake.backOffSpeed))
         .andThen(Commands.waitSeconds(Intake.backOffNoteTime.in(Seconds)))
         .finallyDo(this::stop)
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Intake");
     }
 
@@ -105,6 +107,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
+        map.put("TOF Status", timeOfFlight.getStatus().toString());
         map.put("TOF Distance MM", timeOfFlight.getRange());
         map.put("Is TOF Tripped", isSensorTripped());
         map.put("Shooter RPM", talonShooter.getVelocity().getValueAsDouble() * 60);

@@ -75,7 +75,7 @@ public class Constants {
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.03).withKD(0);
-        public static final Measure<Angle> turnDeadband = Degrees.of(0.5);
+        public static final Measure<Angle> turnDeadband = Degrees.of(1);
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(3); 
         // Trajectories
         public static final double ramseteB = 2.0;
@@ -87,17 +87,18 @@ public class Constants {
         public static final int ID = 4;
         public static final int followerID = 5;
         public static final int throughBoreEncoderID = 0;
+        public static final double boreEncoderTicksPerRotation = 1024;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> encoderOffset = Degrees.of(0); //! Find this
         public static final Measure<Angle> angleDeadband = Degrees.of(0.5); 
-        public static final Measure<Angle> startAngle = Degrees.of(17); 
+        public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(25); 
-        public static final Measure<Angle> speakerAngle = Degrees.of(36);
-        public static final Measure<Angle> ampAngle = Degrees.of(75);
+        public static final Measure<Angle> speakerAngle = Degrees.of(35);
+        public static final Measure<Angle> ampAngle = Degrees.of(70); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(90);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -130,7 +131,7 @@ public class Constants {
     public static class Vision {
         public static final String tagCameraName = "OV9281";
         public static final String noteCameraName = "LifeCam";
-        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(-5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
+        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1); // Meters, Meters, Radians
     }

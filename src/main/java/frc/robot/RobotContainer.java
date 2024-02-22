@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -14,11 +12,10 @@ import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
-import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Routines;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.ArmSubsystem;
@@ -54,13 +51,18 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle, 100, 100, 0));
-        joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0));
-        joystick.onTrue(10, armSubsystem.setAngleCommand(Degrees.of(41), 100, 100, 0));
-        joystick.onTrue(11, armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0));
-        joystick.onTrue(1, intakeShooterSubsystem.intakeCommand());
-        joystick.onTrue(2, intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower));
+        // joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle, 100, 100, 0));
+        // joystick.onTrue(9, armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0));
+        // joystick.onTrue(11, armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0));
+        // joystick.onTrue(1, intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower));
+        // joystick.onTrue(2, intakeShooterSubsystem.intakeCommand());
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
+
+        joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(1, Routines.scoreSpeakerBase(armSubsystem, intakeShooterSubsystem));
+        // joystick.onTrue(10, Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+
+        // joystick.onTrue(5, Routines.turnToSpeaker(driveSubsystem));
         // joystick.onTrue(3, intakeShooterSubsystem.setIntakeSpeed(1)
         // .andThen(intakeShooterSubsystem.setShooterVoltage(Shooter.speakerShootPower)));
         // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));

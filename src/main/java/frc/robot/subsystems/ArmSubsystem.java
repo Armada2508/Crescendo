@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
@@ -16,6 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,13 +35,21 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
-    private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); //! Have to fill this map
+    /**Distance (in.), Angle (deg.) */
+    private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); 
+    private boolean initalizedArm = true; //! Fix this
 
     public ArmSubsystem() {
         throughBoreEncoder.setPositionOffset(Arm.encoderOffset.in(Rotations));
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
+        interpolatingAngleMap.put(89.37, 45.5);
+        interpolatingAngleMap.put(82.16, 44.0);
+        interpolatingAngleMap.put(74.12, 42.5);
+        interpolatingAngleMap.put(63.06, 41.0);
+        interpolatingAngleMap.put(56.13, 40.0);
+        
     }
 
     private void configTalons() {
@@ -50,7 +60,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
         talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
-        // talon.setPosition(throughBoreEncoder.getAbsolutePosition());
+        if (throughBoreEncoder.isConnected()) {
+            // talon.setPosition(throughBoreEncoder.getAbsolutePosition());
+            // initalizedArm = true;
+        }
         talon.setPosition(Arm.startAngle.in(Rotations));
     }
 
@@ -68,11 +81,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private double getFeedforward() {
+        // Not currently used.
         return Arm.gravityFeedforward * Math.cos(getAngle().in(Radians));
     }
 
-    private void setAngle(Supplier<Measure<Angle>> angleSupplier) {
-        Measure<Angle> angle = angleSupplier.get();
+    private void setAngle(Measure<Angle> angle) {
+        if (!initalizedArm) return;
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
         MotionMagicVoltage request = new MotionMagicVoltage(angle.in(Rotations)).withFeedForward(getFeedforward());
@@ -91,10 +105,11 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return Rotations.of(talon.getPosition().getValueAsDouble());
     }
 
-    public Measure<Angle> getTargetAngle(double distance) {
-        return Degrees.of(interpolatingAngleMap.get(distance));
+    public Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
+        return Degrees.of(interpolatingAngleMap.get(distance.in(Inches)));
     }
 
+    private Measure<Angle> targetAngle;
     /**
      * @param angle degrees
      * @param velocity rotations per second
@@ -104,10 +119,17 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public Command setAngleCommand(Supplier<Measure<Angle>> angle, double velocity, double acceleration, double jerk) {
         final double deadband = Arm.angleDeadband.in(Degrees); 
         return runOnce(() -> {
+            targetAngle = angle.get();
+            // System.out.println(targetAngle.in(Degrees));
             configMotionMagic(velocity, acceleration, jerk);
-            setAngle(angle);
+            setAngle(targetAngle);
         })
-        .andThen(Commands.waitUntil(() -> Util.inRange(getAngle().minus(angle.get()).in(Degrees), deadband)))
+        .andThen(
+            Commands.waitUntil(() -> Util.inRange(getAngle().minus(targetAngle).in(Degrees), deadband))
+            // run(() -> {
+            //     System.out.println(getAngle().in(Degrees) + " " + targetAngle.in(Degrees) + " " + deadband);
+            // })
+            ) 
         .withName("Set Angle");
     }
 
@@ -124,8 +146,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Arm Angle", getAngle().in(Degrees));
+        map.put("Arm Initalized", initalizedArm);
         map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
-        map.put("Bore Encoder Angle", throughBoreEncoder.getAbsolutePosition());
+        map.put("Bore Encoder Angle Rot", throughBoreEncoder.getAbsolutePosition());
+        map.put("Bore Encoder Angle Deg", throughBoreEncoder.getAbsolutePosition() * 360);
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
