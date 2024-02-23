@@ -27,8 +27,8 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     private final PhotonCamera tagCam = new PhotonCamera(Vision.tagCameraName); 
     private final PhotonCamera noteCam = new PhotonCamera(Vision.noteCameraName); 
     private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(Vision.aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, tagCam, Vision.robotToCamera);
-    private PhotonPipelineResult tagResult;
-    private PhotonPipelineResult noteResult;
+    private PhotonPipelineResult tagResult = new PhotonPipelineResult();
+    private PhotonPipelineResult noteResult = new PhotonPipelineResult();
 
     public VisionSubsystem() {
         NTLogger.register(this);
