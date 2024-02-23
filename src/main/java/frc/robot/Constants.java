@@ -50,8 +50,6 @@ public class Constants {
         public static final int buttonBoardPort = 1;
         // Joystick
         public static final int driveSlowButton = 12;
-        // Button Board
-        public static final int driveReverseButton = 9;
     }
     
     public static class Drive {
@@ -93,17 +91,22 @@ public class Constants {
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> encoderOffset = Degrees.of(56);
+        public static final Measure<Angle> encoderAccountForSlack = Degrees.of(50);
+        public static final Measure<Angle> armSlack = Degrees.of(14.21);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); 
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
-        public static final Measure<Angle> stowAngle = Degrees.of(25); 
+        public static final Measure<Angle> stowAngle = Degrees.of(28); 
         public static final Measure<Angle> speakerAngle = Degrees.of(35);
         public static final Measure<Angle> ampAngle = Degrees.of(71); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
-        public static final Measure<Angle> maxAngle = Degrees.of(90);
+        public static final Measure<Angle> maxAngle = Degrees.of(83);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
             .withForwardSoftLimitThreshold(maxAngle.in(Rotations)).withReverseSoftLimitThreshold(minAngle.in(Rotations));
+        public static final double defaultVelocity = 100;
+        public static final double defaultAcceleration = 100;
+        public static final double defaultJerk = 0;
     }
 
     public static class Intake {
@@ -145,7 +148,7 @@ public class Constants {
         private static final Measure<Distance> subWooferLength = Inches.of(36.125);
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
         public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
-        // Position of the front of the base of the speaker, facing the speaker
+        // Position of the front of the subwoofer, facing the speaker
         public static final Pose2d blueSpeakerBaseScorePos = new Pose2d(subWooferLength.plus(halfRobotLength).plus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(0));    
         public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength).minus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(180));    
         public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625)); 

@@ -61,10 +61,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
         talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
-        if (throughBoreEncoder.isConnected()) { //! Remove these magic numbers
+        if (throughBoreEncoder.isConnected()) { 
             Measure<Angle> pos = getBoreAngle();
-            if (pos.gte(Degrees.of(60))) {
-                pos = pos.minus(Degrees.of(14.21));
+            if (pos.gte(Arm.encoderAccountForSlack)) {
+                pos = pos.minus(Arm.armSlack);
             }
             talon.setPosition(pos.in(Rotations));
             initalizedArm = true;
@@ -106,7 +106,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Measure<Angle> getBoreAngle() {
-        return Degrees.of((Rotations.of(throughBoreEncoder.getAbsolutePosition()).in(Degrees) + Arm.encoderOffset.in(Degrees)) % 360);
+        return Degrees.of((Rotations.of(throughBoreEncoder.getAbsolutePosition()).in(Degrees) + Arm.encoderOffset.in(Degrees)) % Constants.degreesPerRotation);
     }
 
     public Measure<Angle> getAngle() {
@@ -119,7 +119,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     private Measure<Angle> targetAngle; 
     /**
-     * @param angle degrees
+     * @param angle
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      * @param jerk rotations per second^3
@@ -135,14 +135,22 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         .withName("Set Angle");
     }
 
+    public Command setAngleCommand(Supplier<Measure<Angle>> angle) {
+        return setAngleCommand(angle, Arm.defaultVelocity, Arm.defaultAcceleration, Arm.defaultJerk);
+    }
+
     /**
-     * @param angle degrees
+     * @param angle
      * @param velocity rotations per second
      * @param acceleration rotations per second^2
      * @param jerk rotations per second^3
      */
     public Command setAngleCommand(Measure<Angle> angle, double velocity, double acceleration, double jerk) {
         return setAngleCommand(() -> angle, velocity, acceleration, jerk);
+    }
+
+    public Command setAngleCommand(Measure<Angle> angle) {
+        return setAngleCommand(angle, Arm.defaultVelocity, Arm.defaultAcceleration, Arm.defaultJerk);
     }
 
     @Override

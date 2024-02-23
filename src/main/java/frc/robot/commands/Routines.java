@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -20,24 +22,24 @@ public class Routines {
     private Routines() {}
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.intakeAngle, 100, 100, 0)
+        return armSubsystem.setAngleCommand(Arm.intakeAngle)
         .andThen(
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
         ).withName("Intake Ground");
     }
 
-    public static Command scoreAmp(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle, 100, 100, 0) 
+    public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
+        return intakeSubsystem.shootAmpCommand()
         .andThen(
-            intakeSubsystem.shootAmpCommand()      
-            //? stowCommand(armSubsystem) Need to move back before doing this
+            driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(2)),
+            stowCommand(armSubsystem)
         )    
         .withName("Score Amp");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle, 100, 100, 0)
+        return armSubsystem.setAngleCommand(Arm.speakerAngle)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -47,7 +49,7 @@ public class Routines {
     }
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> getAngle(driveSubsystem, armSubsystem), 100, 100, 0)
+        return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem))
         .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -66,11 +68,24 @@ public class Routines {
         .withName("Turn to Speaker");
     }
 
-    public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle, 100, 100, 0).withName("Stow");
+    public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return turnToSpeaker(driveSubsystem)
+        .alongWith(
+            armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem)),
+            shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower)
+        )
+        .andThen(
+            shooterSubsystem.releaseNoteCommand(),
+            stowCommand(armSubsystem)
+        )
+        .withName("Aim and Score Speaker");
     }
 
-    private static Measure<Angle> getAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
+    public static Command stowCommand(ArmSubsystem armSubsystem) {
+        return armSubsystem.setAngleCommand(Arm.stowAngle).withName("Stow");
+    }
+
+    private static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
         Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
         double distance = driveSubsystem.getFieldPose().getTranslation().getDistance(speakerPos);
         return armSubsystem.getPredictedAngle(Meters.of(distance));
