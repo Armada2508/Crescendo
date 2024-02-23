@@ -61,7 +61,7 @@ public class Constants {
         public static final int RFollowerID = 3;
         public static final int pigeonID = 9;
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            0.25, 0.5, 0.1, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
+            1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
@@ -74,9 +74,9 @@ public class Constants {
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.03).withKD(0);
-        public static final Measure<Angle> turnDeadband = Degrees.of(1);
-        public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(3); 
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.005);
+        public static final Measure<Angle> turnDeadband = Degrees.of(2);
+        public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
@@ -92,13 +92,13 @@ public class Constants {
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
-        public static final Measure<Angle> encoderOffset = Degrees.of(0); //! Find this
-        public static final Measure<Angle> angleDeadband = Degrees.of(0.5); 
+        public static final Measure<Angle> encoderOffset = Degrees.of(56);
+        public static final Measure<Angle> angleDeadband = Degrees.of(0.75); 
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(25); 
         public static final Measure<Angle> speakerAngle = Degrees.of(35);
-        public static final Measure<Angle> ampAngle = Degrees.of(70); 
+        public static final Measure<Angle> ampAngle = Degrees.of(71); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(90);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -110,7 +110,7 @@ public class Constants {
         public static final int intakeID = 6;
         public static final int timeOfFlightID = 0;
         public static final double intakeSpeed = 1; 
-        public static final Measure<Distance> noteDetectionRange = Millimeters.of(100); 
+        public static final Measure<Distance> noteDetectionRange = Millimeters.of(130); 
         public static final Measure<Time> waitAfterTrip = Seconds.of(0.1);
         public static final Measure<Time> noteSettleTime = Seconds.of(0.25);
         public static final Measure<Time> backOffNoteTime = Seconds.of(0.15);

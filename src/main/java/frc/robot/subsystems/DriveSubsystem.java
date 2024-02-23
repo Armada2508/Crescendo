@@ -68,6 +68,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
+        turnPIDController.setSetpoint(0);
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonL, talonR);
@@ -186,21 +187,24 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         .withName("Drive Distance Velocity");
     }
 
+    private Measure<Angle> targetAngle;
     /**
      * @param angle - angle in field frame 
      * @return Command for the robot to turn to angle in field frame
      */
     public Command turnCommand(Supplier<Measure<Angle>> angle) {
-        turnPIDController.reset();
-        turnPIDController.setSetpoint(0);
-        return runEnd(() -> {
-            double volts = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), angle.get().in(Degrees)));
+        return runOnce(() -> {
+            targetAngle = angle.get();
+            turnPIDController.reset();
+        }) // Capture state
+        .andThen(runEnd(() -> {
+            double volts = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), targetAngle.in(Degrees)));
             double voltsL = volts + Drive.velocityLeftConfig.kS * Math.signum(volts);
             double voltsR = volts + Drive.velocityRightConfig.kS * Math.signum(volts);
             voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
             voltsR = MathUtil.clamp(voltsR, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
             setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
-        }, this::stop)
+        }, this::stop))
         .until(turnPIDController::atSetpoint)
         .withName("Turn");
     }

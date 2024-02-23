@@ -37,19 +37,20 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
     /**Distance (in.), Angle (deg.) */
     private final InterpolatingDoubleTreeMap interpolatingAngleMap = new InterpolatingDoubleTreeMap(); 
-    private boolean initalizedArm = true; //! Fix this
+    private boolean initalizedArm = false;
 
     public ArmSubsystem() {
-        throughBoreEncoder.setPositionOffset(Arm.encoderOffset.in(Rotations));
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
-        interpolatingAngleMap.put(89.37, 45.5);
-        interpolatingAngleMap.put(82.16, 44.0);
-        interpolatingAngleMap.put(74.12, 42.5);
-        interpolatingAngleMap.put(63.06, 41.0);
-        interpolatingAngleMap.put(56.13, 40.0);
-        
+        interpolatingAngleMap.put(94.51, 44.0);
+        interpolatingAngleMap.put(87.73, 43.5);
+        interpolatingAngleMap.put(80.24, 43.0);
+        interpolatingAngleMap.put(70.15, 40.0);
+        interpolatingAngleMap.put(64.0, 39.0);
+        interpolatingAngleMap.put(57.63, 35.0);
+        interpolatingAngleMap.put(50.95, 34.0);
+        interpolatingAngleMap.put(43.83, 34.0);
     }
 
     private void configTalons() {
@@ -60,11 +61,14 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(Arm.motionMagicConfig);
         talon.getConfigurator().apply(Arm.feedbackConfig); // Applies gearbox ratio
         talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
-        if (throughBoreEncoder.isConnected()) {
-            // talon.setPosition(throughBoreEncoder.getAbsolutePosition());
-            // initalizedArm = true;
+        if (throughBoreEncoder.isConnected()) { //! Remove these magic numbers
+            Measure<Angle> pos = getBoreAngle();
+            if (pos.gte(Degrees.of(60))) {
+                pos = pos.minus(Degrees.of(14.21));
+            }
+            talon.setPosition(pos.in(Rotations));
+            initalizedArm = true;
         }
-        talon.setPosition(Arm.startAngle.in(Rotations));
     }
 
     /**
@@ -101,6 +105,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setControl(new NeutralOut());
     }
 
+    public Measure<Angle> getBoreAngle() {
+        return Degrees.of((Rotations.of(throughBoreEncoder.getAbsolutePosition()).in(Degrees) + Arm.encoderOffset.in(Degrees)) % 360);
+    }
+
     public Measure<Angle> getAngle() {
         return Rotations.of(talon.getPosition().getValueAsDouble());
     }
@@ -109,7 +117,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return Degrees.of(interpolatingAngleMap.get(distance.in(Inches)));
     }
 
-    private Measure<Angle> targetAngle;
+    private Measure<Angle> targetAngle; 
     /**
      * @param angle degrees
      * @param velocity rotations per second
@@ -120,16 +128,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         final double deadband = Arm.angleDeadband.in(Degrees); 
         return runOnce(() -> {
             targetAngle = angle.get();
-            // System.out.println(targetAngle.in(Degrees));
             configMotionMagic(velocity, acceleration, jerk);
             setAngle(targetAngle);
         })
-        .andThen(
-            Commands.waitUntil(() -> Util.inRange(getAngle().minus(targetAngle).in(Degrees), deadband))
-            // run(() -> {
-            //     System.out.println(getAngle().in(Degrees) + " " + targetAngle.in(Degrees) + " " + deadband);
-            // })
-            ) 
+        .andThen(Commands.waitUntil(() -> Util.inRange(getAngle().minus(targetAngle).in(Degrees), deadband))) 
         .withName("Set Angle");
     }
 
@@ -148,8 +150,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         map.put("Arm Angle", getAngle().in(Degrees));
         map.put("Arm Initalized", initalizedArm);
         map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
-        map.put("Bore Encoder Angle Rot", throughBoreEncoder.getAbsolutePosition());
-        map.put("Bore Encoder Angle Deg", throughBoreEncoder.getAbsolutePosition() * 360);
+        map.put("Bore Encoder Angle Deg", getBoreAngle().in(Degrees));
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);

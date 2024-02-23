@@ -111,6 +111,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         map.put("TOF Distance MM", timeOfFlight.getRange());
         map.put("Is TOF Tripped", isSensorTripped());
         map.put("Shooter RPM", talonShooter.getVelocity().getValueAsDouble() * 60);
+        map.put("Shooter Follower RPM", talonFollowShooter.getVelocity().getValueAsDouble() * 60);
         map.put("Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
         NTLogger.putTalonLog(talonIntake, "Intake TalonFX", map);
         NTLogger.putTalonLog(talonShooter, "Shooter TalonFX", map);
