@@ -24,6 +24,7 @@ public class Routines {
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.intakeAngle)
         .andThen(
+            armSubsystem.runOnce(armSubsystem::stop),
             intakeSubsystem.intakeCommand(),
             stowCommand(armSubsystem)
         ).withName("Intake Ground");
@@ -61,6 +62,7 @@ public class Routines {
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(
             () -> {
+                if (!driveSubsystem.hasInitalizedFieldPose()) return Radians.of(driveSubsystem.getFieldPose().getRotation().getRadians());
                 Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
             }
@@ -86,6 +88,7 @@ public class Routines {
     }
 
     private static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
+        if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;
         Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
         double distance = driveSubsystem.getFieldPose().getTranslation().getDistance(speakerPos);
         return armSubsystem.getPredictedAngle(Meters.of(distance));

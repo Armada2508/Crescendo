@@ -7,6 +7,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerBase;
 import static frc.robot.commands.Routines.scoreSpeakerVision;
+import static frc.robot.commands.Routines.stowCommand;
+import static frc.robot.commands.Routines.turnAndScoreSpeaker;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,8 +27,9 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
     /**
      * Leaves the ROBOT STARTING ZONE
      */
-    public static Command leaveStartingZone(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5));
+    public static Command leaveStartingZone(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
+        return stowCommand(armSubsystem) 
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
     }
 
     /**
@@ -42,11 +45,10 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
     }
     
     /**
-     * Scores a preloaded NOTE into the speaker within reasonable distance, turns, and leaves the ROBOT STARTING ZONE
+     * Scores a preloaded NOTE into the SPEAKER within reasonable distance, turns, and leaves the ROBOT STARTING ZONE
      */
     public static Command scoreSpeakerAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return turnToSpeaker(driveSubsystem)
-        .andThen(scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem))
+        return turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem)
         .andThen(driveSubsystem.turnCommand(
             () -> (Robot.onRedAlliance()) ? Degrees.of(0) : Degrees.of(180)
         ))
@@ -55,7 +57,7 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
 
     // Lot of on the fly trajectory generation might be poor
     /**
-     * Scores a preloaded NOTE into the speaker, grabs another NOTE on the field and then scores it.
+     * Scores a preloaded NOTE into the SPEAKER, grabs another NOTE on the field and then scores it.
      */
     public static Command scoreSpeakerTwice(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return turnToSpeaker(driveSubsystem)

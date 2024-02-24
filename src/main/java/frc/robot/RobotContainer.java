@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,6 +23,7 @@ import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
+    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
     private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     // private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
@@ -34,6 +37,7 @@ public class RobotContainer {
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
             joystick::getYInverted, joystick::getXInverted, joystick::getZInverted, () -> joystick.getRawButton(Joysticks.driveSlowButton)
         ));
+        addAutos();
         configureBindings();
     }
 
@@ -43,10 +47,17 @@ public class RobotContainer {
         armSubsystem.stop();
         intakeShooterSubsystem.stop();
     }
+
+    private void addAutos() {
+        autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        autoChooser.addOption("Score Subwoofer and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Once and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        SmartDashboard.putData(autoChooser);
+    }
     
     private void configureBindings() {
-        // joystick.onTrue(1, Routines.turnToSpeaker(driveSubsystem).andThen(Routines.scoreSpeakerVision(driveSubsystem, armSubsystem, intakeShooterSubsystem)));
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        // joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(47)).andThen(intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
@@ -57,7 +68,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Autos.leaveStartingZone(driveSubsystem);
+        return autoChooser.getSelected();
     } 
 
 }

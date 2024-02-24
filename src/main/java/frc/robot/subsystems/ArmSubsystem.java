@@ -43,14 +43,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
-        interpolatingAngleMap.put(94.51, 44.0);
-        interpolatingAngleMap.put(87.73, 43.5);
-        interpolatingAngleMap.put(80.24, 43.0);
-        interpolatingAngleMap.put(70.15, 40.0);
-        interpolatingAngleMap.put(64.0, 39.0);
-        interpolatingAngleMap.put(57.63, 35.0);
-        interpolatingAngleMap.put(50.95, 34.0);
-        interpolatingAngleMap.put(43.83, 34.0);
+        interpolatingAngleMap.put(77.4, 47.0);
+        interpolatingAngleMap.put(72.3, 45.0);
+        interpolatingAngleMap.put(67.5, 43.0);
+        interpolatingAngleMap.put(62.8, 41.0);
+        interpolatingAngleMap.put(57.0, 40.0);
+        interpolatingAngleMap.put(52.4, 39.0);
     }
 
     private void configTalons() {

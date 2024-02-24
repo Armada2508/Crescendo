@@ -267,6 +267,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
     }
 
+    public boolean hasInitalizedFieldPose() {
+        return poseEstimator != null;
+    }
+
     public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
         return new DriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
     }
