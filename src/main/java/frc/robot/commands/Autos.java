@@ -14,6 +14,7 @@ import static frc.robot.commands.Routines.turnToSpeaker;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Field;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
@@ -40,7 +41,8 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
      * @return
      */
     public static Command scoreSpeakerBaseAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return scoreSpeakerBase(armSubsystem, intakeShooterSubsystem)
+        return stowCommand(armSubsystem)
+        .andThen(scoreSpeakerBase(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(4), FeetPerSecond.of(2)));
     }
     
@@ -48,9 +50,14 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
      * Scores a preloaded NOTE into the SPEAKER within reasonable distance, turns, and leaves the ROBOT STARTING ZONE
      */
     public static Command scoreSpeakerAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem)
+        return stowCommand(armSubsystem)
+        .andThen(Commands.waitSeconds(1))
+        .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.turnCommand(
-            () -> (Robot.onRedAlliance()) ? Degrees.of(0) : Degrees.of(180)
+            () -> {
+                if (!driveSubsystem.hasInitalizedFieldPose()) Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees());
+                return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
+            }
         ))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
     }

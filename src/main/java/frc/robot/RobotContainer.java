@@ -56,7 +56,7 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(1, Routines.scoreSpeakerBase(armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(47)).andThen(intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
@@ -68,7 +68,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem);
     } 
 
 }

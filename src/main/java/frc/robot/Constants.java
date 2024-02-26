@@ -92,7 +92,7 @@ public class Constants {
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> encoderOffset = Degrees.of(56);
         public static final Measure<Angle> encoderAccountForSlack = Degrees.of(50);
-        public static final Measure<Angle> armSlack = Degrees.of(9.21);
+        public static final Measure<Angle> armSlack = Degrees.of(14.21);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); 
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
