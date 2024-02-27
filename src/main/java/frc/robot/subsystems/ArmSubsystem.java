@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Arm;
+import frc.robot.Constants.Shooter;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.music.TalonMusic;
@@ -43,12 +44,18 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
-        interpolatingAngleMap.put(77.4, 47.0);
-        interpolatingAngleMap.put(72.3, 45.0);
-        interpolatingAngleMap.put(67.5, 43.0);
-        interpolatingAngleMap.put(62.8, 41.0);
-        interpolatingAngleMap.put(57.0, 40.0);
-        interpolatingAngleMap.put(52.4, 39.0);
+        // Green
+        interpolatingAngleMap.put(Shooter.maxShootDistance.in(Inches), 52.0);
+        interpolatingAngleMap.put(93.0, 51.0);
+        interpolatingAngleMap.put(81.9, 50.0);
+        interpolatingAngleMap.put(52.6, 40.0);
+        // Orange
+        // interpolatingAngleMap.put(77.4, 47.0);
+        // interpolatingAngleMap.put(72.3, 45.0);
+        // interpolatingAngleMap.put(67.5, 43.0);
+        // interpolatingAngleMap.put(62.8, 41.0);
+        // interpolatingAngleMap.put(57.0, 40.0);
+        // interpolatingAngleMap.put(52.4, 39.0);
     }
 
     private void configTalons() {

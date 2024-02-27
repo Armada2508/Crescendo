@@ -48,8 +48,6 @@ public class Constants {
         // Ports
         public static final int joystickPort = 0;
         public static final int buttonBoardPort = 1;
-        // Joystick
-        public static final int driveSlowButton = 12;
     }
     
     public static class Drive {
@@ -61,6 +59,7 @@ public class Constants {
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
             1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
+        public static final double trimFadeoutOffset = 0;
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
@@ -85,7 +84,6 @@ public class Constants {
         public static final int ID = 4;
         public static final int followerID = 5;
         public static final int throughBoreEncoderID = 0;
-        public static final double boreEncoderTicksPerRotation = 1024;
         public static final double gearRatio = 100;
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
@@ -129,6 +127,7 @@ public class Constants {
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
+        public static final Measure<Distance> maxShootDistance = Inches.of(103.5);
     }
 
     public static class Vision {

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
+import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
 import frc.robot.lib.controller.SmartJoystick;
@@ -33,9 +36,8 @@ public class RobotContainer {
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
-        joystick.bindButtons(Joysticks.driveSlowButton); 
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
-            joystick::getYInverted, joystick::getXInverted, joystick::getZInverted, () -> joystick.getRawButton(Joysticks.driveSlowButton)
+            joystick::getYInverted, joystick::getXInverted, joystick::getZInverted
         ));
         addAutos();
         configureBindings();
@@ -52,23 +54,24 @@ public class RobotContainer {
         autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
         autoChooser.addOption("Score Subwoofer and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Once and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Twice Behind", Autos.scoreSpeakerTwiceBehind(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
     private void configureBindings() {
-        joystick.onTrue(1, Routines.scoreSpeakerBase(armSubsystem, intakeShooterSubsystem));
-        // joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(47)).andThen(intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower)));
+        joystick.onTrue(4, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
+        joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(40.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower)).andThen(Routines.stowCommand(armSubsystem)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, Routines.stowCommand(armSubsystem));
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
-        // joystick.onTrue(7, driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redSpeakerBaseScorePos : Field.blueSpeakerBaseScorePos, true));
         joystick.onTrue(6, Commands.runOnce(this::stopEverything));
     }
 
     public Command getAutonomousCommand() {
-        return Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem);
+        return autoChooser.getSelected();
     } 
 
 }

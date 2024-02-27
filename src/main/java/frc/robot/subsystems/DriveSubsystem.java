@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -8,7 +9,6 @@ import static edu.wpi.first.units.Units.Volts;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -33,7 +33,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -45,9 +44,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
+import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
+import frc.robot.commands.NewDriveCommand;
 import frc.robot.lib.Encoder;
-import frc.robot.lib.drive.DriveCommand;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.motion.FollowTrajectory;
@@ -150,7 +150,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param leftVelocity meters/second
      * @param rightVelocity meters/second
      */
-    private void setVelocity(double leftVelocity, double rightVelocity) {
+    public void setVelocity(double leftVelocity, double rightVelocity) {
         VelocityVoltage request = new VelocityVoltage(0);
         talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
@@ -267,12 +267,17 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
     }
 
+    public Measure<Distance> getDistanceToSpeaker() {
+        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
+        return Meters.of(getFieldPose().getTranslation().getDistance(speakerPos));
+    }
+
     public boolean hasInitalizedFieldPose() {
         return poseEstimator != null;
     }
 
-    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier joystickSlow) {
-        return new DriveCommand(joystickSpeed, joystickTurn, joystickTrim, joystickSlow, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
+    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim) {
+        return new NewDriveCommand(joystickSpeed, joystickTurn, joystickTrim, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
     }
 
     @Override
@@ -281,9 +286,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             map.put("Pigeon Yaw", pigeon.getYaw());
         }
         map.put("Robot Angle", getFieldPose().getRotation().getDegrees());
-        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
-        double distance = getFieldPose().getTranslation().getDistance(speakerPos);
-        map.put("Distance to Speaker", Units.metersToInches(distance));
+        map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
+        map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

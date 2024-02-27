@@ -62,6 +62,20 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
     }
 
+    public static Command scoreSpeakerTwiceBehind(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return stowCommand(armSubsystem)
+        .andThen(Commands.waitSeconds(1))
+        .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
+        .andThen(Commands.waitSeconds(3))
+        .andThen(driveSubsystem.runOnce(() -> driveSubsystem.setVelocity(1.5, 1.5)))
+        .andThen(
+            groundIntake(armSubsystem, intakeShooterSubsystem)
+            .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(driveSubsystem.runOnce(driveSubsystem::stop)))
+        )
+        .andThen(Commands.waitSeconds(1))
+        .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+    }
+
     // Lot of on the fly trajectory generation might be poor
     /**
      * Scores a preloaded NOTE into the SPEAKER, grabs another NOTE on the field and then scores it.
