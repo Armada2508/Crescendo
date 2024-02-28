@@ -53,12 +53,7 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
         return stowCommand(armSubsystem)
         .andThen(Commands.waitSeconds(1))
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(driveSubsystem.turnCommand(
-            () -> {
-                if (!driveSubsystem.hasInitalizedFieldPose()) Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees());
-                return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
-            }
-        ))
+        .andThen(faceShooterTowardsWall(driveSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
     }
 
@@ -66,8 +61,11 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
         return stowCommand(armSubsystem)
         .andThen(Commands.waitSeconds(1))
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(Commands.waitSeconds(3))
-        .andThen(driveSubsystem.runOnce(() -> driveSubsystem.setVelocity(1.5, 1.5)))
+        .andThen(
+            Commands.waitSeconds(3)
+            .alongWith(faceShooterTowardsWall(driveSubsystem))
+        )
+        .andThen(driveSubsystem.runOnce(() -> driveSubsystem.setVelocityCommand(FeetPerSecond.of(5), FeetPerSecond.of(5))))
         .andThen(
             groundIntake(armSubsystem, intakeShooterSubsystem)
             .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(driveSubsystem.runOnce(driveSubsystem::stop)))
@@ -95,6 +93,15 @@ public class Autos { //! Have to tune accelerations and velocities for everythin
 
     private static Pose2d getRedPosition(Pose2d pose) {
         return new Pose2d(Field.fieldLength.in(Meters) - pose.getX(), pose.getY(), pose.getRotation().plus(Rotation2d.fromDegrees(180)));
+    }
+
+    private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
+        return driveSubsystem.turnCommand(
+            () -> {
+                if (!driveSubsystem.hasInitalizedFieldPose()) Degrees.of(driveSubsystem.getFieldPose().getRotation().getDegrees());
+                return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
+            }
+        );
     }
 
 }

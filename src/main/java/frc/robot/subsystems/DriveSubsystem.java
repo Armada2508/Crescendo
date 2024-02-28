@@ -150,10 +150,16 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @param leftVelocity meters/second
      * @param rightVelocity meters/second
      */
-    public void setVelocity(double leftVelocity, double rightVelocity) {
+    private void setVelocity(double leftVelocity, double rightVelocity) {
         VelocityVoltage request = new VelocityVoltage(0);
         talonL.setControl(request.withVelocity(toRotations(leftVelocity)));
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
+    }
+
+    public Command setVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity) {
+        return runOnce(() -> {
+            setVelocity(leftVelocity.in(MetersPerSecond), rightVelocity.in(MetersPerSecond));
+        });
     }
 
     /**

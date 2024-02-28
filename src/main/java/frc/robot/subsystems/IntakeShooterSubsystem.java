@@ -93,8 +93,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Release Note");
     }
     
-    public Command shootSpeakerCommand(Measure<Voltage> voltage) {
-        return spinUpFlywheelCommand(voltage)
+    public Command shootSpeakerCommand() {
+        return spinUpFlywheelCommand(Shooter.speakerShootPower)
         .andThen(releaseNoteCommand())
         .withName("Shoot");
     }

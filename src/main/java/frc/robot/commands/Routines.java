@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
@@ -24,17 +25,17 @@ public class Routines {
         return armSubsystem.setAngleCommand(Arm.intakeAngle)
         .andThen(
             armSubsystem.runOnce(armSubsystem::stop),
-            intakeSubsystem.intakeCommand(),
-            stowCommand(armSubsystem)
+            intakeSubsystem.intakeCommand()
+            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(stowCommand(armSubsystem)))
         ).withName("Intake Ground");
     }
 
     public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return intakeSubsystem.shootAmpCommand()
-        .andThen(
-            driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(2)),
-            stowCommand(armSubsystem)
-        )    
+        return armSubsystem.setAngleCommand(Arm.ampAngle)
+        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false))
+        .andThen(intakeSubsystem.shootAmpCommand())
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(-1), FeetPerSecond.of(2)))
+        .andThen(stowCommand(armSubsystem))
         .withName("Score Amp");
     }
 

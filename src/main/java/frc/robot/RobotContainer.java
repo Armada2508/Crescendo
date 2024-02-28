@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
-import frc.robot.Constants.Shooter;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
 import frc.robot.lib.controller.SmartJoystick;
@@ -61,7 +60,7 @@ public class RobotContainer {
     private void configureBindings() {
         joystick.onTrue(4, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
-        joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(40.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand(Shooter.speakerShootPower)).andThen(Routines.stowCommand(armSubsystem)));
+        joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(40.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));

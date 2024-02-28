@@ -143,13 +143,17 @@ public class Constants {
         public static final Pose2d origin = new Pose2d();
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
-        public static final Measure<Distance> fieldWidth = Inches.of(323.25);
+        public static final Measure<Distance> fieldWidth = Inches.of(323.25); // Also kind of like the height of the field
         private static final Measure<Distance> subWooferLength = Inches.of(36.125);
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
         public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
-        // Position of the front of the subwoofer, facing the speaker
+        // Position of the front of the SUBWOOFER, facing the SPEAKER
         public static final Pose2d blueSpeakerBaseScorePos = new Pose2d(subWooferLength.plus(halfRobotLength).plus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(0));    
-        public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength).minus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(180));    
+        public static final Pose2d redSpeakerBaseScorePos = new Pose2d(Field.fieldLength.minus(subWooferLength).minus(halfRobotLength).minus(Inches.of(4)), Meters.of(5.55), Rotation2d.fromDegrees(180));  
+        // Position in front of the AMP, facing the AMP  
+        public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
+        public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
+        // Notes
         public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
