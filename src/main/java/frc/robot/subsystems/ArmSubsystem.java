@@ -45,9 +45,13 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
         // Green
-        interpolatingAngleMap.put(Shooter.maxShootDistance.in(Inches), 52.0);
-        interpolatingAngleMap.put(93.0, 51.0);
-        interpolatingAngleMap.put(81.9, 50.0);
+        interpolatingAngleMap.put(Shooter.maxShootDistance.in(Inches), 48.0);
+        interpolatingAngleMap.put(93.0, 47.0);
+        interpolatingAngleMap.put(81.9, 46.0);
+        // Everything above not found imperiacally
+        interpolatingAngleMap.put(76.3, 45.0);
+        interpolatingAngleMap.put(70.9, 44.0);
+        interpolatingAngleMap.put(61.6, 42.0);
         interpolatingAngleMap.put(52.6, 40.0);
         // Orange
         // interpolatingAngleMap.put(77.4, 47.0);

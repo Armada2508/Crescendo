@@ -58,9 +58,10 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(4, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        // 76.3
+        joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
-        joystick.onTrue(1, armSubsystem.setAngleCommand(Degrees.of(40.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
+        joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(45.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));

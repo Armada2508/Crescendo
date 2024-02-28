@@ -71,7 +71,7 @@ public class Constants {
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.005);
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.01);
         public static final Measure<Angle> turnDeadband = Degrees.of(2);
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
@@ -112,7 +112,7 @@ public class Constants {
         public static final int timeOfFlightID = 0;
         public static final double intakeSpeed = 1; 
         public static final Measure<Distance> noteDetectionRange = Millimeters.of(130); 
-        public static final Measure<Time> waitAfterTrip = Seconds.of(0.1);
+        public static final Measure<Time> waitAfterTrip = Seconds.of(0.25);
         public static final Measure<Time> noteSettleTime = Seconds.of(0.25);
         public static final Measure<Time> backOffNoteTime = Seconds.of(0.15);
         public static final double backOffSpeed = -0.3;
