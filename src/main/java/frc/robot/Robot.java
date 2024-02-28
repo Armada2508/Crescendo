@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,7 +29,7 @@ public class Robot extends TimedRobot implements Loggable {
         SmartDashboard.putData(Field.simulatedField);
         NTLogger.register(this);
         robotContainer = new RobotContainer();
-        addPeriodic(NTLogger::log, kDefaultPeriod, 0);
+        addPeriodic(NTLogger::log, Constants.loggingPeriod.in(Seconds));
     }
     
     @Override
