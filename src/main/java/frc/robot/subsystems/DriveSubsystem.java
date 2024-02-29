@@ -180,14 +180,13 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
-     * @param distance distance relative to the robot
-     * @param velocity meters/second
-     * @return Command for the robot to drive a distance using velocity control and waiting
+     * @param distance distance to travel
+     * @param velocity meters/second, negative means go backwards
+     * @return Command for the robot to drive a distance using velocity control
      */
     public Command driveDistanceVelCommand(Measure<Distance> distance, Measure<Velocity<Distance>> velocity) {
-        double dist = distance.in(Meters);
-        return setVelocityCommand(velocity.times(Math.signum(dist)), velocity.times(Math.signum(dist)))
-        .andThen(Commands.waitSeconds(Math.abs(dist / velocity.in(MetersPerSecond))))
+        return setVelocityCommand(velocity, velocity)
+        .andThen(Commands.waitSeconds(Math.abs(distance.in(Meters) / velocity.in(MetersPerSecond))))
         .finallyDo(this::stop)
         .withName("Drive Distance Velocity");
     }
@@ -198,12 +197,12 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * @return Command for the robot to turn to angle in field frame
      */
     public Command turnCommand(Supplier<Measure<Angle>> angle) {
-        return runOnce(() -> {
+        return runOnce(() -> { // Capture state
             targetAngle = angle.get();
             turnPIDController.reset();
-        }) // Capture state
+        }) 
         .andThen(runEnd(() -> {
-            double volts = turnPIDController.calculate(shortestPath(getFieldPose().getRotation().getDegrees(), targetAngle.in(Degrees)));
+            double volts = turnPIDController.calculate(shortestPath(getFieldAngle().in(Degrees), targetAngle.in(Degrees)));
             double voltsL = volts + Drive.velocityLeftConfig.kS * Math.signum(volts);
             double voltsR = volts + Drive.velocityRightConfig.kS * Math.signum(volts);
             voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
@@ -272,6 +271,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return (poseEstimator == null) ? Field.origin : poseEstimator.getEstimatedPosition();
     }
 
+    public Measure<Angle> getFieldAngle() {
+        return Degrees.of(getFieldPose().getRotation().getDegrees());
+    }
+
     public Measure<Distance> getDistanceToSpeaker() {
         Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
         return Meters.of(getFieldPose().getTranslation().getDistance(speakerPos));
@@ -290,7 +293,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         if (pigeon.getState() == PigeonState.Ready) {
             map.put("Pigeon Yaw", pigeon.getYaw());
         }
-        map.put("Robot Angle", getFieldPose().getRotation().getDegrees());
+        map.put("Robot Angle", getFieldAngle().in(Degrees));
         map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
         map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);

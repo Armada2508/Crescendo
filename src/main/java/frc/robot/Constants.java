@@ -25,6 +25,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -127,7 +128,24 @@ public class Constants {
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
+        /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */
+        private static final InterpolatingDoubleTreeMap interpolatingShootingMap = new InterpolatingDoubleTreeMap(); 
         public static final Measure<Distance> maxShootDistance = Inches.of(117.0);
+        static {
+            interpolatingShootingMap.put(Shooter.maxShootDistance.in(Inches), 50.0);
+            interpolatingShootingMap.put(112.7, 49.5);
+            interpolatingShootingMap.put(102.1, 48.5);
+            interpolatingShootingMap.put(95.0, 47.0);
+            interpolatingShootingMap.put(90.6, 47.0);
+            interpolatingShootingMap.put(81.9, 47.0);
+            interpolatingShootingMap.put(76.3, 45.0);
+            interpolatingShootingMap.put(70.9, 44.0);
+            interpolatingShootingMap.put(61.6, 42.0);
+            interpolatingShootingMap.put(52.6, 39.0);
+        }
+        public static Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
+            return Degrees.of(interpolatingShootingMap.get(distance.in(Inches)));
+        }
     }
 
     public static class Vision {

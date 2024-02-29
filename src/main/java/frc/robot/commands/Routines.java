@@ -34,14 +34,14 @@ public class Routines {
         return armSubsystem.setAngleCommand(Arm.ampAngle)
         .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false))
         .andThen(intakeSubsystem.shootAmpCommand())
-        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(-1), FeetPerSecond.of(2)))
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
         .andThen(stowCommand(armSubsystem))
         .withName("Score Amp");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(Arm.speakerAngle)
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -51,7 +51,7 @@ public class Routines {
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem))
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower))
+        .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
             stowCommand(armSubsystem)
@@ -62,7 +62,7 @@ public class Routines {
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(
             () -> {
-                if (!driveSubsystem.hasInitalizedFieldPose()) return Radians.of(driveSubsystem.getFieldPose().getRotation().getRadians());
+                if (!driveSubsystem.hasInitalizedFieldPose()) return driveSubsystem.getFieldAngle();
                 Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
             }
@@ -74,7 +74,7 @@ public class Routines {
         return turnToSpeaker(driveSubsystem)
         .alongWith(
             armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem)),
-            shooterSubsystem.spinUpFlywheelCommand(Shooter.speakerShootPower)
+            shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -89,7 +89,7 @@ public class Routines {
 
     private static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
         if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;
-        return armSubsystem.getPredictedAngle(driveSubsystem.getDistanceToSpeaker());
+        return Shooter.getPredictedAngle(driveSubsystem.getDistanceToSpeaker());
     }
 
 }

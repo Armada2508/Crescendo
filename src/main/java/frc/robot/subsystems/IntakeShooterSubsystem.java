@@ -85,8 +85,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Intake");
     }
 
-    public Command spinUpFlywheelCommand(Measure<Voltage> voltage) {
-        return setShooterVoltage(voltage)
+    public Command spinUpFlywheelCommand() {
+        return setShooterVoltage(Shooter.speakerShootPower)
         .andThen(Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds)))
         .withName("Spin Up Flywheel");
     }
@@ -99,15 +99,16 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
     
     public Command shootSpeakerCommand() {
-        return spinUpFlywheelCommand(Shooter.speakerShootPower)
+        return spinUpFlywheelCommand()
         .andThen(releaseNoteCommand())
-        .withName("Shoot");
+        .withName("Shoot Speaker");
     }
 
     public Command shootAmpCommand() {
         return setIntakeVoltage(Shooter.ampShootPower)
         .andThen(Commands.waitSeconds(Shooter.ampTimeToShoot.in(Seconds)))
-        .finallyDo(this::stop);
+        .finallyDo(this::stop)
+        .withName("Shoot Amp");
     }
 
     @Override

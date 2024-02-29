@@ -25,7 +25,6 @@ public class RobotContainer {
 
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
     private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
-    // private final SmartJoystick buttonBoard = new SmartJoystick(Joysticks.buttonBoardPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
@@ -48,14 +47,15 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        // autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
-        // autoChooser.addOption("Score Subwoofer and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        // autoChooser.addOption("Score Once and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.setDefaultOption("Score Speaker Twice Behind", Autos.scoreSpeakerTwiceBehind(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Twice Behind", Autos.scoreSpeakerTwiceBehind(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
     private void configureBindings() {
+        // Higher arm angle = lower note height
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(50)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
