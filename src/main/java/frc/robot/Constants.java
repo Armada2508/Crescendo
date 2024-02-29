@@ -127,7 +127,7 @@ public class Constants {
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
-        public static final Measure<Distance> maxShootDistance = Inches.of(103.5);
+        public static final Measure<Distance> maxShootDistance = Inches.of(117.0);
     }
 
     public static class Vision {

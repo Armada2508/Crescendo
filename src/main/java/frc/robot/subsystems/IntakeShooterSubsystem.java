@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -61,6 +62,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public void stop() {
         talonIntake.setControl(new NeutralOut());
         talonShooter.setControl(new NeutralOut());
+    }
+
+    public Command brakeShooter() {
+        return runOnce(() -> talonShooter.setControl(new StaticBrake()));
     }
 
     public boolean isSensorTripped() {

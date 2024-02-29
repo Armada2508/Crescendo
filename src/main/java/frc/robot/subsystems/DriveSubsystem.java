@@ -186,9 +186,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      */
     public Command driveDistanceVelCommand(Measure<Distance> distance, Measure<Velocity<Distance>> velocity) {
         double dist = distance.in(Meters);
-        double vel = Math.abs(velocity.in(MetersPerSecond));
-        return runOnce(() -> setVelocity(vel * Math.signum(dist), vel * Math.signum(dist)))
-        .andThen(Commands.waitSeconds(dist / vel))
+        return setVelocityCommand(velocity.times(Math.signum(dist)), velocity.times(Math.signum(dist)))
+        .andThen(Commands.waitSeconds(Math.abs(dist / velocity.in(MetersPerSecond))))
         .finallyDo(this::stop)
         .withName("Drive Distance Velocity");
     }

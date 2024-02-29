@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,18 +48,17 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
-        autoChooser.addOption("Score Subwoofer and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Once and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker Twice Behind", Autos.scoreSpeakerTwiceBehind(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        // autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        // autoChooser.addOption("Score Subwoofer and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        // autoChooser.addOption("Score Once and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.setDefaultOption("Score Speaker Twice Behind", Autos.scoreSpeakerTwiceBehind(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
     private void configureBindings() {
-        // 76.3
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
-        joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(45.0)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
+        // joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(50)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
