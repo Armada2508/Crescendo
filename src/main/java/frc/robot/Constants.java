@@ -41,7 +41,6 @@ import frc.robot.lib.drive.DriveCommand.DriveConfig;
 public class Constants {
 
     public static final double degreesPerRotation = 360;
-    public static final Measure<Time> loggingPeriod = Seconds.of(0.04);
     public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Bumper width is 3 in.
     public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
 
