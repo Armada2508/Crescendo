@@ -27,13 +27,12 @@ public class Robot extends TimedRobot implements Loggable {
         SmartDashboard.putData(Field.simulatedField);
         NTLogger.register(this);
         robotContainer = new RobotContainer();
-        // TalonMusic.playStartupTune();
+        addPeriodic(NTLogger::log, kDefaultPeriod);
     }
     
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        NTLogger.log();
     }
 
     @Override
