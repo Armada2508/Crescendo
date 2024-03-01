@@ -135,6 +135,11 @@ public class Constants {
         public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1); // Meters, Meters, Radians
     }
 
+    public static class Climb{ 
+        public static final int climbID = 9;
+        public static final int climbFollowID = 10;
+    }
+
     public static class Field {
         // Origin is always the blue alliance origin
         public static final Pose2d origin = new Pose2d();
