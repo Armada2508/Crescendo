@@ -171,13 +171,27 @@ public class Constants {
         // Position in front of the AMP, facing the AMP  
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
-        // Notes
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Meters.of(5.55).plus(Inches.of(57))); 
+        // Blue Notes
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114 + 8), Inches.of(275.625)); // 8 inches to fudge the numbers 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
-        public static final Pose2d blueTopNotePickupPos = new Pose2d(blueTopNotePos.getX() + Inches.of(8).in(Meters), blueTopNotePos.getY(), Rotation2d.fromDegrees(0));
-        public static final Pose2d blueMidNotePickupPos = new Pose2d(blueMidNotePos.getX(), blueMidNotePos.getY(), Rotation2d.fromDegrees(0));
-        public static final Pose2d blueLowNotePickupPos = new Pose2d(blueLowNotePos.getX(), blueLowNotePos.getY(), Rotation2d.fromDegrees(0));
+        // Red Notes
+        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114 + 8)), Inches.of(275.625)); // 8 inches to fudge the numbers 
+        public static final Translation2d redMidNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(218.625)); 
+        public static final Translation2d redLowNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(161.625)); 
+        public enum Note {
+            TOP,
+            MID,
+            LOW
+        }
+        public static Translation2d getNote(Note note) {
+            return switch (note) {
+                case TOP -> Robot.onRedAlliance() ? Field.redTopNotePos : Field.blueTopNotePos;
+                case MID -> Robot.onRedAlliance() ? Field.redMidNotePos : Field.blueMidNotePos;
+                case LOW -> Robot.onRedAlliance() ? Field.redLowNotePos : Field.blueLowNotePos;
+                default -> throw new IllegalArgumentException("Illegal Note: " + note);
+            };
+        }
     }
 
 }

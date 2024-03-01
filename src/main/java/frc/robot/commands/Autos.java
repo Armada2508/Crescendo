@@ -11,12 +11,12 @@ import static frc.robot.commands.Routines.turnAndScoreSpeaker;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Field;
+import frc.robot.Constants.Field.Note;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -25,6 +25,8 @@ import frc.robot.subsystems.IntakeShooterSubsystem;
 public class Autos { //! There's a lot of magic numbers in these Autos, that's just the nature of this class I think
 
     private Autos() {}
+
+    private static Measure<Angle> robotStartingAngle;
 
     /**
      * Leaves the ROBOT STARTING ZONE.
@@ -55,11 +57,6 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
     }
 
-    private static Measure<Angle> robotStartingAngle;
-
-    /**
-     * Scores a preloaded NOTE into the SPEAKER using vision, faces the ALLIANCE WALL, intakes the NOTE behind it and scores it into the SPEAKER.
-     */
     private static Command scoreSpeakerTwiceBehind(boolean driveBack, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         Command backUp = driveBack ? 
             driveSubsystem.setVelocityCommand(FeetPerSecond.of(3.25), FeetPerSecond.of(3.25))
@@ -87,18 +84,30 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         Commands.none(), driveSubsystem::hasInitalizedFieldPose));
     }
 
+    /**
+     * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE and scores it in the SPEAKER.
+     */
     public static Command scoreSpeakerTwiceBase(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return scoreSpeakerTwiceBehind(false, driveSubsystem, armSubsystem, intakeShooterSubsystem);
     }
 
+    /**
+     * This is for when positioned to the right (in reference to the blue alliance) of the SPEAKER.
+     * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE and scores it in the SPEAKER.
+     */
     public static Command scoreSpeakerTwiceSide(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return scoreSpeakerTwiceBehind(true, driveSubsystem, armSubsystem, intakeShooterSubsystem);
     }
 
+    /**
+     * The third NOTE is the one positioned to the right (in reference to the blue alliance) of the SPEAKER. 
+     * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE, scores it in the SPEAKER and then grabs 
+     * a third NOTE and scores it in the SPEAKER.
+     */
     public static Command scoreSpeakerThrice(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
         return scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem)
         .andThen( // Wait for flywheels
-            faceNote(Field.blueTopNotePickupPos.getTranslation(), driveSubsystem),
+            faceNote(Note.TOP, driveSubsystem),
             driveSubsystem.setVelocityCommand(FeetPerSecond.of(5.25), FeetPerSecond.of(5.25)), // Drive back to pick up third note
             intakeShooterSubsystem.brakeShooter(),
             groundIntake(armSubsystem, intakeShooterSubsystem)
@@ -113,6 +122,9 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         );
     }
 
+    /**
+     * Faces the robot's shooter towards its ALLIANCE WALL.
+     */
     private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(
             () -> {
@@ -122,6 +134,9 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         );
     }
 
+    /**
+     * Faces the robot towards the angle it was at when AUTO started.
+     */
     private static Command faceStartingAngle(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(
             () -> {
@@ -131,9 +146,12 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         );
     }
 
-    private static Command faceNote(Translation2d note, DriveSubsystem driveSubsystem) {
-        return driveSubsystem.turnCommand(() ->
-            Degrees.of(driveSubsystem.getFieldPose().getTranslation().minus(note).getAngle().minus(Rotation2d.fromDegrees(180)).getDegrees())
+    /**
+     * Faces the robot's intake towards a NOTE.
+     */
+    private static Command faceNote(Note note, DriveSubsystem driveSubsystem) {
+        return driveSubsystem.turnCommand(() -> 
+            Degrees.of(driveSubsystem.getFieldPose().getTranslation().minus(Field.getNote(note)).getAngle().minus(Rotation2d.fromDegrees(180)).getDegrees())
         );
     }
 
