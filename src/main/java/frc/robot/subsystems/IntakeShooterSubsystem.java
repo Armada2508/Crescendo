@@ -56,7 +56,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command setShooterVoltage(Measure<Voltage> voltage) {
-        return runOnce(() -> talonShooter.setControl(new VoltageOut(voltage.in(Volts))));
+        return runOnce(() -> {
+            talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
+            talonShooter.setControl(new VoltageOut(voltage.in(Volts)));
+        });
     }
 
     public void stop() {
@@ -65,7 +68,11 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command brakeShooter() {
-        return runOnce(() -> talonShooter.setControl(new StaticBrake()));
+        return runOnce(() -> {
+            StaticBrake request = new StaticBrake();
+            talonShooter.setControl(request);
+            talonFollowShooter.setControl(request);
+        });
     }
 
     public boolean isSensorTripped() {

@@ -72,8 +72,8 @@ public class Constants {
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.01);
-        public static final Measure<Angle> turnDeadband = Degrees.of(2);
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.012);
+        public static final Measure<Angle> turnDeadband = Degrees.of(1.5);
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
         public static final double ramseteB = 2.0;
@@ -172,10 +172,10 @@ public class Constants {
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         // Notes
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625)); 
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Meters.of(5.55).plus(Inches.of(57))); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
-        public static final Pose2d blueTopNotePickupPos = new Pose2d(blueTopNotePos.getX(), blueTopNotePos.getY(), Rotation2d.fromDegrees(0));
+        public static final Pose2d blueTopNotePickupPos = new Pose2d(blueTopNotePos.getX() + Inches.of(8).in(Meters), blueTopNotePos.getY(), Rotation2d.fromDegrees(0));
         public static final Pose2d blueMidNotePickupPos = new Pose2d(blueMidNotePos.getX(), blueMidNotePos.getY(), Rotation2d.fromDegrees(0));
         public static final Pose2d blueLowNotePickupPos = new Pose2d(blueLowNotePos.getX(), blueLowNotePos.getY(), Rotation2d.fromDegrees(0));
     }
