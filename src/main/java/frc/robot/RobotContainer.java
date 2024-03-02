@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
+import frc.robot.Constants.Vision;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
 import frc.robot.lib.controller.SmartJoystick;
@@ -67,6 +69,15 @@ public class RobotContainer {
         joystick.onTrue(9, Routines.stowCommand(armSubsystem));
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(6, Commands.runOnce(this::stopEverything));
+        System.out.println("Center " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(14).get().getRotation().getZ()));
+        System.out.println("Left " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(15).get().getRotation().getZ()));
+        System.out.println("Right" + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(16).get().getRotation().getZ()));
+
+
+        // STAGE Center, 14, X: 5.32, Y: 4.11, Z: 1.32, angle = 0 
+        // STAGE Left, 15, X: 4.64, Y: 4.50, Z: 1.32, angle = 120
+        // STAGE Right, 16, X: 4.64, Y: 3.71, Z: 1.32, angle = -120
+       
     }
 
     public Command getAutonomousCommand() {

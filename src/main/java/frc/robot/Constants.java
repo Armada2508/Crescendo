@@ -197,6 +197,12 @@ public class Constants {
                 default -> throw new IllegalArgumentException("Illegal Note: " + note);
             };
         }
+        // Blue Stage April Tag Poses
+        public static final Pose2d blueStageCenter = new Pose2d(Meters.of(5.32), Meters.of(4.11), Rotation2d.fromDegrees(0));
+        public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
+        public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
+        private static final Measure<Distance> chainToStage = Inches.of(16.625);
+        // Pose2d blueThing = blueStageLeft.plus();
     }
 
 }
