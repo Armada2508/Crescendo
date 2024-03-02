@@ -4,9 +4,9 @@ import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
 
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.Measure;
@@ -35,7 +35,7 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
     }
 
     public Command setClimbVoltage(Measure<Voltage> volts) {
-        return runOnce(() -> talon.setControl(new DutyCycleOut(volts.in(Volts))));
+        return runOnce(() -> talon.setControl(new VoltageOut(volts.in(Volts))));
     }
 
     public void stop() {
@@ -54,7 +54,10 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        throw new UnsupportedOperationException("Unimplemented method 'log'");
+        NTLogger.putTalonLog(talon, "Climb TalonFX", map);
+        NTLogger.putTalonLog(talon, "Climb Follow TalonFX", map);
+        NTLogger.putSubsystemLog(this, map);
+        return map;
     }
 }
 
