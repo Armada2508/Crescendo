@@ -90,16 +90,15 @@ public class Constants {
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Angle> encoderOffset = Degrees.of(56);
-        public static final Measure<Angle> encoderAccountForSlack = Degrees.of(50);
-        public static final Measure<Angle> armSlack = Degrees.of(14.21);
-        public static final Measure<Angle> angleDeadband = Degrees.of(0.75); 
+        public static final Measure<Angle> boreEncoderHardstop = Degrees.of(85);
+        public static final Measure<Angle> angleDeadband = Degrees.of(0.75); // Unfortunately this affects the shooter map, so don't change it
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
         public static final Measure<Angle> speakerAngle = Degrees.of(39);
         public static final Measure<Angle> ampAngle = Degrees.of(71); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
-        public static final Measure<Angle> maxAngle = Degrees.of(83);
+        public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
             .withForwardSoftLimitThreshold(maxAngle.in(Rotations)).withReverseSoftLimitThreshold(minAngle.in(Rotations));

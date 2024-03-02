@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerBase;
-import static frc.robot.commands.Routines.stowCommand;
 import static frc.robot.commands.Routines.turnAndScoreSpeaker;
 import static frc.robot.commands.Routines.turnToSpeaker;
 
@@ -32,7 +31,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
      * Leaves the ROBOT STARTING ZONE.
      */
     public static Command leaveStartingZone(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        return stowCommand(armSubsystem) 
+        return armSubsystem.initArmAngle() 
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
     }
 
@@ -40,8 +39,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
      * Scores a preloaded NOTE at the SUBWOOFER and leaves the ROBOT STARTING ZONE.
      */
     public static Command scoreSpeakerBaseAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return stowCommand(armSubsystem)
-        .andThen(Commands.waitSeconds(1))
+        return armSubsystem.initArmAngle()
         .andThen(scoreSpeakerBase(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
     }
@@ -50,8 +48,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
      * Scores a preloaded NOTE into the SPEAKER using vision, faces the ALLIANCE WALL, and leaves the ROBOT STARTING ZONE.
      */
     public static Command scoreSpeakerAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return stowCommand(armSubsystem)
-        .andThen(Commands.waitSeconds(1))
+        return armSubsystem.initArmAngle()
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(faceShooterTowardsWall(driveSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
@@ -62,8 +59,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
             driveSubsystem.setVelocityCommand(FeetPerSecond.of(3.25), FeetPerSecond.of(3.25))
             .andThen(Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().gte(Inches.of(70))).finallyDo(driveSubsystem::stop))
             : Commands.none();
-        return stowCommand(armSubsystem)
-        .andThen(Commands.waitSeconds(1)) // Let arm settle from breaking dual lock
+        return armSubsystem.initArmAngle()
         .andThen(Commands.either(
             Commands.runOnce(() -> robotStartingAngle = driveSubsystem.getFieldAngle())
             .andThen(

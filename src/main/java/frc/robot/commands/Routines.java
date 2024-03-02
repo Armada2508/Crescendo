@@ -26,7 +26,7 @@ public class Routines {
         .andThen(
             armSubsystem.runOnce(armSubsystem::stop),
             intakeSubsystem.intakeCommand()
-            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(stowCommand(armSubsystem)))
+            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(armSubsystem.stowCommand()))
         ).withName("Intake Ground");
     }
 
@@ -35,7 +35,7 @@ public class Routines {
         .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false))
         .andThen(intakeSubsystem.shootAmpCommand())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
-        .andThen(stowCommand(armSubsystem))
+        .andThen(armSubsystem.stowCommand())
         .withName("Score Amp");
     }
 
@@ -44,7 +44,7 @@ public class Routines {
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            stowCommand(armSubsystem)
+            armSubsystem.stowCommand()
         )    
         .withName("Score Speaker Base");
     }
@@ -54,7 +54,7 @@ public class Routines {
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            stowCommand(armSubsystem)
+            armSubsystem.stowCommand()
         )    
         .withName("Score Speaker Vision");
     }
@@ -78,14 +78,12 @@ public class Routines {
         )
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            stowCommand(armSubsystem)
+            armSubsystem.stowCommand()
         )
         .withName("Aim and Score Speaker");
     }
 
-    public static Command stowCommand(ArmSubsystem armSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.stowAngle).withName("Stow");
-    }
+    
 
     private static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
         if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;

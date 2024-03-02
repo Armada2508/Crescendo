@@ -64,9 +64,10 @@ public class RobotContainer {
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
-        joystick.onTrue(9, Routines.stowCommand(armSubsystem));
+        joystick.onTrue(9, armSubsystem.stowCommand());
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(6, Commands.runOnce(this::stopEverything));
+        joystick.onTrue(10, armSubsystem.initArmAngle());
     }
 
     public Command getAutonomousCommand() {

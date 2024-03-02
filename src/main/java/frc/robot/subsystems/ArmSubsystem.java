@@ -3,21 +3,24 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -50,9 +53,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(Arm.softLimitSwitchConfig); // Soft Limits
         if (throughBoreEncoder.isConnected()) { 
             Measure<Angle> pos = getBoreEncoderAngle();
-            //! This needs to be fixed / made better
-            if (pos.gte(Arm.encoderAccountForSlack)) {
-                pos = pos.minus(Arm.armSlack);
+            if (pos.gte(Arm.boreEncoderHardstop)) {
+                pos = Arm.maxAngle;
             }
             talon.setPosition(pos.in(Rotations));
             initalizedArm = true;
@@ -85,8 +87,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.setControl(request);
     }
 
-    public Command setSpeed(double speed) {
-        return runOnce(() -> talon.setControl(new DutyCycleOut(speed)));
+    public Command setVoltage(Measure<Voltage> volts) {
+        return runOnce(() -> talon.setControl(new VoltageOut(volts.in(Volts))));
     }
 
     public void stop() {
@@ -136,6 +138,31 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public Command setAngleCommand(Measure<Angle> angle) {
         return setAngleCommand(angle, Arm.defaultVelocity, Arm.defaultAcceleration, Arm.defaultJerk);
     }
+
+    public Command stowCommand() {
+        return setAngleCommand(Arm.stowAngle).withName("Stow");
+    }
+
+    public Command initArmAngle() {
+        return setAngleCommand(Arm.intakeAngle, 100, 100, 0)
+        .andThen(setVoltage(Volts.of(0.6)))
+        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 1))
+        .andThen(runOnce(this::stop))
+        .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withName("Init Arm Angle");
+    }
+
+    // public Command initArmAngle() {
+    //     return runOnce(() -> talon.getConfigurator().apply(Arm.softLimitSwitchConfig.withForwardSoftLimitEnable(false))) 
+    //     .andThen(setVoltage(Volts.of(0.6)))
+    //     .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 1.2))
+    //     .andThen(runOnce(this::stop))
+    //     .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
+    //     .andThen(runOnce(() -> talon.getConfigurator().apply(Arm.softLimitSwitchConfig.withForwardSoftLimitEnable(true))))
+    //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+    //     .withName("Init Arm Angle");
+    // }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
