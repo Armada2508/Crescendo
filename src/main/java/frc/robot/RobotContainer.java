@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.FeetPerSecond;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +17,7 @@ import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
+import frc.robot.lib.Encoder;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.ArmSubsystem;
@@ -67,7 +71,10 @@ public class RobotContainer {
         joystick.onTrue(9, armSubsystem.stowCommand());
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(6, Commands.runOnce(this::stopEverything));
-        joystick.onTrue(10, armSubsystem.initArmAngle());
+        // joystick.onTrue(10, armSubsystem.initArmAngle());
+        joystick.onTrue(10, driveSubsystem.setVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6)).andThen(driveSubsystem.run(() -> {})));
+        System.out.println(Encoder.fromDistance(1, Drive.gearRatio, Drive.wheelDiameter.in(Feet)));
+        // 6.679050868953597
     }
 
     public Command getAutonomousCommand() {

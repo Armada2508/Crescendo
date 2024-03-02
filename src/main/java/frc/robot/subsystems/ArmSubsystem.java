@@ -20,7 +20,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -146,10 +145,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     public Command initArmAngle() {
         return setAngleCommand(Arm.intakeAngle, 100, 100, 0)
         .andThen(setVoltage(Volts.of(0.6)))
-        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 1))
+        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 0.5))
         .andThen(runOnce(this::stop))
         .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        // .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Init Arm Angle");
     }
 

@@ -59,8 +59,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
             driveSubsystem.setVelocityCommand(FeetPerSecond.of(3.25), FeetPerSecond.of(3.25))
             .andThen(Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().gte(Inches.of(70))).finallyDo(driveSubsystem::stop))
             : Commands.none();
-        return armSubsystem.initArmAngle()
-        .andThen(Commands.either(
+        return Commands.either(
             Commands.runOnce(() -> robotStartingAngle = driveSubsystem.getFieldAngle())
             .andThen(
                 backUp, // Back up to score
@@ -68,8 +67,9 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
                 faceStartingAngle(driveSubsystem),
                 driveSubsystem.setVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6)), // Drive back to get second note
                 intakeShooterSubsystem.brakeShooter(),
+                // armSubsystem.initArmAngle(),
                 groundIntake(armSubsystem, intakeShooterSubsystem)
-                    .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop))
+                    .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.5))
             )
             .andThen(
                 driveSubsystem.setVelocityCommand(FeetPerSecond.of(-4), FeetPerSecond.of(-4)), // Drive forward to score second note
@@ -77,7 +77,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
                 Commands.waitSeconds(0.25), // Pause for drivetrain to settle
                 turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem) // Shoot second note
             ), 
-        Commands.none(), driveSubsystem::hasInitalizedFieldPose));
+        Commands.none(), driveSubsystem::hasInitalizedFieldPose);
     }
 
     /**
