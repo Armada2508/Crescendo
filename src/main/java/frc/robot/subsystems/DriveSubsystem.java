@@ -65,6 +65,12 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final VisionSubsystem vision; 
     private DifferentialDrivePoseEstimator poseEstimator;
 
+//     private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
+//   // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
+//   private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
+//   // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
+//   private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
@@ -72,6 +78,32 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonL, talonR);
+
+        // SysIdRoutine routine = new SysIdRoutine(
+        // new SysIdRoutine.Config(),
+        // new SysIdRoutine.Mechanism((volts) -> setVoltage(volts, volts), 
+        // // Tell SysId how to record a frame of data for each motor on the mechanism being
+        //       // characterized.
+        //       log -> {
+        //         // Record a frame for the left motors.  Since these share an encoder, we consider
+        //         // the entire group to be one motor.
+        //         log.motor("drive-left")
+        //             .voltage(
+        //                 m_appliedVoltage.mut_replace(
+        //                     m_leftMotor.get() * RobotController.getBatteryVoltage(), Volts))
+        //             .linearPosition(m_distance.mut_replace(m_leftEncoder.getDistance(), Meters))
+        //             .linearVelocity(
+        //                 m_velocity.mut_replace(m_leftEncoder.getRate(), MetersPerSecond));
+        //         // Record a frame for the right motors.  Since these share an encoder, we consider
+        //         // the entire group to be one motor.
+        //         log.motor("drive-right")
+        //             .voltage(
+        //                 m_appliedVoltage.mut_replace(
+        //                     m_rightMotor.get() * RobotController.getBatteryVoltage(), Volts))
+        //             .linearPosition(m_distance.mut_replace(m_rightEncoder.getDistance(), Meters))
+        //             .linearVelocity(
+        //                 m_velocity.mut_replace(m_rightEncoder.getRate(), MetersPerSecond));
+        //       }, this));
     }
 
     @Override
