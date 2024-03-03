@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
@@ -9,9 +10,12 @@ import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.Current;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Climb;
 import frc.robot.lib.logging.Loggable;
@@ -31,10 +35,10 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
     public void configTalons() {
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
-        talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
+        talonFollow.setInverted(true);
     }
 
-    public Command setClimbVoltage(Measure<Voltage> volts) {
+    public Command setVoltage(Measure<Voltage> volts) {
         return runOnce(() -> talon.setControl(new VoltageOut(volts.in(Volts))));
     }
 
@@ -42,14 +46,36 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         talon.setControl(new NeutralOut());
     }
 
-    public Command climbCommand(double volts) {
-        return setClimbVoltage(Volts.of(volts)) //extend
-        .andThen(setClimbVoltage(Volts.of(-volts))); //pull up
-       // .andThen(Commands.waitSeconds(2));
+    public Command extendClimberCommand() {
+        return setVoltage(Climb.climbPower)
+        .andThen(Commands.waitSeconds(2))
+        .andThen(this::stop)
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withName("Extend Climber");
     }
 
-    public Command unClimbCommand(double volts) {
-        return setClimbVoltage(Volts.of(-volts)); //drop down
+    public Command retractClimberCommand() {
+        return setVoltage(Climb.climbPower.negate())
+        .andThen(Commands.waitSeconds(2))
+        .andThen(this::stop)
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withName("Retract Climber");
+    }
+
+    public Command resetClimberCommand() {
+        Measure<Voltage> volts = Volts.of(-0.5);
+        Measure<Current> tripCurrent = Amps.of(0.2);
+        return runOnce(() -> {
+            talon.setControl(new VoltageOut(volts.in(Volts)));
+            talonFollow.setControl(new VoltageOut(volts.in(Volts)));
+        })
+        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps))).finallyDo(this::stop)
+        .alongWith(
+            Commands.waitUntil(() -> talonFollow.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps)).finallyDo(() -> talonFollow.setControl(new NeutralOut()))
+        )
+        .andThen(() -> talonFollow.setControl(new StrictFollower(talon.getDeviceID())))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withName("Reset Climber");
     }
 
     @Override
@@ -60,18 +86,3 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         return map;
     }
 }
-
-
-/*
-2 motors that controls a winch, 10" acutation distance
-mirrored
-
-Methods:
-Constructor
-Config Talons
-Set Voltage
-Stop
-Climb Command
-Unclimb Command (?)
-Log
- */

@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
@@ -36,11 +38,14 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
@@ -65,11 +70,54 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final VisionSubsystem vision; 
     private DifferentialDrivePoseEstimator poseEstimator;
 
-//     private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
-//   // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
-//   private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
-//   // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
-//   private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+    // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
+    private final MutableMeasure<Voltage> m_appliedVoltage = MutableMeasure.mutable(Volts.of(0));
+    // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
+    private final MutableMeasure<Distance> m_distance = MutableMeasure.mutable(Meters.of(0));
+    // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
+    private final MutableMeasure<Velocity<Distance>> m_velocity = MutableMeasure.mutable(MetersPerSecond.of(0));
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+        new SysIdRoutine.Config(),
+        new SysIdRoutine.Mechanism((volts) -> setVoltage(volts, volts), 
+        // Tell SysId how to record a frame of data for each motor on the mechanism being
+              // characterized.
+              log -> {
+                // Record a frame for the left motors.  Since these share an encoder, we consider
+                // the entire group to be one motor.
+                log.motor("drive-left")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            talonL.get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(getLeftPosition(), Meters))
+                    .linearVelocity(
+                        m_velocity.mut_replace(Encoder.toVelocity(talonL.getVelocity().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters)), MetersPerSecond));
+                // Record a frame for the right motors.  Since these share an encoder, we consider
+                // the entire group to be one motor.
+                log.motor("drive-right")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            talonR.get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(getRightPosition(), Meters))
+                    .linearVelocity(
+                        m_velocity.mut_replace(Encoder.toVelocity(talonR.getVelocity().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters)), MetersPerSecond));
+              }, this));
+    
+              /**
+     * Returns a command that will execute a quasistatic test in the given direction.
+     *
+     * @param direction The direction (forward or reverse) to run the test in
+     */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction);
+    }
+    /**
+     * Returns a command that will execute a dynamic test in the given direction.
+     *
+     * @param direction The direction (forward or reverse) to run the test in
+     */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction);
+    }
 
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
@@ -78,32 +126,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonL, talonR);
-
-        // SysIdRoutine routine = new SysIdRoutine(
-        // new SysIdRoutine.Config(),
-        // new SysIdRoutine.Mechanism((volts) -> setVoltage(volts, volts), 
-        // // Tell SysId how to record a frame of data for each motor on the mechanism being
-        //       // characterized.
-        //       log -> {
-        //         // Record a frame for the left motors.  Since these share an encoder, we consider
-        //         // the entire group to be one motor.
-        //         log.motor("drive-left")
-        //             .voltage(
-        //                 m_appliedVoltage.mut_replace(
-        //                     m_leftMotor.get() * RobotController.getBatteryVoltage(), Volts))
-        //             .linearPosition(m_distance.mut_replace(m_leftEncoder.getDistance(), Meters))
-        //             .linearVelocity(
-        //                 m_velocity.mut_replace(m_leftEncoder.getRate(), MetersPerSecond));
-        //         // Record a frame for the right motors.  Since these share an encoder, we consider
-        //         // the entire group to be one motor.
-        //         log.motor("drive-right")
-        //             .voltage(
-        //                 m_appliedVoltage.mut_replace(
-        //                     m_rightMotor.get() * RobotController.getBatteryVoltage(), Volts))
-        //             .linearPosition(m_distance.mut_replace(m_rightEncoder.getDistance(), Meters))
-        //             .linearVelocity(
-        //                 m_velocity.mut_replace(m_rightEncoder.getRate(), MetersPerSecond));
-        //       }, this));
     }
 
     @Override
@@ -191,6 +213,15 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     public Command setVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity) {
         return runOnce(() -> {
             setVelocity(leftVelocity.in(MetersPerSecond), rightVelocity.in(MetersPerSecond));
+        });
+    }
+
+    public Command motionMagicVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity, Measure<Velocity<Velocity<Distance>>> acceleration) {
+        return runOnce(() -> {
+            configMotionMagic(0, acceleration.in(MetersPerSecondPerSecond));
+            MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0);
+            talonL.setControl(request.withVelocity(toRotations(leftVelocity.in(MetersPerSecond))));
+            talonR.setControl(request.withVelocity(toRotations(rightVelocity.in(MetersPerSecond))));
         });
     }
 
