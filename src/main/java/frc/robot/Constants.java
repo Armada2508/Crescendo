@@ -65,8 +65,11 @@ public class Constants {
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.11);
-        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.11);
+        // public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.11);
+        // public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.11);
+        public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.074181).withKV(0.10813).withKA(0.018);
+        public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.15188).withKV(0.10875).withKA(0.019);
+
         // Motion Magic, not using currently
         public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int motionMagicSlot = 1;
@@ -159,6 +162,7 @@ public class Constants {
     public static class Climb { 
         public static final int climbID = 10;
         public static final int climbFollowID = 11;
+        public static final Measure<Voltage> climbPower = Volts.of(1);
     }
 
     public static class Field {

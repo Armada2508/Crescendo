@@ -4,21 +4,20 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.Arm;
+import frc.robot.Constants.Climb;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
-import frc.robot.Constants.Vision;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -31,6 +30,7 @@ public class RobotContainer {
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
@@ -46,6 +46,7 @@ public class RobotContainer {
         driveSubsystem.stop();
         armSubsystem.stop();
         intakeShooterSubsystem.stop();
+        climbSubsystem.stop();
     }
 
     private void addAutos() {
@@ -65,13 +66,21 @@ public class RobotContainer {
         // joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(50)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(Routines.stowCommand(armSubsystem)));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
+        // joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, Routines.stowCommand(armSubsystem));
-        joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+        // joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(6, Commands.runOnce(this::stopEverything));
-        System.out.println("Center " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(14).get().getRotation().getZ()));
-        System.out.println("Left " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(15).get().getRotation().getZ()));
-        System.out.println("Right" + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(16).get().getRotation().getZ()));
+
+        joystick.whileTrue(10, climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.whileTrue(11, climbSubsystem.setVoltage(Climb.climbPower).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.onTrue(12, climbSubsystem.resetClimberCommand());
+        // joystick.onTrue(4, driveSubsystem.setVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6)).andThen(driveSubsystem.run(() -> {})));
+        // joystick.onTrue(4, driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecond.per(Second).of(3)).andThen(driveSubsystem.run(() -> {})));
+
+        
+        // System.out.println("Center " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(14).get().getRotation().getZ()));
+        // System.out.println("Left " + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(15).get().getRotation().getZ()));
+        // System.out.println("Right" + Units.radiansToDegrees(Vision.aprilTagFieldLayout.getTagPose(16).get().getRotation().getZ()));
 
 
         // STAGE Center, 14, X: 5.32, Y: 4.11, Z: 1.32, angle = 0 
