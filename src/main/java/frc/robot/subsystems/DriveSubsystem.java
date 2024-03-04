@@ -38,14 +38,11 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
@@ -69,55 +66,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
     private final VisionSubsystem vision; 
     private DifferentialDrivePoseEstimator poseEstimator;
-
-    // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
-    private final MutableMeasure<Voltage> m_appliedVoltage = MutableMeasure.mutable(Volts.of(0));
-    // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
-    private final MutableMeasure<Distance> m_distance = MutableMeasure.mutable(Meters.of(0));
-    // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
-    private final MutableMeasure<Velocity<Distance>> m_velocity = MutableMeasure.mutable(MetersPerSecond.of(0));
-    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-        new SysIdRoutine.Config(),
-        new SysIdRoutine.Mechanism((volts) -> setVoltage(volts, volts), 
-        // Tell SysId how to record a frame of data for each motor on the mechanism being
-              // characterized.
-              log -> {
-                // Record a frame for the left motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("drive-left")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            talonL.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(getLeftPosition(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(Encoder.toVelocity(talonL.getVelocity().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters)), MetersPerSecond));
-                // Record a frame for the right motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("drive-right")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            talonR.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(getRightPosition(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(Encoder.toVelocity(talonR.getVelocity().getValueAsDouble(), Drive.gearRatio, Drive.wheelDiameter.in(Meters)), MetersPerSecond));
-              }, this));
-    
-              /**
-     * Returns a command that will execute a quasistatic test in the given direction.
-     *
-     * @param direction The direction (forward or reverse) to run the test in
-     */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
-    }
-    /**
-     * Returns a command that will execute a dynamic test in the given direction.
-     *
-     * @param direction The direction (forward or reverse) to run the test in
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction);
-    }
 
     public DriveSubsystem(VisionSubsystem vision) {
         this.vision = vision;
@@ -218,7 +166,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     public Command motionMagicVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity, Measure<Velocity<Velocity<Distance>>> acceleration) {
         return runOnce(() -> {
-            configMotionMagic(0, acceleration.in(MetersPerSecondPerSecond));
+            configMotionMagic(0, Math.abs(acceleration.in(MetersPerSecondPerSecond)));
             MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0);
             talonL.setControl(request.withVelocity(toRotations(leftVelocity.in(MetersPerSecond))));
             talonR.setControl(request.withVelocity(toRotations(rightVelocity.in(MetersPerSecond))));
@@ -254,7 +202,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         .withName("Drive Distance Velocity");
     }
 
-    private Measure<Angle> targetAngle;
+    private Measure<Angle> targetAngle = getFieldAngle();
     /**
      * @param angle - angle in field frame 
      * @return Command for the robot to turn to angle in field frame
@@ -266,10 +214,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         }) 
         .andThen(runEnd(() -> {
             double volts = turnPIDController.calculate(shortestPath(getFieldAngle().in(Degrees), targetAngle.in(Degrees)));
-            double voltsL = volts + Drive.velocityLeftConfig.kS * Math.signum(volts);
-            double voltsR = volts + Drive.velocityRightConfig.kS * Math.signum(volts);
+            double voltsL = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
+            double voltsR = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
             voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
             voltsR = MathUtil.clamp(voltsR, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
+            // System.out.println("Output: " + volts + " Left: " + voltsL + " Right: " + voltsR);
             setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
         }, this::stop))
         .until(turnPIDController::atSetpoint)
@@ -357,6 +306,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             map.put("Pigeon Yaw", pigeon.getYaw());
         }
         map.put("Robot Angle", getFieldAngle().in(Degrees));
+        map.put("Target Angle", targetAngle.in(Degrees));
         map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
         map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);

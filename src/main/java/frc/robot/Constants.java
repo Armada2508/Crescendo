@@ -1,12 +1,14 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -35,6 +37,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.lib.drive.DriveCommand.DriveConfig;
@@ -44,6 +47,7 @@ public class Constants {
     public static final double degreesPerRotation = 360;
     public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Bumper width is 3 in.
     public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
+    public static final Velocity<Velocity<Distance>> FeetPerSecondSquared = FeetPerSecond.per(Second);
 
     public static class Joysticks {
         // Ports
@@ -65,18 +69,16 @@ public class Constants {
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
-        // public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.18).withKV(0.11);
-        // public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.23).withKV(0.11);
         public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.074181).withKV(0.10813).withKA(0.018);
         public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.15188).withKV(0.10875).withKA(0.019);
-
         // Motion Magic, not using currently
         public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.012);
-        public static final Measure<Angle> turnDeadband = Degrees.of(1.5);
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.008);
+        public static final Measure<Angle> turnDeadband = Degrees.of(1);
+        public static final Measure<Voltage> minTurnPIDVoltage = Volts.of(0.3); 
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
         public static final double ramseteB = 2.0;
@@ -137,8 +139,9 @@ public class Constants {
             interpolatingShootingMap.put(Shooter.maxShootDistance.in(Inches), 50.0);
             interpolatingShootingMap.put(112.7, 49.5);
             interpolatingShootingMap.put(102.1, 48.5);
-            interpolatingShootingMap.put(95.0, 47.0);
-            interpolatingShootingMap.put(90.6, 47.0);
+            interpolatingShootingMap.put(95.0, 48.0);
+            interpolatingShootingMap.put(90.5, 47.75);
+            interpolatingShootingMap.put(85.4, 47.50);
             interpolatingShootingMap.put(81.9, 47.0);
             interpolatingShootingMap.put(76.3, 45.0);
             interpolatingShootingMap.put(70.9, 44.0);
@@ -180,11 +183,11 @@ public class Constants {
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         // Blue Notes
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114 + 8), Inches.of(275.625)); // 8 inches to fudge the numbers 
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114 - 8), Inches.of(275.625)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         // Red Notes
-        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114 + 8)), Inches.of(275.625)); // 8 inches to fudge the numbers 
+        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114 - 8)), Inches.of(275.625)); 
         public static final Translation2d redMidNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(218.625)); 
         public static final Translation2d redLowNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(161.625)); 
         public enum Note {
@@ -204,8 +207,7 @@ public class Constants {
         public static final Pose2d blueStageCenter = new Pose2d(Meters.of(5.32), Meters.of(4.11), Rotation2d.fromDegrees(0));
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
-        private static final Measure<Distance> chainToStage = Inches.of(16.625);
-        // Pose2d blueThing = blueStageLeft.plus();
+        // private static final Measure<Distance> chainToStage = Inches.of(16.625);
     }
 
 }

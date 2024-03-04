@@ -20,6 +20,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -142,26 +143,14 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(Arm.stowAngle).withName("Stow");
     }
 
-    public Command initArmAngle() {
-        return setAngleCommand(Arm.intakeAngle, 100, 100, 0)
-        .andThen(setVoltage(Volts.of(0.6)))
-        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 0.5))
-        .andThen(runOnce(this::stop))
+    public Command initArmAngle() { //! Magic Numbers
+        return setAngleCommand(Arm.intakeAngle)
+        .andThen(this::stop)
+        .andThen(Commands.waitSeconds(0.25))
         .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
-        // .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Init Arm Angle");
     }
-
-    // public Command initArmAngle() {
-    //     return runOnce(() -> talon.getConfigurator().apply(Arm.softLimitSwitchConfig.withForwardSoftLimitEnable(false))) 
-    //     .andThen(setVoltage(Volts.of(0.6)))
-    //     .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() >= 1.2))
-    //     .andThen(runOnce(this::stop))
-    //     .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
-    //     .andThen(runOnce(() -> talon.getConfigurator().apply(Arm.softLimitSwitchConfig.withForwardSoftLimitEnable(true))))
-    //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-    //     .withName("Init Arm Angle");
-    // }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {

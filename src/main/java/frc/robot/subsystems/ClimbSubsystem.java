@@ -36,6 +36,7 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
         talonFollow.setInverted(true);
+        talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
     }
 
     public Command setVoltage(Measure<Voltage> volts) {
@@ -46,34 +47,18 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         talon.setControl(new NeutralOut());
     }
 
-    public Command extendClimberCommand() {
-        return setVoltage(Climb.climbPower)
-        .andThen(Commands.waitSeconds(2))
-        .andThen(this::stop)
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        .withName("Extend Climber");
-    }
-
-    public Command retractClimberCommand() {
-        return setVoltage(Climb.climbPower.negate())
-        .andThen(Commands.waitSeconds(2))
-        .andThen(this::stop)
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        .withName("Retract Climber");
-    }
-
     public Command resetClimberCommand() {
         Measure<Voltage> volts = Volts.of(-0.5);
         Measure<Current> tripCurrent = Amps.of(0.2);
         return runOnce(() -> {
-            talon.setControl(new VoltageOut(volts.in(Volts)));
             talonFollow.setControl(new VoltageOut(volts.in(Volts)));
+            talon.setControl(new VoltageOut(volts.in(Volts)));
         })
         .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps))).finallyDo(this::stop)
         .alongWith(
             Commands.waitUntil(() -> talonFollow.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps)).finallyDo(() -> talonFollow.setControl(new NeutralOut()))
         )
-        .andThen(() -> talonFollow.setControl(new StrictFollower(talon.getDeviceID())))
+        .finallyDo(() -> talonFollow.setControl(new StrictFollower(talon.getDeviceID())))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Reset Climber");
     }

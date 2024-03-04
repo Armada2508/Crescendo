@@ -50,7 +50,7 @@ public class Routines {
     }
 
     public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem))
+        return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem))
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -73,7 +73,7 @@ public class Routines {
     public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
         return turnToSpeaker(driveSubsystem)
         .alongWith(
-            armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem, armSubsystem)),
+            armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem)),
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
@@ -83,9 +83,7 @@ public class Routines {
         .withName("Aim and Score Speaker");
     }
 
-    
-
-    private static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
+    public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {
         if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;
         return Shooter.getPredictedAngle(driveSubsystem.getDistanceToSpeaker());
     }
