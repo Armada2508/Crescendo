@@ -292,6 +292,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return Meters.of(getFieldPose().getTranslation().getDistance(speakerPos));
     }
 
+    public Measure<Distance> getDistanceToChain(Pose2d chain) {
+        Translation2d chainPos = chain.getTranslation();
+        return null;
+    }
+
     public boolean hasInitalizedFieldPose() {
         return poseEstimator != null;
     }
