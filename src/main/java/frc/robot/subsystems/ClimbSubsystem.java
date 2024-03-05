@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
@@ -10,7 +11,6 @@ import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.units.Current;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,7 +35,9 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
     public void configTalons() {
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
-        talonFollow.setInverted(true);
+        talon.setInverted(true);
+        talon.setPosition(Climb.minPosition.in(Rotations));
+        talon.getConfigurator().apply(Climb.softLimitSwitchConfig);
         talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
     }
 
@@ -43,24 +45,27 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         return runOnce(() -> talon.setControl(new VoltageOut(volts.in(Volts))));
     }
 
-    public void stop() {
-        talon.setControl(new NeutralOut());
-    }
-
     public Command resetClimberCommand() {
-        Measure<Voltage> volts = Volts.of(-0.5);
-        Measure<Current> tripCurrent = Amps.of(0.2);
         return runOnce(() -> {
-            talonFollow.setControl(new VoltageOut(volts.in(Volts)));
-            talon.setControl(new VoltageOut(volts.in(Volts)));
+            talon.getConfigurator().apply(Climb.softLimitSwitchConfig.withReverseSoftLimitEnable(false));
+            talonFollow.setControl(new VoltageOut(Climb.zeroVoltage.in(Volts)));
+            talon.setControl(new VoltageOut(Climb.zeroVoltage.in(Volts)));
         })
-        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps))).finallyDo(this::stop)
+        .andThen(Commands.waitUntil(() -> talon.getSupplyCurrent().getValueAsDouble() > Climb.zeroTripCurrent.in(Amps))).finallyDo(this::stop)
         .alongWith(
-            Commands.waitUntil(() -> talonFollow.getSupplyCurrent().getValueAsDouble() > tripCurrent.in(Amps)).finallyDo(() -> talonFollow.setControl(new NeutralOut()))
+            Commands.waitUntil(() -> talonFollow.getSupplyCurrent().getValueAsDouble() > Climb.zeroTripCurrent.in(Amps)).finallyDo(() -> talonFollow.setControl(new NeutralOut()))
         )
-        .finallyDo(() -> talonFollow.setControl(new StrictFollower(talon.getDeviceID())))
+        .finallyDo(() -> {
+            stop();
+            talon.getConfigurator().apply(Climb.softLimitSwitchConfig.withReverseSoftLimitEnable(true));
+            talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
+        })
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Reset Climber");
+    }
+
+    public void stop() {
+        talon.setControl(new NeutralOut());
     }
 
     @Override

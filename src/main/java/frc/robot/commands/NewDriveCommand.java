@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.Drive;
 import frc.robot.lib.drive.DriveCommand;
@@ -31,7 +32,7 @@ public class NewDriveCommand extends DriveCommand {
             trim = Math.signum(trim) * (trim * trim);   
         }
         // Fade out trim
-        trim *= (1 - Drive.trimFadeoutOffset - speed);
+        trim *= MathUtil.clamp(1 - Math.abs(speed * Drive.trimFadeout), 0, 1);
         // Speed Adjusting and Slew Rate Limiting 
         speed *= config.speedAdjustment();
         turn *= config.turnAdjustment();

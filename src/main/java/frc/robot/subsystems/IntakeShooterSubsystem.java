@@ -8,13 +8,13 @@ import java.util.Map;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -57,7 +57,6 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public Command setShooterVoltage(Measure<Voltage> voltage) {
         return runOnce(() -> {
-            talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
             talonShooter.setControl(new VoltageOut(voltage.in(Volts)));
         });
     }
@@ -65,14 +64,6 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public void stop() {
         talonIntake.setControl(new NeutralOut());
         talonShooter.setControl(new NeutralOut());
-    }
-
-    public Command brakeShooter() {
-        return runOnce(() -> {
-            StaticBrake request = new StaticBrake();
-            talonShooter.setControl(request);
-            talonFollowShooter.setControl(request);
-        });
     }
 
     public boolean isSensorTripped() {
@@ -90,6 +81,15 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .finallyDo(this::stop)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Intake");
+    }
+
+    public Command intakeFirstTryCommand(double speed, Measure<Time> seconds) {
+        return setIntakeSpeed(speed)
+        .andThen(Commands.waitUntil(this::isSensorTripped))
+        .andThen(Commands.waitSeconds(seconds.in(Seconds)))
+        .finallyDo(this::stop)
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        .withName("Intake First Try");
     }
 
     public Command spinUpFlywheelCommand() {

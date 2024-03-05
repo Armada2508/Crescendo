@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
@@ -34,6 +35,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Current;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
@@ -64,7 +66,7 @@ public class Constants {
         public static final DriveConfig joystickDriveConfig = new DriveConfig(
             1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
         );
-        public static final double trimFadeoutOffset = 0;
+        public static final double trimFadeout = 0.25;
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
@@ -129,7 +131,7 @@ public class Constants {
         public static final double indexSpeed = 1;
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
         public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
-        public static final Measure<Time> speakerTimeToShoot = Seconds.of(1.0);
+        public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
         /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */
@@ -164,7 +166,14 @@ public class Constants {
     public static class Climb { 
         public static final int climbID = 10;
         public static final int climbFollowID = 11;
-        public static final Measure<Voltage> climbPower = Volts.of(1);
+        public static final Measure<Voltage> zeroVoltage = Volts.of(-0.5);
+        public static final Measure<Current> zeroTripCurrent = Amps.of(0.1);
+        public static final Measure<Voltage> climbPower = Volts.of(12);
+        public static final Measure<Angle> minPosition = Rotations.of(0);
+        public static final Measure<Angle> maxPosition = Rotations.of(295);
+         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(maxPosition.in(Rotations)).withReverseSoftLimitThreshold(minPosition.in(Rotations));
     }
 
     public static class Field {
@@ -183,11 +192,11 @@ public class Constants {
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         // Blue Notes
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114 - 8), Inches.of(275.625)); 
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         // Red Notes
-        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114 - 8)), Inches.of(275.625)); 
+        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(275.625)); 
         public static final Translation2d redMidNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(218.625)); 
         public static final Translation2d redLowNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(161.625)); 
         public enum Note {

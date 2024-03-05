@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static frc.robot.Constants.FeetPerSecondSquared;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,13 +53,14 @@ public class RobotContainer {
         autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
         autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
         autoChooser.addOption("Score Speaker Twice Side", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
     private void configureBindings() {
+        //! Need to add climber reset to autos and put stuff into routines class
         // Higher arm angle = lower note height
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
@@ -72,14 +70,19 @@ public class RobotContainer {
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, armSubsystem.stowCommand());
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
-        joystick.onTrue(6, Commands.runOnce(this::stopEverything));
+        joystick.onTrue(5, Commands.runOnce(this::stopEverything));
 
-        // joystick.whileTrue(10, climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        // joystick.whileTrue(11, climbSubsystem.setVoltage(Climb.climbPower).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        //Climbing, put into routines class
+        // joystick.whileTrue(4, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
+        //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // joystick.whileTrue(6, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
+        //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // joystick.onTrue(10, climbSubsystem.resetClimberCommand());
+
         // joystick.onTrue(12, climbSubsystem.resetClimberCommand());
         // joystick.onTrue(4, driveSubsystem.setVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6)).andThen(driveSubsystem.run(() -> {})));
         // joystick.onTrue(4, Autos.faceNote(Note.TOP, driveSubsystem));
-        joystick.onTrue(5, driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(6)).andThen(driveSubsystem.run(() -> {})));
+        // joystick.onTrue(5, driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(6)).andThen(driveSubsystem.run(() -> {})));
     }
 
     public Command getAutonomousCommand() {
