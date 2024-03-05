@@ -83,6 +83,10 @@ public class Routines {
         .withName("Aim and Score Speaker");
     }
 
+    public static Command centerOnChain(DriveSubsystem driveSubsystem) {
+        return driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), true);
+    }
+
     public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {
         if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;
         return Shooter.getPredictedAngle(driveSubsystem.getDistanceToSpeaker());
