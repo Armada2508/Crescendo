@@ -216,7 +216,35 @@ public class Constants {
         public static final Pose2d blueStageCenter = new Pose2d(Meters.of(5.32), Meters.of(4.11), Rotation2d.fromDegrees(0));
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
-        // private static final Measure<Distance> chainToStage = Inches.of(16.625);
+        private static final Measure<Distance> chainToStage = Inches.of(16.625);
+
+        public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainToStage), Meters.of(4.11), Rotation2d.fromDegrees(0));
+
+        public static final Pose2d blueChainLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
+        public static final Pose2d blueChainRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
+
+        public static Translation2d getNearestChain() {
+            for (int i = 0; i < 3; i++) {
+                switch (i) {
+                    case 1:
+                        //check center
+                        break;
+
+                    case 2:
+                        //check left
+                        break;
+
+                    case 3:
+                        //check right
+                        break;
+                
+                    default:
+                        //???
+                        break;
+                }
+            }
+            return null; //! error is annoying
+        }
     }
 
 }
