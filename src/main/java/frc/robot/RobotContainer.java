@@ -7,9 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
+import frc.robot.Constants.Climb;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
@@ -73,16 +75,13 @@ public class RobotContainer {
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
 
         //Climbing, put into routines class
-        // joystick.whileTrue(4, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
-        //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        // joystick.whileTrue(6, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
-        //     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        // joystick.onTrue(10, climbSubsystem.resetClimberCommand());
+        joystick.whileTrue(4, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
+            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        joystick.whileTrue(6, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
+            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        joystick.onTrue(10, climbSubsystem.resetClimberCommand());
 
-        // joystick.onTrue(12, climbSubsystem.resetClimberCommand());
-        // joystick.onTrue(4, driveSubsystem.setVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6)).andThen(driveSubsystem.run(() -> {})));
         // joystick.onTrue(4, Autos.faceNote(Note.TOP, driveSubsystem));
-        // joystick.onTrue(5, driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(6)).andThen(driveSubsystem.run(() -> {})));
     }
 
     public Command getAutonomousCommand() {

@@ -167,7 +167,7 @@ public class Constants {
         public static final int climbID = 10;
         public static final int climbFollowID = 11;
         public static final Measure<Voltage> zeroVoltage = Volts.of(-0.5);
-        public static final Measure<Current> zeroTripCurrent = Amps.of(0.1);
+        public static final Measure<Current> zeroTripTorqueCurrent = Amps.of(2.5);
         public static final Measure<Voltage> climbPower = Volts.of(12);
         public static final Measure<Angle> minPosition = Rotations.of(0);
         public static final Measure<Angle> maxPosition = Rotations.of(295);
