@@ -32,7 +32,7 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
         NTLogger.register(this);
     }
 
-    public void configTalons() {
+    private void configTalons() {
         Util.factoryResetTalons(talon, talonFollow);
         Util.brakeMode(talon, talonFollow);
         talon.setInverted(true);
@@ -57,9 +57,10 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
             Commands.waitUntil(() -> Math.abs(talonFollow.getTorqueCurrent().getValueAsDouble()) > Climb.zeroTripTorqueCurrent.in(Amps)).andThen(() -> talonFollow.setControl(new NeutralOut()))
         )
         .finallyDo(() -> {
-            stop();
-            talon.getConfigurator().apply(Climb.softLimitSwitchConfig.withReverseSoftLimitEnable(true));
             talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
+            stop();
+            talon.setPosition(Climb.minPosition.in(Rotations));
+            talon.getConfigurator().apply(Climb.softLimitSwitchConfig.withReverseSoftLimitEnable(true));
         })
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Reset Climber");
@@ -72,7 +73,7 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         NTLogger.putTalonLog(talon, "Climb TalonFX", map);
-        NTLogger.putTalonLog(talon, "Climb Follow TalonFX", map);
+        NTLogger.putTalonLog(talonFollow, "Climb Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
         return map;
     }

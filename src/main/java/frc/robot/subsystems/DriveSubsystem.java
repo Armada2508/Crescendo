@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Volts;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -243,12 +244,15 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return error2;
     }
 
+    private Command trajectoryCommand;
+
     public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, boolean driveBackwards) {
         return runOnce(() -> {
             Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
-            FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this).schedule();
-        }).withName("Generating Trajectory");
+            trajectoryCommand = FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
+        }).andThen(Commands.defer(() -> trajectoryCommand, Set.of(this)))
+        .withName("Generating Trajectory");
     }
 
     public Command trajectoryToPoseCommand(Pose2d targetPose, boolean driveBackwards) {

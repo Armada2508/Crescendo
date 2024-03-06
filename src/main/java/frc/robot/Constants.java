@@ -33,6 +33,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Current;
@@ -85,7 +86,8 @@ public class Constants {
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
-        public static final TrajectoryConfig trajectoryConfig = new TrajectoryConfig(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(0.5)).setKinematics(diffKinematics);
+        public static final TrajectoryConfig trajectoryConfig = 
+            new TrajectoryConfig(MetersPerSecond.of(2.0), MetersPerSecondPerSecond.of(1.0)).setKinematics(diffKinematics).addConstraint(new CentripetalAccelerationConstraint(1));
     }
 
     public static class Arm {
@@ -96,6 +98,7 @@ public class Constants {
         public static final double gravityFeedforward = 0; //! Find this
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
+        public static final Measure<Time> calibrateTime = Seconds.of(0.25);
         public static final Measure<Angle> encoderOffset = Degrees.of(56);
         public static final Measure<Angle> boreEncoderHardstop = Degrees.of(85);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); // Unfortunately this affects the shooter map, so don't change it
@@ -103,7 +106,7 @@ public class Constants {
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
         public static final Measure<Angle> speakerAngle = Degrees.of(39);
-        public static final Measure<Angle> ampAngle = Degrees.of(71); 
+        public static final Measure<Angle> ampAngle = Degrees.of(72.5); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -136,9 +139,9 @@ public class Constants {
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
         /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */
         private static final InterpolatingDoubleTreeMap interpolatingShootingMap = new InterpolatingDoubleTreeMap(); 
-        public static final Measure<Distance> maxShootDistance = Inches.of(117.0);
+        public static final Measure<Distance> maxShootDistance = Inches.of(90.0);
         static {
-            interpolatingShootingMap.put(Shooter.maxShootDistance.in(Inches), 50.0);
+            interpolatingShootingMap.put(117.0, 50.0);
             interpolatingShootingMap.put(112.7, 49.5);
             interpolatingShootingMap.put(102.1, 48.5);
             interpolatingShootingMap.put(95.0, 48.0);
@@ -217,14 +220,15 @@ public class Constants {
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
         private static final Measure<Distance> chainToStage = Inches.of(16.625);
+        private static final Measure<Distance> chainClimbOffset = chainToStage.minus(Inches.of(4)); 
 
-        public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainToStage), Meters.of(4.11), blueStageCenter.getRotation());
+        public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainClimbOffset), Meters.of(4.11), blueStageCenter.getRotation());
 
-        public static final Translation2d leftChainVector = new Translation2d(chainToStage, Meters.of(0)).rotateBy(blueStageLeft.getRotation());
+        public static final Translation2d leftChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageLeft.getRotation());
         public static final Pose2d blueChainLeft = new Pose2d(blueStageLeft.getTranslation().plus(leftChainVector), blueStageLeft.getRotation());
 
-        public static final Translation2d rightChainVector = new Translation2d(chainToStage, Meters.of(0)).rotateBy(blueStageRight.getRotation());
-        public static final Pose2d blueChainRight = new Pose2d(blueStageLeft.getTranslation().plus(rightChainVector), blueStageRight.getRotation());
+        public static final Translation2d rightChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageRight.getRotation());
+        public static final Pose2d blueChainRight = new Pose2d(blueStageRight.getTranslation().plus(rightChainVector), blueStageRight.getRotation());
  
         public static Pose2d getNearestChain(Pose2d pose) {
             double centerDistance = pose.getTranslation().getDistance(blueChainCenter.getTranslation());

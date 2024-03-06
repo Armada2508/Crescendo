@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
@@ -103,7 +104,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return Rotations.of(talon.getPosition().getValueAsDouble());
     }
 
-    private Measure<Angle> targetAngle; 
+    private Measure<Angle> targetAngle = getAngle();
     /**
      * @param angle
      * @param velocity degrees per second
@@ -143,10 +144,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(Arm.stowAngle).withName("Stow");
     }
 
-    public Command initArmAngle() { //! Magic Numbers
+    public Command initArmAngle() { 
         return setAngleCommand(Arm.intakeAngle)
         .andThen(this::stop)
-        .andThen(Commands.waitSeconds(0.25))
+        .andThen(Commands.waitSeconds(Arm.calibrateTime.in(Seconds)))
         .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Init Arm Angle");
@@ -158,6 +159,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         map.put("Arm Initalized", initalizedArm);
         map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
         map.put("Bore Encoder Angle Deg", getBoreEncoderAngle().in(Degrees));
+        map.put("Target Angle", targetAngle.in(Degrees));
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
