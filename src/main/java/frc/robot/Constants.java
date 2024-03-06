@@ -218,33 +218,30 @@ public class Constants {
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
         private static final Measure<Distance> chainToStage = Inches.of(16.625);
 
-        public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainToStage), Meters.of(4.11), Rotation2d.fromDegrees(0));
+        public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainToStage), Meters.of(4.11), blueStageCenter.getRotation());
 
-        public static final Pose2d blueChainLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
-        public static final Pose2d blueChainRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
+        public static final Translation2d leftChainVector = new Translation2d(chainToStage, Meters.of(0)).rotateBy(blueStageLeft.getRotation());
+        public static final Pose2d blueChainLeft = new Pose2d(blueStageLeft.getTranslation().plus(leftChainVector), blueStageLeft.getRotation());
 
-        public static Translation2d getNearestChain() {
-            for (int i = 0; i < 3; i++) {
-                switch (i) {
-                    case 1:
-                        //check center
-                        break;
+        public static final Translation2d rightChainVector = new Translation2d(chainToStage, Meters.of(0)).rotateBy(blueStageRight.getRotation());
+        public static final Pose2d blueChainRight = new Pose2d(blueStageLeft.getTranslation().plus(rightChainVector), blueStageRight.getRotation());
+ 
+        public static Pose2d getNearestChain(Pose2d pose) {
+            double centerDistance = pose.getTranslation().getDistance(blueChainCenter.getTranslation());
+            double leftDistance = pose.getTranslation().getDistance(blueChainLeft.getTranslation());
+            double rightDistance = pose.getTranslation().getDistance(blueChainRight.getTranslation());
+            
+            double distance = Math.min(Math.min(leftDistance, rightDistance), centerDistance);
 
-                    case 2:
-                        //check left
-                        break;
-
-                    case 3:
-                        //check right
-                        break;
-                
-                    default:
-                        //???
-                        break;
-                }
+            if (distance == centerDistance) {
+                return blueChainCenter;
+            } 
+            else if (distance == leftDistance) {
+                return blueChainLeft;
             }
-            return null; //! error is annoying
+            else {
+                return blueChainRight;
+            }
         }
     }
-
 }

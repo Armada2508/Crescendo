@@ -74,6 +74,7 @@ public class RobotContainer {
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
 
+        joystick.onTrue(20, Routines.centerOnChain(driveSubsystem));
         //Climbing, put into routines class
         joystick.whileTrue(4, armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop))
             .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
