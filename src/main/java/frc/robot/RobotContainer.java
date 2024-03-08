@@ -50,9 +50,9 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
         autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.setDefaultOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
         autoChooser.addOption("Score Speaker Twice Side", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
@@ -61,23 +61,18 @@ public class RobotContainer {
     
     private void configureBindings() {
         //! Need to add climber reset to autos
-        // Higher arm angle = lower note height
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(47.75)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(armSubsystem.stowCommand()));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
-        // joystick.onTrue(3, Routines.scoreAmp(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, armSubsystem.stowCommand());
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
-        joystick.onTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem));
-        joystick.onTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem));
-        joystick.onFalse(4, Commands.runOnce(climbSubsystem::stop));
-        joystick.onFalse(6, Commands.runOnce(climbSubsystem::stop));
+        joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
-        joystick.onTrue(12, Routines.centerOnChain(driveSubsystem).alongWith(Routines.extendClimber(armSubsystem, climbSubsystem)));
-        // joystick.onTrue(4, Autos.faceNote(Note.TOP, driveSubsystem));
+        joystick.onTrue(12, Routines.extendClimber(armSubsystem, climbSubsystem).alongWith(Commands.waitSeconds(2).andThen(Routines.centerOnChain(driveSubsystem))));
     }
 
     public Command getAutonomousCommand() {

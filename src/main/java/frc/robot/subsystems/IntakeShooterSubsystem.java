@@ -71,7 +71,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command intakeCommand() {
-        return setIntakeSpeed(Intake.intakeSpeed)
+        return Commands.waitUntil(() -> talonShooter.getVelocity().getValueAsDouble() < 5) //! Magic Number
+        .andThen(setIntakeSpeed(Intake.intakeSpeed))
         .andThen(Commands.waitUntil(this::isSensorTripped))
         .andThen(Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)))
         .andThen(this::stop)

@@ -79,6 +79,7 @@ public class Routines {
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
+            Commands.waitSeconds(0.75), //! Magic Number
             shooterSubsystem.releaseNoteCommand(),
             armSubsystem.stowCommand()
         )

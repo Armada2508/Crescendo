@@ -238,8 +238,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * Returns the shorter error considering a wrap around bounded [-180, 180] degrees, CCW positive
      */
     private double shortestPath(double current, double target) {
-        double error1 = Constants.degreesPerRotation + target - current;
-        double error2 = target - current;
+        double error1 = Util.boundedAngleDegrees(Constants.degreesPerRotation + target - current);
+        double error2 = Util.boundedAngleDegrees(target - current);
         if (Math.abs(error1) < Math.abs(error2)) return error1;
         return error2;
     }
@@ -248,6 +248,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, boolean driveBackwards) {
         return runOnce(() -> {
+            if (!hasInitalizedFieldPose()) {
+                trajectoryCommand = Commands.none();
+                return;
+            }
             Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             trajectoryCommand = FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
@@ -313,6 +317,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         map.put("Target Angle", targetAngle.in(Degrees));
         map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
         map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
+        // map.put("", map);
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

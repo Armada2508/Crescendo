@@ -79,8 +79,8 @@ public class Constants {
         public static final int motionMagicSlot = 1;
         public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.008);
-        public static final Measure<Angle> turnDeadband = Degrees.of(1);
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.15).withKD(0.008);
+        public static final Measure<Angle> turnDeadband = Degrees.of(2);
         public static final Measure<Voltage> minTurnPIDVoltage = Volts.of(0.3); 
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
@@ -106,7 +106,7 @@ public class Constants {
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
         public static final Measure<Angle> speakerAngle = Degrees.of(39);
-        public static final Measure<Angle> ampAngle = Degrees.of(72.5); 
+        public static final Measure<Angle> ampAngle = Degrees.of(73.5); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -124,7 +124,7 @@ public class Constants {
         public static final Measure<Distance> noteDetectionRange = Millimeters.of(130); 
         public static final Measure<Time> waitAfterTrip = Seconds.of(0.25);
         public static final Measure<Time> noteSettleTime = Seconds.of(0.25);
-        public static final Measure<Time> backOffNoteTime = Seconds.of(0.15);
+        public static final Measure<Time> backOffNoteTime = Seconds.of(0.05);
         public static final double backOffSpeed = -0.3;
     }
 
@@ -137,7 +137,8 @@ public class Constants {
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
-        /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */
+        // Higher arm angle = lower note height
+        /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */ 
         private static final InterpolatingDoubleTreeMap interpolatingShootingMap = new InterpolatingDoubleTreeMap(); 
         public static final Measure<Distance> maxShootDistance = Inches.of(90.0);
         static {
@@ -229,8 +230,29 @@ public class Constants {
 
         public static final Translation2d rightChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageRight.getRotation());
         public static final Pose2d blueChainRight = new Pose2d(blueStageRight.getTranslation().plus(rightChainVector), blueStageRight.getRotation());
+
+        public static final Pose2d redChainCenter = new Pose2d(Field.fieldLength.in(Meters) - blueChainCenter.getX(), blueChainCenter.getY(), Rotation2d.fromDegrees(180));
+        public static final Pose2d redChainLeft = new Pose2d(Field.fieldLength.in(Meters) - blueChainRight.getX(), blueChainRight.getY(), Rotation2d.fromDegrees(-60));
+        public static final Pose2d redChainRight = new Pose2d(Field.fieldLength.in(Meters) - blueChainLeft.getX(), blueChainLeft.getY(), Rotation2d.fromDegrees(60));
  
         public static Pose2d getNearestChain(Pose2d pose) {
+            if (Robot.onRedAlliance()) {
+                double centerDistance = pose.getTranslation().getDistance(redChainCenter.getTranslation());
+                double leftDistance = pose.getTranslation().getDistance(redChainLeft.getTranslation());
+                double rightDistance = pose.getTranslation().getDistance(redChainRight.getTranslation());
+                
+                double distance = Math.min(Math.min(leftDistance, rightDistance), centerDistance);
+
+                if (distance == centerDistance) {
+                    return redChainCenter;
+                } 
+                else if (distance == leftDistance) {
+                    return redChainLeft;
+                }
+                else {
+                    return redChainRight;
+                }
+            }
             double centerDistance = pose.getTranslation().getDistance(blueChainCenter.getTranslation());
             double leftDistance = pose.getTranslation().getDistance(blueChainLeft.getTranslation());
             double rightDistance = pose.getTranslation().getDistance(blueChainRight.getTranslation());
