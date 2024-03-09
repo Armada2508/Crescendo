@@ -7,7 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -246,21 +246,21 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private Command trajectoryCommand;
 
-    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, boolean driveBackwards) {
+    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
         return runOnce(() -> {
             if (!hasInitalizedFieldPose()) {
                 trajectoryCommand = Commands.none();
                 return;
             }
-            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
+            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), waypoints.get(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
             Field.simulatedField.getObject("traj").setTrajectory(trajectory);
             trajectoryCommand = FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
         }).andThen(Commands.defer(() -> trajectoryCommand, Set.of(this)))
         .withName("Generating Trajectory");
     }
 
-    public Command trajectoryToPoseCommand(Pose2d targetPose, boolean driveBackwards) {
-        return trajectoryToPoseCommand(() -> targetPose, driveBackwards);
+    public Command trajectoryToPoseCommand(Pose2d targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
+        return trajectoryToPoseCommand(() -> targetPose, waypoints, driveBackwards);
     }
 
     public void stop() {

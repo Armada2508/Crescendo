@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.FeetPerSecondSquared;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerBase;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Field.Note;
-import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -49,6 +47,12 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         .andThen(scoreSpeakerBase(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
     }
+
+    public static Command scoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return armSubsystem.stowCommand()
+        .andThen(armSubsystem.initArmAngle())
+        .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+    }
     
     /**
      * Scores a preloaded NOTE into the SPEAKER using vision, faces the ALLIANCE WALL, and leaves the ROBOT STARTING ZONE.
@@ -57,8 +61,8 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         return armSubsystem.stowCommand() 
         .andThen(armSubsystem.initArmAngle())
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        .andThen(faceShooterTowardsWall(driveSubsystem))
-        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
+        // .andThen(faceShooterTowardsWall(driveSubsystem))
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(2.5))); 
     }
 
     /**
@@ -110,7 +114,9 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
             Commands.waitSeconds(0.25),
             driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(10)), // Drive back to pick up third note
             armSubsystem.setAngleCommand(Arm.intakeAngle),
-            intakeShooterSubsystem.intakeFirstTryCommand(0.5, Seconds.of(0.02))
+            intakeShooterSubsystem.brakeShooter(),
+            intakeShooterSubsystem.intakeCommand()
+            // intakeShooterSubsystem.intakeFirstTryCommand(0.5, Seconds.of(0.02))
                 .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1)),
             armSubsystem.stowCommand(),
             turnToSpeaker(driveSubsystem),
@@ -150,12 +156,12 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
     /**
      * Faces the robot's shooter towards its ALLIANCE WALL.
      */
-    private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.turnCommand(() -> {
-            if (!driveSubsystem.hasInitalizedFieldPose()) driveSubsystem.getFieldAngle();
-            return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
-        });
-    }
+    // private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
+    //     return driveSubsystem.turnCommand(() -> {
+    //         if (!driveSubsystem.hasInitalizedFieldPose()) driveSubsystem.getFieldAngle();
+    //         return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
+    //     });
+    // }
 
     /**
      * Faces the robot towards the angle it was at when AUTO started.

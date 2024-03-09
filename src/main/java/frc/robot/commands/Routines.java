@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -34,7 +36,7 @@ public class Routines {
 
     public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle)
-        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false))
+        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, ArrayList::new, false))
         .andThen(intakeSubsystem.shootAmpCommand())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
         .andThen(armSubsystem.stowCommand())
@@ -94,8 +96,17 @@ public class Routines {
         return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
     }
 
+    // private static Pose2d chainPose;
     public static Command centerOnChain(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), true);
+        return driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true);
+        // return Commands.runOnce(() -> chainPose = Field.getNearestChain(driveSubsystem.getFieldPose()))
+        // .andThen(driveSubsystem.trajectoryToPoseCommand(() -> chainPose, 
+        //     () -> {
+        //         // return List.of(chainPose.getTranslation().plus(new Translation2d(Feet.of(3), Meters.of(0))));
+        //         // System.out.println(chainPose.getTranslation());
+        //         return List.of(chainPose.getTranslation().minus(new Translation2d(Meters.of(1), Meters.of(0)).rotateBy(chainPose.getRotation().unaryMinus())));
+        //     }/*ArrayList::new*/, true
+        // ));
     }
 
     public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {

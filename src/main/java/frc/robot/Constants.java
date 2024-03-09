@@ -106,7 +106,7 @@ public class Constants {
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
         public static final Measure<Angle> speakerAngle = Degrees.of(39);
-        public static final Measure<Angle> ampAngle = Degrees.of(73.5); 
+        public static final Measure<Angle> ampAngle = Degrees.of(75.0); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -196,7 +196,7 @@ public class Constants {
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         // Blue Notes
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625 - 8)); 
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625 + 8)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         // Red Notes
@@ -220,8 +220,8 @@ public class Constants {
         public static final Pose2d blueStageCenter = new Pose2d(Meters.of(5.32), Meters.of(4.11), Rotation2d.fromDegrees(0));
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
-        private static final Measure<Distance> chainToStage = Inches.of(16.625);
-        private static final Measure<Distance> chainClimbOffset = chainToStage.minus(Inches.of(4)); 
+        public static final Measure<Distance> chainToStage = Inches.of(16.625);
+        public static final Measure<Distance> chainClimbOffset = chainToStage.minus(Inches.of(-12)); // 4 
 
         public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainClimbOffset), Meters.of(4.11), blueStageCenter.getRotation());
 

@@ -50,12 +50,13 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        autoChooser.setDefaultOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
         autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        autoChooser.setDefaultOption("Score Speaker", Autos.scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
         autoChooser.addOption("Score Speaker Twice Side", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.setDefaultOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
+        autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
@@ -72,6 +73,7 @@ public class RobotContainer {
         joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
+        // joystick.onTrue(12, Routines.centerOnChain(driveSubsystem));
         joystick.onTrue(12, Routines.extendClimber(armSubsystem, climbSubsystem).alongWith(Commands.waitSeconds(2).andThen(Routines.centerOnChain(driveSubsystem))));
     }
 
