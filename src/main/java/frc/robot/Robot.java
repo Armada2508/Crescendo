@@ -28,6 +28,7 @@ public class Robot extends TimedRobot implements Loggable {
         NTLogger.register(this);
         robotContainer = new RobotContainer();
         addPeriodic(NTLogger::log, kDefaultPeriod);
+        // CameraServer.startAutomaticCapture();
     }
     
     @Override

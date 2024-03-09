@@ -51,8 +51,8 @@ public class Routines {
         .withName("Score Speaker Base");
     }
 
-    public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem))
+    public static Command scoreSpeaker(Measure<Angle> angle, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return armSubsystem.setAngleCommand(angle)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -79,7 +79,7 @@ public class Routines {
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
-            Commands.waitSeconds(0.75), //! Magic Number
+            Commands.waitSeconds(0.5), //! Magic Number
             shooterSubsystem.releaseNoteCommand(),
             armSubsystem.stowCommand()
         )

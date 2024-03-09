@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -57,6 +58,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public Command setShooterVoltage(Measure<Voltage> voltage) {
         return runOnce(() -> {
+            talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
             talonShooter.setControl(new VoltageOut(voltage.in(Volts)));
         });
     }
@@ -66,12 +68,22 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         talonShooter.setControl(new NeutralOut());
     }
 
+    public Command brakeShooter() {
+        return runOnce(() -> {
+            var request = new StaticBrake();
+            talonShooter.setControl(request);
+            talonFollowShooter.setControl(request);
+        });
+    }
+
     public boolean isSensorTripped() {
         return Util.inRange(timeOfFlight.getRange(), Intake.noteDetectionRange.in(Millimeters));
     }
 
     public Command intakeCommand() {
-        return Commands.waitUntil(() -> talonShooter.getVelocity().getValueAsDouble() < 5) //! Magic Number
+        return Commands.waitUntil(() -> getShooterRPM() < 3000) //! Magic Number
+        .andThen(brakeShooter())
+        // Commands.waitUntil(() -> talonShooter.getVelocity().getValueAsDouble() < 5)
         .andThen(setIntakeSpeed(Intake.intakeSpeed))
         .andThen(Commands.waitUntil(this::isSensorTripped))
         .andThen(Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)))
@@ -119,12 +131,16 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Shoot Amp");
     }
 
+    public double getShooterRPM() {
+        return talonShooter.getVelocity().getValueAsDouble() * 60;
+    }
+
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("TOF Status", timeOfFlight.getStatus().toString());
         map.put("TOF Distance MM", timeOfFlight.getRange());
         map.put("Is TOF Tripped", isSensorTripped());
-        map.put("Shooter RPM", talonShooter.getVelocity().getValueAsDouble() * 60);
+        map.put("Shooter RPM", getShooterRPM());
         map.put("Shooter Follower RPM", talonFollowShooter.getVelocity().getValueAsDouble() * 60);
         map.put("Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
         NTLogger.putTalonLog(talonIntake, "Intake TalonFX", map);
