@@ -248,4 +248,8 @@ public class Constants {
             }
         }
     }
+
+    public class LED {
+        public static final int ledPort = 12;
+    }
 }
