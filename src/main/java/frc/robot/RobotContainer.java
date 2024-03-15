@@ -61,7 +61,6 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        //! Need to add climber reset to autos
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
@@ -76,7 +75,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return climbSubsystem.resetClimberCommand().alongWith(autoChooser.getSelected());
     } 
 
 }
