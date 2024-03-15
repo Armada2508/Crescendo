@@ -45,7 +45,6 @@ import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
-import frc.robot.Robot;
 import frc.robot.commands.NewDriveCommand;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.logging.Loggable;
@@ -170,6 +169,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
 
     private Measure<Angle> targetAngle = getFieldAngle();
     /**
+     * Has inbuilt safety to an uninitalized field pose
      * @param angle - angle in field frame 
      * @return Command for the robot to turn to angle in field frame
      */
@@ -179,6 +179,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             turnPIDController.reset();
         }) 
         .andThen(runEnd(() -> {
+            if (!hasInitalizedFieldPose()) {
+                turnPIDController.calculate(turnPIDController.getSetpoint());
+                return;
+            }
             double volts = turnPIDController.calculate(shortestPath(getFieldAngle().in(Degrees), targetAngle.in(Degrees)));
             double voltsL = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
             double voltsR = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
@@ -188,14 +192,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         }, this::stop))
         .until(turnPIDController::atSetpoint)
         .withName("Turn");
-    }
-
-    /**
-     * @param angle - angle in field frame 
-     * @return Command for the robot to turn to angle in field frame
-     */
-    public Command turnCommand(Measure<Angle> angle) {
-        return turnCommand(() -> angle);
     }
 
     /**
@@ -217,10 +213,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
             return FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
         }, Set.of(this));
-    }
-
-    public Command trajectoryToPoseCommand(Pose2d targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
-        return trajectoryToPoseCommand(() -> targetPose, waypoints, driveBackwards);
     }
 
     public void stop() {
@@ -255,11 +247,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return Degrees.of(getFieldPose().getRotation().getDegrees());
     }
 
-    public Measure<Distance> getDistanceToSpeaker() {
-        Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
-        return Meters.of(getFieldPose().getTranslation().getDistance(speakerPos));
-    }
-
     public boolean hasInitalizedFieldPose() {
         return poseEstimator != null;
     }
@@ -275,8 +262,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         }
         map.put("Robot Angle", getFieldAngle().in(Degrees));
         map.put("Target Angle", targetAngle.in(Degrees));
-        map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
-        map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
+        map.put("Distance to Speaker", Field.getDistanceToSpeaker(getFieldPose()).in(Inches));
+        map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

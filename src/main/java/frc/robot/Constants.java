@@ -277,6 +277,11 @@ public class Constants {
                 return chainRight;
             }
         }
+
+        public static Measure<Distance> getDistanceToSpeaker(Pose2d pose) {
+            Translation2d speakerPos = (Robot.onRedAlliance()) ? Field.redSpeakerPosition : Field.blueSpeakerPosition;
+            return Meters.of(pose.getTranslation().getDistance(speakerPos));
+        }
     }
 
     public class LED {
