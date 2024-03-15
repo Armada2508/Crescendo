@@ -44,7 +44,7 @@ public class Routines {
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle)
+        return armSubsystem.setAngleCommand(Arm.speakerBaseAngle)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -105,7 +105,7 @@ public class Routines {
     }
 
     public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {
-        if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerAngle;
+        if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerBaseAngle;
         return Shooter.getPredictedAngle(driveSubsystem.getDistanceToSpeaker());
     }
 

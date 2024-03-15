@@ -72,6 +72,12 @@ public class RobotContainer {
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
         joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
+
+        // Testing shooter map
+        // joystick.onTrue(6, armSubsystem.setAngleCommand(armSubsystem.getAngle().plus(Degrees.of(0.5))));
+        // joystick.onTrue(4, armSubsystem.setAngleCommand(armSubsystem.getAngle().minus(Degrees.of(0.5))));
+        // joystick.onTrue(3, armSubsystem.setAngleCommand(Arm.speakerBaseAngle));
+        // joystick.onTrue(1, intakeShooterSubsystem.shootSpeakerCommand());
     }
 
     public Command getAutonomousCommand() {

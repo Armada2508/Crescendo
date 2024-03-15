@@ -102,7 +102,7 @@ public class Constants {
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
-        public static final Measure<Angle> speakerAngle = Degrees.of(39);
+        public static final Measure<Angle> speakerBaseAngle = Degrees.of(39);
         public static final Measure<Angle> ampAngle = Degrees.of(75.0); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
