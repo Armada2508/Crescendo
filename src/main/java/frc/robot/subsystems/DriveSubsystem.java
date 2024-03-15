@@ -21,7 +21,6 @@ import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -108,8 +107,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonRFollow.setControl(new StrictFollower(talonR.getDeviceID()));
         talonR.setInverted(true);
         talonRFollow.setInverted(true);
-        talonL.getConfigurator().apply(Drive.motionMagicConfig);
-        talonR.getConfigurator().apply(Drive.motionMagicConfig);
         talonL.getConfigurator().apply(Drive.velocityLeftConfig);
         talonR.getConfigurator().apply(Drive.velocityRightConfig);
     }
@@ -125,17 +122,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         config.MotionMagicAcceleration = toRotations(acceleration);
         talonL.getConfigurator().apply(config);
         talonR.getConfigurator().apply(config);
-    }
-
-    /**
-     * Drives the robot a certain distance relative to itself using motion magic
-     * @param distance meters
-     */
-    private void driveDistance(Measure<Distance> distance) {
-        MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(Drive.motionMagicSlot);
-        double distanceRots = toRotations(distance.in(Meters));
-        talonL.setControl(request.withPosition(talonL.getPosition().getValueAsDouble() + distanceRots));
-        talonR.setControl(request.withPosition(talonR.getPosition().getValueAsDouble() + distanceRots));
     }
 
     private void setSpeed(double leftSpeed, double rightSpeed) {
@@ -175,23 +161,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     }
 
     /**
-     * @param distance distance relative to the robot
-     * @param velocity meters/second
-     * @param acceleration meters/second^2
-     * @return Command for the robot to drive distance using motion magic
-     */
-    public Command driveDistanceCommand(Measure<Distance> distance, double velocity, double acceleration) {
-        final double deadbandRotations = toRotations(Drive.driveDeadband.in(Meters)); 
-        return runOnce(() -> {
-            configMotionMagic(velocity, acceleration);
-            driveDistance(distance);
-        })
-        .andThen(Commands.waitUntil(() -> Util.epsilonEquals(talonL.getPosition().getValueAsDouble(), talonL.getClosedLoopReference().getValueAsDouble(), deadbandRotations)))
-        .finallyDo(this::stop)
-        .withName("Drive Distance");
-    }
-
-    /**
      * @param distance distance to travel
      * @param velocity meters/second, negative means go backwards
      * @return Command for the robot to drive a distance using velocity control
@@ -219,7 +188,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             double voltsR = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
             voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
             voltsR = MathUtil.clamp(voltsR, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
-            // System.out.println("Output: " + volts + " Left: " + voltsL + " Right: " + voltsR);
             setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
         }, this::stop))
         .until(turnPIDController::atSetpoint)
@@ -244,19 +212,15 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return error2;
     }
 
-    private Command trajectoryCommand;
-
     public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
-        return runOnce(() -> {
+        return Commands.defer(() -> {
             if (!hasInitalizedFieldPose()) {
-                trajectoryCommand = Commands.none();
-                return;
+                return Commands.none();
             }
             Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), waypoints.get(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
-            Field.simulatedField.getObject("traj").setTrajectory(trajectory);
-            trajectoryCommand = FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
-        }).andThen(Commands.defer(() -> trajectoryCommand, Set.of(this)))
-        .withName("Generating Trajectory");
+            Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
+            return FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
+        }, Set.of(this));
     }
 
     public Command trajectoryToPoseCommand(Pose2d targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
@@ -317,7 +281,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         map.put("Target Angle", targetAngle.in(Degrees));
         map.put("Distance to Speaker", getDistanceToSpeaker().in(Inches));
         map.put("In Range", getDistanceToSpeaker().lte(Shooter.maxShootDistance));
-        // map.put("", map);
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

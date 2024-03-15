@@ -81,7 +81,7 @@ public class Routines {
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
-            Commands.waitSeconds(0.5), //! Magic Number
+            Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
             armSubsystem.stowCommand()
         )
@@ -96,17 +96,12 @@ public class Routines {
         return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
     }
 
-    // private static Pose2d chainPose;
-    public static Command centerOnChain(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true);
-        // return Commands.runOnce(() -> chainPose = Field.getNearestChain(driveSubsystem.getFieldPose()))
-        // .andThen(driveSubsystem.trajectoryToPoseCommand(() -> chainPose, 
-        //     () -> {
-        //         // return List.of(chainPose.getTranslation().plus(new Translation2d(Feet.of(3), Meters.of(0))));
-        //         // System.out.println(chainPose.getTranslation());
-        //         return List.of(chainPose.getTranslation().minus(new Translation2d(Meters.of(1), Meters.of(0)).rotateBy(chainPose.getRotation().unaryMinus())));
-        //     }/*ArrayList::new*/, true
-        // ));
+    public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
+        return extendClimber(armSubsystem, climbSubsystem)
+        .alongWith(
+            Commands.waitSeconds(2)
+            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true)
+        ));
     }
 
     public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {

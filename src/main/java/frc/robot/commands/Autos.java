@@ -18,12 +18,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Field.Note;
+import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 
-public class Autos { //! There's a lot of magic numbers in these Autos, that's just the nature of this class I think
+public class Autos {
 
     private Autos() {}
 
@@ -61,7 +62,7 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
         return armSubsystem.stowCommand() 
         .andThen(armSubsystem.initArmAngle())
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
-        // .andThen(faceShooterTowardsWall(driveSubsystem))
+        .andThen(faceShooterTowardsWall(driveSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(2.5))); 
     }
 
@@ -74,13 +75,11 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
             armSubsystem.stowCommand()
             .andThen(
                 scoreSpeakerBase(armSubsystem, intakeShooterSubsystem),
-                // Commands.waitUntil(() -> intakeShooterSubsystem.getShooterRPM() < 2000),
                 Commands.waitSeconds(1),
                 intakeShooterSubsystem.brakeShooter(),
                 driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(7.5), FeetPerSecond.of(7.5), FeetPerSecondSquared.of(12)) // Drive back to get second note
                     .alongWith(
                         armSubsystem.initArmAngle(),
-                        // intakeShooterSubsystem.intakeFirstTryCommand(0.4, Seconds.of(0.07)),
                         intakeShooterSubsystem.intakeCommand(),
                         Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.25)
                     )
@@ -93,11 +92,11 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
                     ), 
                 Commands.waitSeconds(0.25), // Pause for drivetrain to settle
                 turnToSpeaker(driveSubsystem),
-                armSubsystem.setAngleCommand(Degrees.of(41.5))
+                armSubsystem.setAngleCommand(Degrees.of(41.5)) // Manually adjust angle for distance above
                     .alongWith(intakeShooterSubsystem.spinUpFlywheelCommand())
                     .andThen(
                         intakeShooterSubsystem.releaseNoteCommand()
-                    )     // Manually adjust angle for distance above
+                    )     
             ), 
         Commands.none(), driveSubsystem::hasInitalizedFieldPose));
     }
@@ -116,7 +115,6 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
             armSubsystem.setAngleCommand(Arm.intakeAngle),
             intakeShooterSubsystem.brakeShooter(),
             intakeShooterSubsystem.intakeCommand()
-            // intakeShooterSubsystem.intakeFirstTryCommand(0.5, Seconds.of(0.02))
                 .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1)),
             armSubsystem.stowCommand(),
             turnToSpeaker(driveSubsystem),
@@ -156,12 +154,12 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
     /**
      * Faces the robot's shooter towards its ALLIANCE WALL.
      */
-    // private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
-    //     return driveSubsystem.turnCommand(() -> {
-    //         if (!driveSubsystem.hasInitalizedFieldPose()) driveSubsystem.getFieldAngle();
-    //         return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
-    //     });
-    // }
+    private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
+        return driveSubsystem.turnCommand(() -> {
+            if (!driveSubsystem.hasInitalizedFieldPose()) driveSubsystem.getFieldAngle();
+            return (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0);
+        });
+    }
 
     /**
      * Faces the robot towards the angle it was at when AUTO started.

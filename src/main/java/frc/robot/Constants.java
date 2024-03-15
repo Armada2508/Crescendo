@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
@@ -15,7 +16,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 
@@ -48,7 +48,7 @@ import frc.robot.lib.drive.DriveCommand.DriveConfig;
 public class Constants {
 
     public static final double degreesPerRotation = 360;
-    public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Bumper width is 3 in.
+    public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Robot is 29 in. by 29 in. Bumper width is 3 in.
     public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
     public static final Velocity<Velocity<Distance>> FeetPerSecondSquared = FeetPerSecond.per(Second);
 
@@ -74,10 +74,6 @@ public class Constants {
         public static final DifferentialDriveKinematics diffKinematics = new DifferentialDriveKinematics(trackWidth); 
         public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.074181).withKV(0.10813).withKA(0.018);
         public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.15188).withKV(0.10875).withKA(0.019);
-        // Motion Magic, not using currently
-        public static final Slot1Configs motionMagicConfig = new Slot1Configs().withKP(0).withKD(0).withKS(0).withKV(0); //! Have to tune for these values
-        public static final int motionMagicSlot = 1;
-        public static final Measure<Distance> driveDeadband = Inches.of(0.1); //! Tune this
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.15).withKD(0.008);
         public static final Measure<Angle> turnDeadband = Degrees.of(2);
@@ -137,6 +133,7 @@ public class Constants {
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
+        public static final Measure<Velocity<Angle>> minShooterVelocityBraking = Rotations.per(Minute).of(3000);
         // Higher arm angle = lower note height
         /**INPUT: Distance (in.), OUTPUT: Angle (deg.) */ 
         private static final InterpolatingDoubleTreeMap interpolatingShootingMap = new InterpolatingDoubleTreeMap(); 
@@ -175,7 +172,7 @@ public class Constants {
         public static final Measure<Voltage> climbPower = Volts.of(12);
         public static final Measure<Angle> minPosition = Rotations.of(0);
         public static final Measure<Angle> maxPosition = Rotations.of(295);
-         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
+        public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
             .withForwardSoftLimitThreshold(maxPosition.in(Rotations)).withReverseSoftLimitThreshold(minPosition.in(Rotations));
     }
@@ -186,7 +183,7 @@ public class Constants {
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25); // Also kind of like the height of the field
-        private static final Measure<Distance> subWooferLength = Inches.of(36.125);
+        public static final Measure<Distance> subWooferLength = Inches.of(36.125);
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
         public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
         // Position of the front of the SUBWOOFER, facing the SPEAKER
@@ -195,11 +192,11 @@ public class Constants {
         // Position in front of the AMP, facing the AMP  
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
-        // Blue Notes
+        // Blue Notes, plus fudge for AUTO
         public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625 + 8)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
-        // Red Notes
+        // Red Notes, plus fudge for AUTO
         public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(275.625 + 8)); 
         public static final Translation2d redMidNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(218.625)); 
         public static final Translation2d redLowNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(161.625)); 
@@ -221,52 +218,38 @@ public class Constants {
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
         public static final Measure<Distance> chainToStage = Inches.of(16.625);
-        public static final Measure<Distance> chainClimbOffset = chainToStage.minus(Inches.of(-12)); // 4 
+        public static final Measure<Distance> chainClimbOffset = chainToStage.plus(Inches.of(-4));
 
         public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainClimbOffset), Meters.of(4.11), blueStageCenter.getRotation());
-
         public static final Translation2d leftChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageLeft.getRotation());
         public static final Pose2d blueChainLeft = new Pose2d(blueStageLeft.getTranslation().plus(leftChainVector), blueStageLeft.getRotation());
-
         public static final Translation2d rightChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageRight.getRotation());
         public static final Pose2d blueChainRight = new Pose2d(blueStageRight.getTranslation().plus(rightChainVector), blueStageRight.getRotation());
-
         public static final Pose2d redChainCenter = new Pose2d(Field.fieldLength.in(Meters) - blueChainCenter.getX(), blueChainCenter.getY(), Rotation2d.fromDegrees(180));
         public static final Pose2d redChainLeft = new Pose2d(Field.fieldLength.in(Meters) - blueChainRight.getX(), blueChainRight.getY(), Rotation2d.fromDegrees(-60));
         public static final Pose2d redChainRight = new Pose2d(Field.fieldLength.in(Meters) - blueChainLeft.getX(), blueChainLeft.getY(), Rotation2d.fromDegrees(60));
  
         public static Pose2d getNearestChain(Pose2d pose) {
+            Pose2d chainCenter = blueChainCenter;
+            Pose2d chainLeft = blueChainLeft;
+            Pose2d chainRight = blueChainRight;
             if (Robot.onRedAlliance()) {
-                double centerDistance = pose.getTranslation().getDistance(redChainCenter.getTranslation());
-                double leftDistance = pose.getTranslation().getDistance(redChainLeft.getTranslation());
-                double rightDistance = pose.getTranslation().getDistance(redChainRight.getTranslation());
-                
-                double distance = Math.min(Math.min(leftDistance, rightDistance), centerDistance);
-
-                if (distance == centerDistance) {
-                    return redChainCenter;
-                } 
-                else if (distance == leftDistance) {
-                    return redChainLeft;
-                }
-                else {
-                    return redChainRight;
-                }
+                chainCenter = redChainCenter;
+                chainLeft = redChainLeft;
+                chainRight = redChainRight;
             }
-            double centerDistance = pose.getTranslation().getDistance(blueChainCenter.getTranslation());
-            double leftDistance = pose.getTranslation().getDistance(blueChainLeft.getTranslation());
-            double rightDistance = pose.getTranslation().getDistance(blueChainRight.getTranslation());
-            
-            double distance = Math.min(Math.min(leftDistance, rightDistance), centerDistance);
-
-            if (distance == centerDistance) {
-                return blueChainCenter;
+            double distanceCenter = pose.getTranslation().getDistance(chainCenter.getTranslation());
+            double distanceLeft = pose.getTranslation().getDistance(chainLeft.getTranslation());
+            double distanceRight = pose.getTranslation().getDistance(chainRight.getTranslation());
+            double distance = Math.min(Math.min(distanceLeft, distanceRight), distanceCenter);
+            if (distance == distanceCenter) {
+                return chainCenter;
             } 
-            else if (distance == leftDistance) {
-                return blueChainLeft;
+            else if (distance == distanceLeft) {
+                return chainLeft;
             }
             else {
-                return blueChainRight;
+                return chainRight;
             }
         }
     }

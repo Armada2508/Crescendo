@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Minute;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -14,8 +17,9 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
+import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Time;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -73,7 +77,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
             var request = new StaticBrake();
             talonShooter.setControl(request);
             talonFollowShooter.setControl(request);
-        });
+        })
+        .withName("Brake Shooter");
     }
 
     public boolean isSensorTripped() {
@@ -81,9 +86,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command intakeCommand() {
-        return Commands.waitUntil(() -> getShooterRPM() < 3000) //! Magic Number
+        return Commands.waitUntil(() -> getShooterRPM().lte(Shooter.minShooterVelocityBraking)) 
         .andThen(brakeShooter())
-        // Commands.waitUntil(() -> talonShooter.getVelocity().getValueAsDouble() < 5)
         .andThen(setIntakeSpeed(Intake.intakeSpeed))
         .andThen(Commands.waitUntil(this::isSensorTripped))
         .andThen(Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)))
@@ -94,15 +98,6 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .finallyDo(this::stop)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Intake");
-    }
-
-    public Command intakeFirstTryCommand(double speed, Measure<Time> seconds) {
-        return setIntakeSpeed(speed)
-        .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(Commands.waitSeconds(seconds.in(Seconds)))
-        .finallyDo(this::stop)
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        .withName("Intake First Try");
     }
 
     public Command spinUpFlywheelCommand() {
@@ -131,8 +126,8 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         .withName("Shoot Amp");
     }
 
-    public double getShooterRPM() {
-        return talonShooter.getVelocity().getValueAsDouble() * 60;
+    public Measure<Velocity<Angle>> getShooterRPM() {
+        return RotationsPerSecond.of(talonShooter.getVelocity().getValueAsDouble());
     }
 
     @Override
@@ -140,7 +135,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         map.put("TOF Status", timeOfFlight.getStatus().toString());
         map.put("TOF Distance MM", timeOfFlight.getRange());
         map.put("Is TOF Tripped", isSensorTripped());
-        map.put("Shooter RPM", getShooterRPM());
+        map.put("Shooter RPM", getShooterRPM().in(Rotations.per(Minute)));
         map.put("Shooter Follower RPM", talonFollowShooter.getVelocity().getValueAsDouble() * 60);
         map.put("Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
         NTLogger.putTalonLog(talonIntake, "Intake TalonFX", map);

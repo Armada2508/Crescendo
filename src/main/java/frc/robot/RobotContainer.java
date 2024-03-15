@@ -64,7 +64,6 @@ public class RobotContainer {
         //! Need to add climber reset to autos
         joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
-        // joystick.onTrue(4, armSubsystem.setAngleCommand(Degrees.of(47.75)).andThen(intakeShooterSubsystem.shootSpeakerCommand()).andThen(armSubsystem.stowCommand()));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, armSubsystem.stowCommand());
@@ -73,13 +72,11 @@ public class RobotContainer {
         joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
-        // joystick.onTrue(12, Routines.centerOnChain(driveSubsystem));
-        joystick.onTrue(12, Routines.extendClimber(armSubsystem, climbSubsystem).alongWith(Commands.waitSeconds(2).andThen(Routines.centerOnChain(driveSubsystem))));
+        joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
     }
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
-        // return driveSubsystem.driveDistanceVelCommand(Feet.of(6), FeetPerSecond.of(2.5));
     } 
 
 }
