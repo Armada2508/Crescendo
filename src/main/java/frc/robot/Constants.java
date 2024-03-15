@@ -2,6 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -156,14 +157,6 @@ public class Constants {
         }
     }
 
-    public static class Vision {
-        public static final String tagCameraName = "OV9281";
-        public static final String noteCameraName = "LifeCam";
-        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
-        public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-        public static final Matrix<N3, N1> poseStdDevs = VecBuilder.fill(0.5, 0.5, 1); // Meters, Meters, Radians
-    }
-
     public static class Climb { 
         public static final int climbID = 10;
         public static final int climbFollowID = 11;
@@ -175,6 +168,17 @@ public class Constants {
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
             .withForwardSoftLimitThreshold(maxPosition.in(Rotations)).withReverseSoftLimitThreshold(minPosition.in(Rotations));
+    }
+
+    public static class Vision {
+        public static final String tagCameraName = "OV9281";
+        public static final String noteCameraName = "LifeCam";
+        public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
+        public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+        public static final Measure<Distance> maxAvgTagDistance = Feet.of(15);
+         // Meters, Meters, Radians
+        public static final Matrix<N3, N1> defaultVisionStdDevs = VecBuilder.fill(0.5, 0.5, 1); 
+        public static final Matrix<N3, N1> untrustedVisionStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     }
 
     public static class Field {

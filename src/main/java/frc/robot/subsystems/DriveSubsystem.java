@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.photonvision.EstimatedRobotPose;
-
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -55,6 +53,7 @@ import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
+import frc.robot.subsystems.VisionSubsystem.VisionResult;
 
 public class DriveSubsystem extends SubsystemBase implements Loggable {
 
@@ -64,11 +63,11 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talonRFollow = new TalonFX(Drive.RFollowerID);
     private final PigeonIMU pigeon = new PigeonIMU(Drive.pigeonID); 
     private final PIDController turnPIDController = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD);
-    private final VisionSubsystem vision; 
+    private final Supplier<Optional<VisionResult>> visionSupplier; 
     private DifferentialDrivePoseEstimator poseEstimator;
 
-    public DriveSubsystem(VisionSubsystem vision) {
-        this.vision = vision;
+    public DriveSubsystem(Supplier<Optional<VisionResult>> visionSupplier) {
+        this.visionSupplier = visionSupplier;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         turnPIDController.setSetpoint(0);
         configTalons();
@@ -79,20 +78,17 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     @Override
     public void periodic() {
         if (pigeon.getState() != PigeonState.Ready) return;
-        Optional<EstimatedRobotPose> visionPose = vision.getEstimatedGlobalPose();
+        Optional<VisionResult> result = visionSupplier.get();
         if (poseEstimator == null) { // Initialize field pose
-            if (visionPose.isPresent()) {
-                poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), visionPose.get().estimatedPose.toPose2d());
-            }
+            result.ifPresent((r) -> {
+                poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), r.estimatedRobotPose());
+            });
             return;
         }
         poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
-        if (visionPose.isPresent()) {
-            Pose2d pose = visionPose.get().estimatedPose.toPose2d();
-            if (vision.isValidPose(pose)) {
-                poseEstimator.addVisionMeasurement(pose, visionPose.get().timestampSeconds, vision.getEstimationStdDevs(pose));
-            }
-        }   
+        result.ifPresent((r) -> {
+            poseEstimator.addVisionMeasurement(r.estimatedRobotPose(), r.timestampSeconds(), r.visionMeasurementStdDevs());
+        });
         Field.simulatedField.setRobotPose(getFieldPose());
     }
 

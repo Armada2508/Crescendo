@@ -27,7 +27,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
     private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
-    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem);
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
     private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
