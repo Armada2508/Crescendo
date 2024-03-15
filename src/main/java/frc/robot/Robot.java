@@ -23,11 +23,11 @@ public class Robot extends TimedRobot implements Loggable {
     @Override
     public void robotInit() {
         DriverStation.silenceJoystickConnectionWarning(true);
-        // NTLogger.initDataLogger();
-        SmartDashboard.putData(Field.simulatedField);
+        NTLogger.initDataLogger();
         NTLogger.register(this);
         robotContainer = new RobotContainer();
         addPeriodic(NTLogger::log, kDefaultPeriod);
+        SmartDashboard.putData(Field.simulatedField);
     }
     
     @Override
@@ -51,11 +51,6 @@ public class Robot extends TimedRobot implements Loggable {
     }
 
     @Override
-    public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Battery Voltage (V)", RobotController.getBatteryVoltage());
         map.put("RIO Voltage (V)", RobotController.getInputVoltage());
@@ -70,29 +65,5 @@ public class Robot extends TimedRobot implements Loggable {
 
     @Override
     public void simulationPeriodic() {}
-    
-    @Override
-    public void disabledPeriodic() {}
-    
-    @Override
-    public void disabledExit() {}
-    
-    @Override
-    public void autonomousPeriodic() {}
-    
-    @Override
-    public void autonomousExit() {}
-    
-    @Override
-    public void teleopPeriodic() {}
-    
-    @Override
-    public void teleopExit() {}
-    
-    @Override
-    public void testPeriodic() {}
-    
-    @Override
-    public void testExit() {}
     
 }

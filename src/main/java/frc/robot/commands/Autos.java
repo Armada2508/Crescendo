@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.FeetPerSecondSquared;
 import static frc.robot.commands.Routines.groundIntake;
 import static frc.robot.commands.Routines.scoreSpeakerBase;
@@ -25,7 +24,7 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 
-public class Autos { //! There's a lot of magic numbers in these Autos, that's just the nature of this class I think
+public class Autos {
 
     private Autos() {}
 
@@ -35,7 +34,8 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
      * Leaves the ROBOT STARTING ZONE.
      */
     public static Command leaveStartingZone(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        return armSubsystem.initArmAngle() 
+        return armSubsystem.stowCommand()
+        .andThen(armSubsystem.initArmAngle())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
     }
 
@@ -43,45 +43,60 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
      * Scores a preloaded NOTE at the SUBWOOFER and leaves the ROBOT STARTING ZONE.
      */
     public static Command scoreSpeakerBaseAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return armSubsystem.initArmAngle()
+        return armSubsystem.stowCommand()
+        .andThen(armSubsystem.initArmAngle())
         .andThen(scoreSpeakerBase(armSubsystem, intakeShooterSubsystem))
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5)));
+    }
+
+    public static Command scoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return armSubsystem.stowCommand()
+        .andThen(armSubsystem.initArmAngle())
+        .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
     }
     
     /**
      * Scores a preloaded NOTE into the SPEAKER using vision, faces the ALLIANCE WALL, and leaves the ROBOT STARTING ZONE.
      */
     public static Command scoreSpeakerAndLeave(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return armSubsystem.initArmAngle()
+        return armSubsystem.stowCommand() 
+        .andThen(armSubsystem.initArmAngle())
         .andThen(turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem))
         .andThen(faceShooterTowardsWall(driveSubsystem))
-        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5))); 
+        .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(2.5))); 
     }
 
     /**
      * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE and scores it in the SPEAKER.
      */
     public static Command scoreSpeakerTwiceBase(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem, ClimbSubsystem climbSubsystem) {
-        return //climbSubsystem.resetClimberCommand()
+        return 
         (Commands.either(
             armSubsystem.stowCommand()
             .andThen(
                 scoreSpeakerBase(armSubsystem, intakeShooterSubsystem),
-                driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(6)) // Drive back to get second note
+                Commands.waitSeconds(1),
+                intakeShooterSubsystem.brakeShooter(),
+                driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(7.5), FeetPerSecond.of(7.5), FeetPerSecondSquared.of(12)) // Drive back to get second note
                     .alongWith(
                         armSubsystem.initArmAngle(),
-                        intakeShooterSubsystem.intakeFirstTryCommand(0.5, Seconds.of(0.04)),
-                        Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.5)
+                        intakeShooterSubsystem.intakeCommand(),
+                        Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.25)
                     )
             )
             .andThen(
                 armSubsystem.stowCommand()
                     .alongWith( // Drive forward to score second note
                         driveSubsystem.setVelocityCommand(FeetPerSecond.of(-4), FeetPerSecond.of(-4))
-                        .andThen(Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().lte(Inches.of(88))).finallyDo(driveSubsystem::stop))
+                        .andThen(Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().lte(Inches.of(60))).finallyDo(driveSubsystem::stop))
                     ), 
                 Commands.waitSeconds(0.25), // Pause for drivetrain to settle
-                turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem) // Shoot second note
+                turnToSpeaker(driveSubsystem),
+                armSubsystem.setAngleCommand(Degrees.of(41.5)) // Manually adjust angle for distance above
+                    .alongWith(intakeShooterSubsystem.spinUpFlywheelCommand())
+                    .andThen(
+                        intakeShooterSubsystem.releaseNoteCommand()
+                    )     
             ), 
         Commands.none(), driveSubsystem::hasInitalizedFieldPose));
     }
@@ -94,16 +109,17 @@ public class Autos { //! There's a lot of magic numbers in these Autos, that's j
     public static Command scoreSpeakerThrice(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem, ClimbSubsystem climbSubsystem) {
         return scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem)
         .andThen( 
-            faceNote(Note.TOP, driveSubsystem),
+            faceNote(Note.TOP, driveSubsystem).withTimeout(1.5),
             Commands.waitSeconds(0.25),
-            driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(5.25), FeetPerSecond.of(5.25), FeetPerSecondSquared.of(5.25)), // Drive back to pick up third note
+            driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(10)), // Drive back to pick up third note
             armSubsystem.setAngleCommand(Arm.intakeAngle),
-            intakeShooterSubsystem.intakeFirstTryCommand(0.5, Seconds.of(0.04))
-                .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.25)),
+            intakeShooterSubsystem.brakeShooter(),
+            intakeShooterSubsystem.intakeCommand()
+                .alongWith(Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1)),
             armSubsystem.stowCommand(),
             turnToSpeaker(driveSubsystem),
-            driveSubsystem.setVelocityCommand(FeetPerSecond.of(-3.75), FeetPerSecond.of(-3.75)), // Drive forward to score third note
-            Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().lte(Inches.of(89))).finallyDo(driveSubsystem::stop),
+            driveSubsystem.setVelocityCommand(FeetPerSecond.of(-6), FeetPerSecond.of(-6)), // Drive forward to score third note
+            Commands.waitUntil(() -> driveSubsystem.getDistanceToSpeaker().lte(Inches.of(78))).finallyDo(driveSubsystem::stop),
             Commands.waitSeconds(0.25), // Pause for drivetrain to settle
             turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem) // Shoot third note
         );

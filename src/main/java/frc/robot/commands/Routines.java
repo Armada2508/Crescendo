@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -34,7 +36,7 @@ public class Routines {
 
     public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle)
-        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false))
+        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, ArrayList::new, false))
         .andThen(intakeSubsystem.shootAmpCommand())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
         .andThen(armSubsystem.stowCommand())
@@ -51,8 +53,8 @@ public class Routines {
         .withName("Score Speaker Base");
     }
 
-    public static Command scoreSpeakerVision(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem))
+    public static Command scoreSpeaker(Measure<Angle> angle, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return armSubsystem.setAngleCommand(angle)
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
@@ -79,6 +81,7 @@ public class Routines {
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
+            Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
             armSubsystem.stowCommand()
         )
@@ -93,8 +96,12 @@ public class Routines {
         return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
     }
 
-    public static Command centerOnChain(DriveSubsystem driveSubsystem) {
-        return driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), true);
+    public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
+        return extendClimber(armSubsystem, climbSubsystem)
+        .alongWith(
+            Commands.waitSeconds(2)
+            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true)
+        ));
     }
 
     public static Measure<Angle> getPredictedShootAngle(DriveSubsystem driveSubsystem) {
