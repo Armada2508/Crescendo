@@ -114,6 +114,27 @@ public class Constants {
         public static final double defaultJerk = 0;
     }
 
+    public class Wrist {
+        public static final int ID = 13;
+        public static final int followID = 14;
+        public static final int boreEncoderID = 1;
+        public static final double gearRatio = 50;
+        public static final Measure<Angle> stowAngle = Degrees.of(0); //! Tune this value
+        public static final Measure<Angle> intakeShootAngle = Degrees.of(0); //! Tune this value
+        public static final Measure<Angle> maxAngle = Degrees.of(0); //! Tune this value
+        public static final Measure<Angle> minAngle = Degrees.of(0); //! Tune this value
+        public static final Measure<Angle> angleDeadband = Degrees.of(0); //! Tune this value
+        public static final Measure<Angle> encoderOffset = Degrees.of(0); //! Tune this value (if needed)
+        public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(maxAngle.in(Rotations)).withReverseSoftLimitThreshold(minAngle.in(Rotations));
+        public static final double defaultVelocity = 100;
+        public static final double defaultAcceleration = 100;
+        public static final double defaultJerk = 0;
+        public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(0).withKD(0); //! Find this
+        public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
+    }
+
     public static class Intake {
         public static final int intakeID = 6;
         public static final int timeOfFlightID = 0;
