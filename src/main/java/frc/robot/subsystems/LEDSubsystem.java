@@ -11,7 +11,7 @@ import frc.robot.lib.led.LEDStrip;
 
 public class LEDSubsystem {
 
-    private static LEDStrip led = new LEDStrip(LED.ledPort, 10); //placeholder numbers, led on the bottom of the robot
+    private static LEDStrip led = new LEDStrip(LED.ledPort, 10); //placeholder number, led on the bottom of the robot
     
     public LEDSubsystem() {
 
@@ -27,34 +27,32 @@ public class LEDSubsystem {
         if ((!DriverStation.isAutonomous() == true) && DriverStation.isTeleop() == true) { //match is not in autonomous and is in teleop
             teleopStart();
         }
-        if (matchTime.gte(Seconds.of(130))) {
+        if (matchTime.gte(Seconds.of(130)) && DriverStation.isTeleop() == true) {
             endgameStart();
         }
     }
 
     public void autoStart() {
         Color color = new Color(255, 255, 255);
-        led.set(color); //sets led to red
+        led.band(3, color);
     }
 
     public void teleopStart() {
         Color color = new Color(255, 0, 255);
-        led.set(color); //sets led to red
+        led.band(3, color);
     }
 
     public void endgameStart() {
         Color color = new Color(0, 0, 255);
-        led.set(color); //sets led to red
-    }
-
-    public void pulse() {
-        
+        led.band(3, color);
     }
 
     public void intakeNoteAnimation(IntakeShooterSubsystem intakeShooterSubsystem) {
-        Color color = new Color(255, 0, 0);
+        Color red = new Color(255, 0, 0);
+        Color green = new Color(0, 255, 0);
         if (intakeShooterSubsystem.isSensorTripped() == true) {
-            led.set(color);
+            led.pulseCommand(red, green, 0.5)
+            .end(true);
         }
     }
 }
