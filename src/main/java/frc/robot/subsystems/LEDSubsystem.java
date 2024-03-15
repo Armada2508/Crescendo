@@ -6,10 +6,11 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LED;
 import frc.robot.lib.led.LEDStrip;
 
-public class LEDSubsystem {
+public class LEDSubsystem extends SubsystemBase {
 
     private static LEDStrip led = new LEDStrip(LED.ledPort, 10); //placeholder number, led on the bottom of the robot
     
