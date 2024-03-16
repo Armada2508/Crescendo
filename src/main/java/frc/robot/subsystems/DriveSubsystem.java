@@ -262,6 +262,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         }
         map.put("Robot Angle", getFieldAngle().in(Degrees));
         map.put("Target Angle", targetAngle.in(Degrees));
+        map.put("Turn PID Position Error", turnPIDController.getPositionError());
+        map.put("Turn PID Velocity Error", turnPIDController.getVelocityError());
         map.put("Distance to Speaker", Field.getDistanceToSpeaker(getFieldPose()).in(Inches));
         map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);

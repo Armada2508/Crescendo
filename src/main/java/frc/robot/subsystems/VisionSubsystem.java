@@ -117,6 +117,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             double distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
             map.put("Best Tag ID", id);
             map.put("Best Tag Distance (in.)", distance);
+            map.put("Num Tags Seen", tagResult.getTargets().size());
         }
         if (canSeeNote()) {
             var target = noteResult.getBestTarget();
