@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -20,45 +21,64 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 public class Routines {
 
     private Routines() {}
    
-    public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.intakeAngle)
+    public static Command enterStow(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem) {
+        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update degree
+        .andThen(wristSubsystem.stowCommand())
+        .andThen(armSubsystem.stowCommand())
+        .withName("Stow arm and wrist");
+    }
+
+    public static Command leaveStow(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem) {
+        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update degree
+        .andThen(wristSubsystem.setAngleCommand(Degrees.of(0))) //! Update degree
+        .withName("Leave stow");
+    }
+
+    public static Command groundIntake(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem,IntakeShooterSubsystem intakeSubsystem) {
+        return leaveStow(armSubsystem, wristSubsystem) 
+        .andThen(armSubsystem.setAngleCommand(Arm.intakeAngle))
         .andThen(
             armSubsystem.runOnce(armSubsystem::stop),
             intakeSubsystem.intakeCommand()
-            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(armSubsystem.stowCommand()))
+            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped)
+            .andThen(enterStow(armSubsystem, wristSubsystem)))
         ).withName("Intake Ground");
     }
 
-    public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.ampAngle)
+    public static Command scoreAmp(DriveSubsystem driveSubsystem, WristSubsystem wristSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
+        return leaveStow(armSubsystem, wristSubsystem) 
+        .andThen(armSubsystem.setAngleCommand(Arm.ampAngle))
         .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, ArrayList::new, false))
         .andThen(intakeSubsystem.shootAmpCommand())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
-        .andThen(armSubsystem.stowCommand())
+        .andThen(enterStow(armSubsystem, wristSubsystem))
         .withName("Score Amp");
     }
 
-    public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.speakerAngle)
+    public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return leaveStow(armSubsystem, wristSubsystem)
+        .andThen(armSubsystem.setAngleCommand(Arm.speakerAngle))
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            armSubsystem.stowCommand()
+            enterStow(armSubsystem, wristSubsystem) //? maybe move out of andThen()
         )    
         .withName("Score Speaker Base");
     }
 
-    public static Command scoreSpeaker(Measure<Angle> angle, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return armSubsystem.setAngleCommand(angle)
+    public static Command scoreSpeaker(Measure<Angle> angle, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return leaveStow(armSubsystem, wristSubsystem)
+        .andThen(armSubsystem.setAngleCommand(angle))
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            armSubsystem.stowCommand()
+            enterStow(armSubsystem, wristSubsystem) //? maybe move out of andThen()
         )    
         .withName("Score Speaker Vision");
     }
@@ -74,30 +94,31 @@ public class Routines {
         .withName("Turn to Speaker");
     }
 
-    public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return turnToSpeaker(driveSubsystem)
-        .alongWith(
+    public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, IntakeShooterSubsystem shooterSubsystem) {
+        return turnToSpeaker(driveSubsystem) //! double check this is good
+        .alongWith(leaveStow(armSubsystem, wristSubsystem))
+        .andThen(
             armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem)),
             shooterSubsystem.spinUpFlywheelCommand()
         )
         .andThen(
             Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
-            armSubsystem.stowCommand()
+            enterStow(armSubsystem, wristSubsystem) //? maybe move out of andThen()
         )
         .withName("Aim and Score Speaker");
     }
 
-    public static Command extendClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
-        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower));
+    public static Command extendClimber(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, ClimbSubsystem climbSubsystem) {
+        return enterStow(armSubsystem, wristSubsystem).andThen(climbSubsystem.setVoltage(Climb.climbPower));
     }
 
-    public static Command retractClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
-        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
+    public static Command retractClimber(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, ClimbSubsystem climbSubsystem) {
+        return enterStow(armSubsystem, wristSubsystem).andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
     }
 
-    public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
-        return extendClimber(armSubsystem, climbSubsystem)
+    public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, ClimbSubsystem climbSubsystem) {
+        return extendClimber(armSubsystem, wristSubsystem, climbSubsystem)
         .alongWith(
             Commands.waitSeconds(2)
             .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true)

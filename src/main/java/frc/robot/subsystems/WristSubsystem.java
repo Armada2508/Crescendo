@@ -102,6 +102,10 @@ public class WristSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(angle, Wrist.defaultVelocity, Wrist.defaultAcceleration, Wrist.defaultJerk);
     }
 
+    public Command stowCommand() {
+        return setAngleCommand(Wrist.stowAngle).withName("Stow");
+    }
+
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Wrist Angle", getAngle().in(Degrees));

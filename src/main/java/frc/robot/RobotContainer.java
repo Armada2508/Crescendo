@@ -21,6 +21,7 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 public class RobotContainer {
 
@@ -31,6 +32,7 @@ public class RobotContainer {
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
     private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
+    private final WristSubsystem wristSubsystem = new WristSubsystem();
 
     public RobotContainer() {
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
@@ -51,28 +53,28 @@ public class RobotContainer {
 
     private void addAutos() {
         autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
-        autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.setDefaultOption("Score Speaker", Autos.scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
-        autoChooser.addOption("Score Speaker Twice Side", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, intakeShooterSubsystem));
-        autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem));
+        autoChooser.addOption("Score Speaker Base and Leave", Autos.scoreSpeakerBaseAndLeave(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem));
+        autoChooser.setDefaultOption("Score Speaker", Autos.scoreSpeaker(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem, climbSubsystem));
+        autoChooser.addOption("Score Speaker Twice Side", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem));
+        autoChooser.addOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem, climbSubsystem));
         SmartDashboard.putData(autoChooser);
     }
     
     private void configureBindings() {
         //! Need to add climber reset to autos
-        joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, wristSubsystem, intakeShooterSubsystem));
         joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
         joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
         joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, armSubsystem.stowCommand());
-        joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(11, Routines.groundIntake(armSubsystem, wristSubsystem, intakeShooterSubsystem));
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
-        joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.whileTrue(4, Routines.retractClimber(armSubsystem, wristSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.whileTrue(6, Routines.extendClimber(armSubsystem, wristSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
-        joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
+        joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, wristSubsystem, climbSubsystem));
     }
 
     public Command getAutonomousCommand() {
