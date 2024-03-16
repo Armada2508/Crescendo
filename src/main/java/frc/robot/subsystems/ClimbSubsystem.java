@@ -51,10 +51,11 @@ public class ClimbSubsystem extends SubsystemBase  implements Loggable{
             talonFollow.setControl(new VoltageOut(Climb.zeroVoltage.in(Volts)));
             talon.setControl(new VoltageOut(Climb.zeroVoltage.in(Volts)));
         })
-        .andThen(Commands.waitSeconds(0.5)) // Filter out inital current spike
-        .andThen(Commands.waitUntil(() -> Math.abs(talon.getTorqueCurrent().getValueAsDouble()) > Climb.zeroTripTorqueCurrent.in(Amps))).andThen(this::stop)
-        .alongWith(
-            Commands.waitUntil(() -> Math.abs(talonFollow.getTorqueCurrent().getValueAsDouble()) > Climb.zeroTripTorqueCurrent.in(Amps)).andThen(() -> talonFollow.setControl(new NeutralOut()))
+        .andThen(
+            Commands.waitSeconds(0.5), // Filter out inital current spike
+            Commands.waitUntil(() -> Math.abs(talon.getTorqueCurrent().getValueAsDouble()) > Climb.zeroTripTorqueCurrent.in(Amps)).finallyDo(this::stop)
+                .alongWith(Commands.waitUntil(() -> Math.abs(talonFollow.getTorqueCurrent().getValueAsDouble()) > Climb.zeroTripTorqueCurrent.in(Amps))
+                .finallyDo(() -> talonFollow.setControl(new NeutralOut())))
         )
         .finallyDo(() -> {
             talonFollow.setControl(new StrictFollower(talon.getDeviceID()));
