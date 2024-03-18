@@ -41,10 +41,10 @@ import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
+import frc.robot.Robot;
 import frc.robot.commands.NewDriveCommand;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.logging.Loggable;
@@ -68,7 +68,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     public DriveSubsystem(Supplier<Optional<VisionResult>> visionSupplier) {
         this.visionSupplier = visionSupplier;
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
-        turnPIDController.setSetpoint(0);
+        turnPIDController.enableContinuousInput(Field.minAngle.in(Degrees), Field.maxAngle.in(Degrees));
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonL, talonR);
@@ -177,31 +177,22 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return runOnce(() -> { // Capture state
             targetAngle = angle.get();
             turnPIDController.reset();
+            turnPIDController.setSetpoint(targetAngle.in(Degrees));
         }) 
         .andThen(runEnd(() -> {
             if (!hasInitalizedFieldPose()) {
                 turnPIDController.calculate(turnPIDController.getSetpoint());
                 return;
             }
-            double volts = turnPIDController.calculate(shortestPath(getFieldAngle().in(Degrees), targetAngle.in(Degrees)));
+            double volts = turnPIDController.calculate(getFieldAngle().in(Degrees));
             double voltsL = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
             double voltsR = volts + Drive.minTurnPIDVoltage.in(Volts) * Math.signum(volts);
             voltsL = MathUtil.clamp(voltsL, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
             voltsR = MathUtil.clamp(voltsR, -Drive.maxTurnPIDVoltage.in(Volts), Drive.maxTurnPIDVoltage.in(Volts));
-            setVoltage(Volts.of(voltsL), Volts.of(-voltsR));
+            setVoltage(Volts.of(-voltsL), Volts.of(voltsR));
         }, this::stop))
         .until(turnPIDController::atSetpoint)
         .withName("Turn");
-    }
-
-    /**
-     * Returns the shorter error considering a wrap around bounded [-180, 180] degrees, CCW positive
-     */
-    private double shortestPath(double current, double target) {
-        double error1 = Util.boundedAngleDegrees(Constants.degreesPerRotation + target - current);
-        double error2 = Util.boundedAngleDegrees(target - current);
-        if (Math.abs(error1) < Math.abs(error2)) return error1;
-        return error2;
     }
 
     public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
@@ -265,6 +256,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         map.put("Turn PID Position Error", turnPIDController.getPositionError());
         map.put("Turn PID Velocity Error", turnPIDController.getVelocityError());
         map.put("Distance to Speaker", Field.getDistanceToSpeaker(getFieldPose()).in(Inches));
+        Translation2d speaker = Field.blueSpeakerPosition;
+        if (Robot.onRedAlliance()) speaker = Field.redSpeakerPosition;
+        map.put("Lateral Speaker Distance", getFieldPose().getY() - speaker.getY());
         map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);

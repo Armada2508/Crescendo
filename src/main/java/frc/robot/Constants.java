@@ -76,7 +76,7 @@ public class Constants {
         public static final Slot0Configs velocityLeftConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.074181).withKV(0.10813).withKA(0.018);
         public static final Slot0Configs velocityRightConfig = new Slot0Configs().withKP(0.3).withKD(0).withKS(0.15188).withKV(0.10875).withKA(0.019);
         // RoboRIO PID auto turning
-        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.15).withKD(0.008);
+        public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.009);
         public static final Measure<Angle> turnDeadband = Degrees.of(2);
         public static final Measure<Voltage> minTurnPIDVoltage = Volts.of(0.3); 
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
@@ -209,6 +209,8 @@ public class Constants {
         public static final Field2d simulatedField = new Field2d();
         public static final Measure<Distance> fieldLength = Inches.of(651.25);
         public static final Measure<Distance> fieldWidth = Inches.of(323.25); // Also kind of like the height of the field
+        public static final Measure<Angle> minAngle = Degrees.of(-180);
+        public static final Measure<Angle> maxAngle = Degrees.of(180);
         public static final Measure<Distance> subWooferLength = Inches.of(36.125);
         public static final Translation2d blueSpeakerPosition = new Translation2d(Meters.of(0), Meters.of(5.55));
         public static final Translation2d redSpeakerPosition = new Translation2d(Field.fieldLength, Meters.of(5.55));    
