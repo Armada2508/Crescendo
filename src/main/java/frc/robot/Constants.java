@@ -196,9 +196,10 @@ public class Constants {
         public static final String noteCameraName = "LifeCam";
         public static final Transform3d robotToCamera = new Transform3d(Units.inchesToMeters(-11.5), Units.inchesToMeters(5.5), 0, new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
         public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-        public static final Measure<Distance> maxAvgTagDistance = Feet.of(15);
-         // Meters, Meters, Radians
-        public static final Matrix<N3, N1> defaultVisionStdDevs = VecBuilder.fill(0.5, 0.5, 1); 
+        public static final Measure<Distance> maxAvgTagDistance = Feet.of(13);
+        // Meters, Meters, Radians
+        public static final Matrix<N3, N1> singleTagVisionStdDevs = VecBuilder.fill(4, 4, 8); 
+        public static final Matrix<N3, N1> multiTagVisionStdDevs = VecBuilder.fill(0.5, 0.5, 1); 
         public static final Matrix<N3, N1> untrustedVisionStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     }
 

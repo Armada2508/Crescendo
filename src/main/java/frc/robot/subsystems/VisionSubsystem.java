@@ -99,14 +99,18 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         for (var target : tagResult.getTargets()) {
             var tagPose = photonPoseEstimator.getFieldTags().getTagPose(target.getFiducialId());
             if (tagPose.isEmpty()) continue;
+            numTags++;
             avgDistMeters += tagPose.get().toPose2d().getTranslation().getDistance(estimatedPose.getTranslation());
         }
-        if (numTags == 0) return Vision.defaultVisionStdDevs;
+        if (numTags == 0) return Vision.singleTagVisionStdDevs;
         avgDistMeters /= numTags;
         lastAvgDist = Meters.of(avgDistMeters); // Logging
-        System.out.println(avgDistMeters);
+
+        if (numTags > 1) return Vision.multiTagVisionStdDevs;
+
         if (avgDistMeters > Vision.maxAvgTagDistance.in(Meters)) return Vision.untrustedVisionStdDevs;
-        return Vision.defaultVisionStdDevs;
+
+        return Vision.singleTagVisionStdDevs;
     }
 
     @Override
