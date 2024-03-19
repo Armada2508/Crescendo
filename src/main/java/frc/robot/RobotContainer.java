@@ -4,6 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
+import frc.robot.Constants.Field;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
@@ -71,7 +80,11 @@ public class RobotContainer {
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
         joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
-
+        
+        Measure<Distance> waypointOffset = Feet.of(3); 
+        Pose2d chain = Field.getNearestChain(driveSubsystem.getFieldPose());
+        Pose2d waypoint = chain.plus(new Transform2d(waypointOffset.in(Meters), 0, Rotation2d.fromDegrees(0)));
+        Field.simulatedField.getObject("waypoint").setPose(waypoint);
         // Testing shooter map
         // joystick.onTrue(6, armSubsystem.setAngleCommand(armSubsystem.getAngle().plus(Degrees.of(0.5))));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(armSubsystem.getAngle().minus(Degrees.of(0.5))));

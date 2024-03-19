@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -195,14 +196,31 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         .withName("Turn");
     }
 
-    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
+    /**
+     * Clamped Cubic Spline 
+     */
+    public Trajectory generateTrajectory(Pose2d targetPose, boolean driveBackwards) {
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig.setReversed(driveBackwards));
+        Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
+        return trajectory;
+    }
+
+    /**
+     * Quintic Hermite Spline 
+     */
+    public Trajectory generateTrajectory(List<Pose2d> waypoints, boolean driveBackwards) {
+        waypoints.add(0, getFieldPose());
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, Drive.trajectoryConfig.setReversed(driveBackwards));
+        Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
+        return trajectory;
+    }
+
+    public Command trajectoryToPoseCommand(Supplier<Trajectory> trajectory) {
         return Commands.defer(() -> {
             if (!hasInitalizedFieldPose()) {
                 return Commands.none();
             }
-            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), waypoints.get(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
-            Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
-            return FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
+            return FollowTrajectory.getCommandTalon(trajectory.get(), Field.origin, this::getFieldPose, this::setVelocity, this);
         }, Set.of(this));
     }
 

@@ -128,6 +128,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             map.put("Note Yaw", target.getYaw());
             map.put("Note Pitch", target.getPitch());
         }
+        latestEstimatedPose.ifPresent(p -> map.put("Estimated Pose Z (in.)", Units.metersToInches(p.estimatedPose.getZ())));
         map.put("Camera Connected Note", tagCam.isConnected());
         map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());

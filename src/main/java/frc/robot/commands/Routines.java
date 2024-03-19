@@ -4,8 +4,6 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
-import java.util.ArrayList;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -36,7 +34,7 @@ public class Routines {
 
     public static Command scoreAmp(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem) {
         return armSubsystem.setAngleCommand(Arm.ampAngle)
-        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, ArrayList::new, false))
+        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> driveSubsystem.generateTrajectory(Robot.onRedAlliance() ? Field.redAmpScorePos : Field.blueAmpScorePos, false)))
         .andThen(intakeSubsystem.shootAmpCommand())
         .andThen(driveSubsystem.driveDistanceVelCommand(Feet.of(1), FeetPerSecond.of(-2)))
         .andThen(armSubsystem.stowCommand())
@@ -101,8 +99,8 @@ public class Routines {
     public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
         return extendClimber(armSubsystem, climbSubsystem)
         .alongWith(
-            Commands.waitSeconds(2)
-            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> Field.getNearestChain(driveSubsystem.getFieldPose()), ArrayList::new, true)
+            Commands.waitSeconds(2) //! implement quintic spline with waypoint
+            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> driveSubsystem.generateTrajectory(Field.getNearestChain(driveSubsystem.getFieldPose()), true))
         ));
     }
 
