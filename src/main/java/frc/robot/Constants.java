@@ -135,6 +135,10 @@ public class Constants {
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
     }
 
+    public static class Pneumatics {
+
+    }
+
     public static class Intake {
         public static final int intakeID = 6;
         public static final int timeOfFlightID = 0;
