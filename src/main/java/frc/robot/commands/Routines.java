@@ -16,6 +16,7 @@ import frc.robot.Constants.Arm;
 import frc.robot.Constants.Climb;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
+import frc.robot.Constants.Wrist;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
@@ -28,16 +29,36 @@ public class Routines {
     private Routines() {}
    
     public static Command enterStow(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem) {
-        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update degree
-        .andThen(wristSubsystem.stowCommand())
-        .andThen(armSubsystem.stowCommand())
-        .withName("Stow arm and wrist");
+        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update Degree
+        .alongWith(
+            Commands.waitUntil(() -> armSubsystem.getAngle().gte(Degrees.of(0))) //! Update Degree
+            .andThen(wristSubsystem.stowCommand())
+        )
+        .alongWith(
+            Commands.waitUntil(() -> wristSubsystem.getAngle().gte(Wrist.stowAngle))
+            .andThen(armSubsystem.stowCommand())
+        );
+
+        // return armSubsystem.setAngleCommand(Degrees.of(0)) //~ Update degree
+        // .andThen(wristSubsystem.stowCommand())
+        // .andThen(armSubsystem.stowCommand())
+        // .withName("Stow arm and wrist");
     }
 
     public static Command leaveStow(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem) {
-        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update degree
-        .andThen(wristSubsystem.setAngleCommand(Degrees.of(0))) //! Update degree
-        .withName("Leave stow");
+        return armSubsystem.setAngleCommand(Degrees.of(0)).asProxy() //! Update degree
+        .alongWith(
+            Commands.waitUntil(() -> armSubsystem.getAngle().gte(Degrees.of(0))) //! Update degree
+            .andThen(wristSubsystem.setAngleCommand(Wrist.intakeShootAngle))
+        )
+        .alongWith(
+            Commands.waitUntil(() -> wristSubsystem.getAngle().gte(Wrist.intakeShootAngle))
+            .andThen(armSubsystem.setAngleCommand(Degrees.of(0))) //! Update degree
+        ); 
+       
+        // return armSubsystem.setAngleCommand(Degrees.of(0)) //~ Update degree
+        // .andThen(wristSubsystem.setAngleCommand(Degrees.of(0))) //~ Update degree
+        // .withName("Leave stow");
     }
 
     public static Command groundIntake(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem,IntakeShooterSubsystem intakeSubsystem) {
@@ -95,7 +116,7 @@ public class Routines {
     }
 
     public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, WristSubsystem wristSubsystem, IntakeShooterSubsystem shooterSubsystem) {
-        return turnToSpeaker(driveSubsystem) //! double check this is good
+        return turnToSpeaker(driveSubsystem)
         .alongWith(leaveStow(armSubsystem, wristSubsystem))
         .andThen(
             armSubsystem.setAngleCommand(() -> getPredictedShootAngle(driveSubsystem)),
