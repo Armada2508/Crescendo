@@ -36,17 +36,12 @@ public class Routines {
         )
         .alongWith(
             Commands.waitUntil(() -> wristSubsystem.getAngle().gte(Wrist.stowAngle))
-            .andThen(armSubsystem.stowCommand())
+            .andThen(armSubsystem.stowCommand()).asProxy()
         );
-
-        // return armSubsystem.setAngleCommand(Degrees.of(0)) //~ Update degree
-        // .andThen(wristSubsystem.stowCommand())
-        // .andThen(armSubsystem.stowCommand())
-        // .withName("Stow arm and wrist");
     }
 
     public static Command leaveStow(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem) {
-        return armSubsystem.setAngleCommand(Degrees.of(0)).asProxy() //! Update degree
+        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Update degree
         .alongWith(
             Commands.waitUntil(() -> armSubsystem.getAngle().gte(Degrees.of(0))) //! Update degree
             .andThen(wristSubsystem.setAngleCommand(Wrist.intakeShootAngle))
@@ -55,10 +50,6 @@ public class Routines {
             Commands.waitUntil(() -> wristSubsystem.getAngle().gte(Wrist.intakeShootAngle))
             .andThen(armSubsystem.setAngleCommand(Degrees.of(0))) //! Update degree
         ); 
-       
-        // return armSubsystem.setAngleCommand(Degrees.of(0)) //~ Update degree
-        // .andThen(wristSubsystem.setAngleCommand(Degrees.of(0))) //~ Update degree
-        // .withName("Leave stow");
     }
 
     public static Command groundIntake(ArmSubsystem armSubsystem, WristSubsystem wristSubsystem,IntakeShooterSubsystem intakeSubsystem) {
