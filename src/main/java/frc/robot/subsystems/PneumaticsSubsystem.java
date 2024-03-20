@@ -3,61 +3,47 @@ package frc.robot.subsystems;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.lib.logging.Loggable;
-import frc.robot.lib.pneumatics.Piston;
 
 public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
-    private final Piston leftPiston = new Piston(0, 0);
-    private final Piston rightPiston = new Piston(0, 0);
-    private final Compressor leftCompressor = new Compressor(PneumaticsModuleType.CTREPCM); //add id's for compressors
-    private final Compressor rightCompressor = new Compressor(PneumaticsModuleType.CTREPCM); 
+
+    private final DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 0); //! find channels
+    private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM); //add id's for compressors
 
     private PneumaticsSubsystem() {}
 
     public final Command extend() {
-        return runOnce(() -> {
-            leftPiston.extend();
-            rightPiston.extend();
-        });
+        if (doubleSolenoid.get() == Value.kReverse) {
+            return runOnce(() -> doubleSolenoid.toggle());
+        } return runOnce(() -> {}); //! fix / verify
     }
 
-    public final Command retract(Piston piston) {
-        return runOnce(() -> {
-            leftPiston.retract();
-            rightPiston.retract();
-        });
+    public final Command retract() {
+        if (doubleSolenoid.get() == Value.kForward) {
+            return runOnce(() -> doubleSolenoid.toggle());
+        } return runOnce(() -> {}); //! fix / verify
     }
 
     public final Command enableCompressor() {
-        return runOnce(() -> {
-            leftCompressor.enableDigital();
-            rightCompressor.enableDigital();
-        });
+        return runOnce(() -> compressor.enableDigital());
         
     }
 
     public final Command disableCompressor() {
-        return runOnce(() -> {
-            leftCompressor.disable();
-            rightCompressor.disable();
-        });
-    }
-
-    private final boolean getStatus (Piston piston) { //! Fix, return true if piston is extended, false if retracted
-        return false;
+        return runOnce(() -> compressor.disable());
     }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Left piston status", getStatus(leftPiston));
-        map.put("Right piston status", getStatus(rightPiston));
-        map.put("Left compressor status", leftCompressor.isEnabled());
-        map.put("Right compressor status", rightCompressor.isEnabled());
-        map.put("Left compressor pressure", leftCompressor.getPressure());
-        map.put("Right compressor pressure", rightCompressor.getPressure());
+        map.put("Solenoid status", doubleSolenoid.get());
+        map.put("Compressor status", compressor.isEnabled());
+        map.put("Compressor pressure", compressor.getPressure());
+        map.put("Compressor Current", compressor.getCurrent());
         return map;
     }
 }
