@@ -138,8 +138,8 @@ public class Constants {
     public static class Pneumatics {
         public static final int leftForwardChannel = 0;
         public static final int leftReverseChannel = 1;
-        public static final int rightForwardChannel = 0;
-        public static final int rightReverseChannel = 1;
+        public static final int rightForwardChannel = 2;
+        public static final int rightReverseChannel = 3;
     }
 
     public static class Intake {
