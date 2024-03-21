@@ -57,6 +57,7 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
         map.put("Right Piston Extended", rightPiston.isExtended());
         map.put("Compressor Status", compressor.isEnabled());
         map.put("Compressor Current (A)", compressor.getCurrent());
+        map.put("Pressure Switch Tripped", compressor.getPressureSwitchValue());
         return map;
     }
 }
