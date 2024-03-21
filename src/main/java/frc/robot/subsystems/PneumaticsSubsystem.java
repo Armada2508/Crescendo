@@ -11,12 +11,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Pneumatics;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
+import frc.robot.lib.pneumatics.Piston;
 
 public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
 
-    private final DoubleSolenoid leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.leftForwardChannel, Pneumatics.leftReverseChannel);
-    private final DoubleSolenoid rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.rightForwardChannel, Pneumatics.rightReverseChannel);
     private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+    private final DoubleSolenoid leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.leftForwardChannel, Pneumatics.leftReverseChannel);
+    // private final DoubleSolenoid rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.rightForwardChannel, Pneumatics.rightReverseChannel);
+    private final Piston rightPiston = new Piston(Pneumatics.rightReverseChannel, Pneumatics.rightForwardChannel);
 
     public PneumaticsSubsystem() {
         NTLogger.register(this);
@@ -26,14 +28,16 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     public Command extend() {
         return runOnce(() -> {
             leftPiston.set(Value.kForward);
-            rightPiston.set(Value.kForward);
+            // rightPiston.set(Value.kForward);
+            rightPiston.extend();
         });
     }
 
     public Command retract() {
         return runOnce(() -> {
             leftPiston.set(Value.kReverse);
-            rightPiston.set(Value.kReverse);
+            // rightPiston.set(Value.kReverse);
+            rightPiston.retract();
         });
     }
 
@@ -49,7 +53,8 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Left Piston Status", leftPiston.get());
-        map.put("Right Piston Status", rightPiston.get());
+        // map.put("Right Piston Status", rightPiston.get());
+        map.put("Right Piston Extended", rightPiston.isExtended());
         map.put("Compressor Status", compressor.isEnabled());
         map.put("Compressor Current (A)", compressor.getCurrent());
         return map;
