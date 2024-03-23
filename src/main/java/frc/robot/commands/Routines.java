@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -20,6 +21,7 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class Routines {
 
@@ -106,4 +108,7 @@ public class Routines {
         ));
     }
 
+    public static Command turnToNote(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
+        return driveSubsystem.turnCommand(() -> Degrees.of(visionSubsystem.getNoteYaw()));
+    }
 }

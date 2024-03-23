@@ -128,7 +128,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             map.put("Note Yaw", target.getYaw());
             map.put("Note Pitch", target.getPitch());
         }
-        map.put("Camera Connected Note", tagCam.isConnected());
+        map.put("Camera Connected Note", noteCam.isConnected());
         map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());
         map.put("Can See Note", canSeeNote());
