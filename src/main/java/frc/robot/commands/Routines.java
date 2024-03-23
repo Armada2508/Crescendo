@@ -2,10 +2,18 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -99,9 +107,14 @@ public class Routines {
     public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
         return extendClimber(armSubsystem, climbSubsystem)
         .alongWith(
-            Commands.waitSeconds(2) //! implement quintic spline with waypoint
-            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> driveSubsystem.generateTrajectory(Field.getNearestChain(driveSubsystem.getFieldPose()), true))
-        ));
+            Commands.waitSeconds(2) 
+            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
+                Measure<Distance> waypointOffset = Feet.of(3.5); 
+                Pose2d endPose = Field.getNearestChain(driveSubsystem.getFieldPose());
+                Pose2d waypoint = endPose.plus(new Transform2d(waypointOffset, Meters.of(0), Rotation2d.fromDegrees(0)));
+                return driveSubsystem.generateTrajectory(new ArrayList<>(List.of(waypoint, endPose)), true); // List.of is immutable
+            }))
+        );
     }
 
 }

@@ -201,17 +201,18 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      */
     public Trajectory generateTrajectory(Pose2d targetPose, boolean driveBackwards) {
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig.setReversed(driveBackwards));
-        Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
+        Field.simulatedField.getObject("Cubic Trajectory").setTrajectory(trajectory);
         return trajectory;
     }
 
     /**
      * Quintic Hermite Spline 
+     * @param waypoints list of waypoints including end pose, doesn't include start pose
      */
     public Trajectory generateTrajectory(List<Pose2d> waypoints, boolean driveBackwards) {
         waypoints.add(0, getFieldPose());
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, Drive.trajectoryConfig.setReversed(driveBackwards));
-        Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
+        Field.simulatedField.getObject("Quintic Trajectory").setTrajectory(trajectory);
         return trajectory;
     }
 
