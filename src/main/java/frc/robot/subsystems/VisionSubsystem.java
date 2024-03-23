@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -10,10 +11,13 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -77,6 +81,12 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return 0;
     }
 
+    public double getNoteDistance() {
+        double camToNoteDistance = PhotonUtils.calculateDistanceToTargetMeters(Vision.robotToCamera.getY(), 0, Math.toRadians(0), Math.toRadians(getNotePitch())); //! verify to make sure this works
+        double camHeight = Vision.robotToCamera.getY();
+        return Math.abs(Math.sqrt(Math.pow(camToNoteDistance, 2) - Math.pow(camHeight, 2)));
+    }
+
     public Optional<VisionResult> getVisionResult() {
         if (latestEstimatedPose.isEmpty()) return Optional.empty();
         Pose2d robotPose = latestEstimatedPose.get().estimatedPose.toPose2d();
@@ -111,6 +121,13 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         if (avgDistMeters > Vision.maxAvgTagDistance.in(Meters)) return Vision.untrustedVisionStdDevs;
 
         return Vision.singleTagVisionStdDevs;
+    }
+
+    public Pose2d getNotePose() {
+        if (!canSeeNote()) return null;
+        Translation2d noteTranslation = new Translation2d(getNoteDistance(), getNoteYaw());
+        Rotation2d noteRotations = new Rotation2d(Degrees.of(getNoteYaw()));
+        return new Pose2d(noteTranslation, noteRotations);
     }
 
     @Override

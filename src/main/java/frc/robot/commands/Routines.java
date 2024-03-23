@@ -109,6 +109,6 @@ public class Routines {
     }
 
     public static Command turnToNote(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
-        return driveSubsystem.turnCommand(() -> Degrees.of(visionSubsystem.getNoteYaw()));
+        return driveSubsystem.turnCommand(() -> Degrees.of(visionSubsystem.getNotePose().getRotation().getDegrees()));
     }
 }
