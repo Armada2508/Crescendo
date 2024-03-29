@@ -66,6 +66,8 @@ public class RobotContainer {
 
         joystick.onTrue(5, pneumaticsSubsystem.extend());
         joystick.onTrue(3, pneumaticsSubsystem.retract());
+        joystick.onTrue(4, pneumaticsSubsystem.setFan(false));
+        joystick.onTrue(6, pneumaticsSubsystem.setFan(true));
         // Testing shooter map
         // joystick.onTrue(6, armSubsystem.setAngleCommand(armSubsystem.getAngle().plus(Degrees.of(0.5))));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(armSubsystem.getAngle().minus(Degrees.of(0.5))));

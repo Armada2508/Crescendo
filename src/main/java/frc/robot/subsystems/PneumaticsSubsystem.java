@@ -45,12 +45,18 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     }
 
     public Command enableCompressor() {
-        return runOnce(() -> compressor.enableDigital());
-        
+        return runOnce(() -> {
+            compressor.enableDigital();
+            compressorFan.set(true); //! remove me!
+        });
     }
 
     public Command disableCompressor() {
         return runOnce(() -> compressor.disable());
+    }
+
+    public Command setFan(boolean val) { //! remove me!
+        return runOnce(() ->compressorFan.set(val));
     }
 
     @Override
