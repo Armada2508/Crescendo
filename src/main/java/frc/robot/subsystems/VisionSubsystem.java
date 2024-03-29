@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -16,8 +15,6 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -123,12 +120,12 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return Vision.singleTagVisionStdDevs;
     }
 
-    public Pose2d getNotePose() {
-        if (!canSeeNote()) return null;
-        Translation2d noteTranslation = new Translation2d(getNoteDistance(), getNoteYaw());
-        Rotation2d noteRotations = new Rotation2d(Degrees.of(getNoteYaw()));
-        return new Pose2d(noteTranslation, noteRotations);
-    }
+    // public Pose2d getNotePose() {
+    //     if (!canSeeNote()) return null;
+    //     Translation2d noteTranslation = new Translation2d(getNoteDistance(), getNoteYaw());
+    //     Rotation2d noteRotations = new Rotation2d(Degrees.of(getNoteYaw()));
+    //     return new Pose2d(noteTranslation, noteRotations);
+    // }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {

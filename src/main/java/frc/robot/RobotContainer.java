@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
@@ -59,13 +60,14 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(3, Routines.turnToNote(driveSubsystem, visionSubsystem));
+        joystick.onTrue(4, Routines.turnToNote(driveSubsystem, visionSubsystem));
+        joystick.onTrue(1, Routines.scoreSpeaker(Arm.speakerBaseAngle, driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
-        // joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
-        // joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
+        joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());
+        joystick.onTrue(7, armSubsystem.setAngleCommand(Arm.ampAngle));
         joystick.onTrue(9, armSubsystem.stowCommand());
-        // joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+        joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
         // joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         // joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));

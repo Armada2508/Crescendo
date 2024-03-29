@@ -17,6 +17,7 @@ import frc.robot.Constants.Climb;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
+import frc.robot.lib.util.Util;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -109,6 +110,12 @@ public class Routines {
     }
 
     public static Command turnToNote(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
-        return driveSubsystem.turnCommand(() -> Degrees.of(visionSubsystem.getNotePose().getRotation().getDegrees()));
+        return driveSubsystem.turnCommand(() ->
+            Degrees.of(
+                Util.boundedAngleDegrees(
+                    visionSubsystem.getNoteYaw() + driveSubsystem.getFieldAngle().in(Degrees)
+                )
+            )
+        );
     }
 }
