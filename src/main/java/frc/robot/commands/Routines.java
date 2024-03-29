@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Volts;
 import java.util.ArrayList;
 import java.util.Set;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Climb;
+import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
@@ -123,14 +125,23 @@ public class Routines {
     }
 
     public static Command pickupNoteCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        return Commands.defer(() -> {
-            Measure<Voltage> leftVolts = Volts.of(0);
-            Measure<Voltage> rightVolts = Volts.of(0);
+        //? === put into another method ?? ===
+        PIDController pid = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD); //! Find
+        pid.setSetpoint(0);
+        double voltageChange = 0.1; //! Tune
+        //? ==================================
+        return 
+        Commands.runOnce(() -> pid.reset())
+        .andThen(Commands.defer(() -> {
+            double volts = pid.calculate(visionSubsystem.getNoteYaw()); 
+            Measure<Voltage> leftVolts = Volts.of(-volts + voltageChange);
+            Measure<Voltage> rightVolts = Volts.of(volts + voltageChange);
             return driveSubsystem.setVoltageCommand(leftVolts, rightVolts);
         }, Set.of(driveSubsystem))
         .repeatedly()
         .until(intakeShooterSubsystem::isSensorTripped)
-        .alongWith(Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+        .alongWith(Routines.groundIntake(armSubsystem, intakeShooterSubsystem)))
+        .finallyDo(() -> pid.close());
     }
 
 }
