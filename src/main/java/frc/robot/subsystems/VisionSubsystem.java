@@ -64,9 +64,12 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return noteResult.hasTargets();
     }
 
+    /**
+     * @return note yaw CCW+
+     */
     public double getNoteYaw() {
         if (canSeeNote()) {
-            return noteResult.getBestTarget().getYaw();
+            return -noteResult.getBestTarget().getYaw();
         }
         return 0;
     }

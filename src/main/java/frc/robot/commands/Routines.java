@@ -4,12 +4,15 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
@@ -118,4 +121,16 @@ public class Routines {
             )
         );
     }
+
+    public static Command pickupNoteCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+        return Commands.defer(() -> {
+            Measure<Voltage> leftVolts = Volts.of(0);
+            Measure<Voltage> rightVolts = Volts.of(0);
+            return driveSubsystem.setVoltageCommand(leftVolts, rightVolts);
+        }, Set.of(driveSubsystem))
+        .repeatedly()
+        .until(intakeShooterSubsystem::isSensorTripped)
+        .alongWith(Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
+    }
+
 }

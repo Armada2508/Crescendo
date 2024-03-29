@@ -140,6 +140,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
     }
 
+    public Command setVoltageCommand(Measure<Voltage> leftVoltage, Measure<Voltage> rightVoltage) {
+        return runOnce(() -> setVoltage(leftVoltage, rightVoltage));
+    }
+
     public Command setVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity) {
         return runOnce(() -> {
             setVelocity(leftVelocity.in(MetersPerSecond), rightVelocity.in(MetersPerSecond));
@@ -260,6 +264,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         if (Robot.onRedAlliance()) speaker = Field.redSpeakerPosition;
         map.put("Lateral Speaker Distance", getFieldPose().getY() - speaker.getY());
         map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
+        map.put("Has Initalized Pose", hasInitalizedFieldPose());
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);
