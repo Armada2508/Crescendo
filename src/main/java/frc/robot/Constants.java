@@ -140,6 +140,7 @@ public class Constants {
         public static final int leftReverseChannel = 1;
         public static final int rightReverseChannel = 2;
         public static final int rightForwardChannel = 3;
+        public static final int compressorFanChannel = 4;
     }
 
     public static class Intake {

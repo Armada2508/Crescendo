@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Pneumatics;
@@ -19,10 +20,12 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     private final DoubleSolenoid leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.leftForwardChannel, Pneumatics.leftReverseChannel);
     // private final DoubleSolenoid rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.rightForwardChannel, Pneumatics.rightReverseChannel);
     private final Piston rightPiston = new Piston(Pneumatics.rightReverseChannel, Pneumatics.rightForwardChannel);
+    private final Solenoid compressorFan = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.compressorFanChannel);
 
     public PneumaticsSubsystem() {
         NTLogger.register(this);
         compressor.disable();
+        compressorFan.set(true);
     }
 
     public Command extend() {
