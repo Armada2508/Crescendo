@@ -6,14 +6,15 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
+
+import java.util.List;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -33,8 +34,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Current;
@@ -83,8 +82,6 @@ public class Constants {
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
-        public static final TrajectoryConfig trajectoryConfig = 
-            new TrajectoryConfig(MetersPerSecond.of(2.0), MetersPerSecondPerSecond.of(1.0)).setKinematics(diffKinematics).addConstraint(new CentripetalAccelerationConstraint(1));
     }
 
     public static class Arm {
@@ -138,7 +135,8 @@ public class Constants {
         public static final int shooterFollowerID = 8;
         public static final double indexSpeed = 1;
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
-        public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
+        public static final Measure<Voltage> speakerShootPower = Volts.of(9);
+        public static final Measure<Velocity<Angle>> speakerShootVelocity = RotationsPerSecond.of(4800); // Velocity the shooter gets to at 9 volts 
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
@@ -188,6 +186,7 @@ public class Constants {
         public static final Matrix<N3, N1> singleTagVisionStdDevs = VecBuilder.fill(4, 4, 8); 
         public static final Matrix<N3, N1> multiTagVisionStdDevs = VecBuilder.fill(0.5, 0.5, 1); 
         public static final Matrix<N3, N1> untrustedVisionStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        public static final List<Integer> stageTags = List.of(11, 12, 13, 14, 15, 16);
     }
 
     public static class Field {
@@ -233,7 +232,7 @@ public class Constants {
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
         public static final Measure<Distance> chainToStage = Inches.of(16.625);
-        public static final Measure<Distance> chainClimbOffset = chainToStage.plus(Inches.of(-4));
+        public static final Measure<Distance> chainClimbOffset = chainToStage.plus(Inches.of(-6));
 
         public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainClimbOffset), Meters.of(4.11), blueStageCenter.getRotation());
         public static final Translation2d leftChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageLeft.getRotation());
