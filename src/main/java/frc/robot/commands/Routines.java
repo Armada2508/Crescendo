@@ -94,11 +94,11 @@ public class Routines {
     }
 
     public static Command extendClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
-        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower));
+        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower)).withName("Extend Climber");
     }
 
     public static Command retractClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
-        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate()));
+        return armSubsystem.stowCommand().andThen(climbSubsystem.setVoltage(Climb.climbPower.negate())).withName("Retract Climber");
     }
 
     public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem) {
@@ -124,7 +124,8 @@ public class Routines {
                 points.add(endPose);
                 return driveSubsystem.generateTrajectory(points, config); 
             }))
-        );
+        )
+        .withName("Go to Climb");
     }
 
 }
