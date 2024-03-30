@@ -84,7 +84,7 @@ public class Constants {
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
         public static final TrajectoryConfig trajectoryConfig = 
-            new TrajectoryConfig(MetersPerSecond.of(2.0), MetersPerSecondPerSecond.of(1.0)).setKinematics(diffKinematics).addConstraint(new CentripetalAccelerationConstraint(1));
+            new TrajectoryConfig(MetersPerSecond.of(2.0), MetersPerSecondPerSecond.of(1.0)).setKinematics(diffKinematics).addConstraint(new CentripetalAccelerationConstraint(0.25));
     }
 
     public static class Arm {
@@ -246,7 +246,7 @@ public class Constants {
         public static final Pose2d blueStageLeft = new Pose2d(Meters.of(4.64), Meters.of(4.5), Rotation2d.fromDegrees(120));
         public static final Pose2d blueStageRight = new Pose2d(Meters.of(4.64), Meters.of(3.71), Rotation2d.fromDegrees(-120));
         public static final Measure<Distance> chainToStage = Inches.of(16.625);
-        public static final Measure<Distance> chainClimbOffset = chainToStage.plus(Inches.of(-4));
+        public static final Measure<Distance> chainClimbOffset = chainToStage.plus(Inches.of(-6));
 
         public static final Pose2d blueChainCenter = new Pose2d(Meters.of(5.32).plus(chainClimbOffset), Meters.of(4.11), blueStageCenter.getRotation());
         public static final Translation2d leftChainVector = new Translation2d(chainClimbOffset, Meters.of(0)).rotateBy(blueStageLeft.getRotation());

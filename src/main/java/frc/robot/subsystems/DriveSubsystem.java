@@ -279,6 +279,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         if (Robot.onRedAlliance()) speaker = Field.redSpeakerPosition;
         map.put("Lateral Speaker Distance", getFieldPose().getY() - speaker.getY());
         map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
+        map.put("Has Initalized Pose", hasInitalizedFieldPose());
         NTLogger.putTalonLog(talonL, "Left TalonFX", map);
         NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
         NTLogger.putTalonLog(talonR, "Right TalonFX", map);

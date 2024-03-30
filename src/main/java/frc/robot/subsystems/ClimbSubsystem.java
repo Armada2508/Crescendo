@@ -22,7 +22,7 @@ import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
 
-public class ClimbSubsystem extends SubsystemBase  implements Loggable{
+public class ClimbSubsystem extends SubsystemBase implements Loggable {
 
     private final TalonFX talon = new TalonFX(Climb.climbID);
     private final TalonFX talonFollow = new TalonFX(Climb.climbFollowID);

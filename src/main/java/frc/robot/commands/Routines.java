@@ -109,10 +109,18 @@ public class Routines {
         .alongWith(
             Commands.waitSeconds(2) 
             .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
-                Measure<Distance> waypointOffset = Feet.of(3.5); 
-                Pose2d endPose = Field.getNearestChain(driveSubsystem.getFieldPose());
+                List<Pose2d> points = new ArrayList<>();
+                Measure<Distance> waypointOffset = Feet.of(3.5);
+                Pose2d fieldPose = driveSubsystem.getFieldPose(); 
+                Pose2d endPose = Field.getNearestChain(fieldPose);
                 Pose2d waypoint = endPose.plus(new Transform2d(waypointOffset, Meters.of(0), Rotation2d.fromDegrees(0)));
-                return driveSubsystem.generateTrajectory(new ArrayList<>(List.of(waypoint, endPose)), true); // List.of is immutable
+                
+                // if (driveSubsystem.getFieldPose().getTranslation().getDistance(endPose.getTranslation()) > waypointOffset.in(Meters)) {
+                //     points.add(waypoint);
+                // }
+
+                points.add(endPose);
+                return driveSubsystem.generateTrajectory(points, true); 
             }))
         );
     }
