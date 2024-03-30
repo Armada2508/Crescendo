@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -147,7 +148,8 @@ public class Constants {
         public static final int shooterFollowerID = 8;
         public static final double indexSpeed = 1;
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
-        public static final Measure<Voltage> speakerShootPower = Volts.of(9); 
+        public static final Measure<Voltage> speakerShootPower = Volts.of(9);
+        public static final Measure<Velocity<Angle>> speakerShootVelocity = RotationsPerSecond.of(4800); // Velocity the shooter gets to at 9 volts 
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 

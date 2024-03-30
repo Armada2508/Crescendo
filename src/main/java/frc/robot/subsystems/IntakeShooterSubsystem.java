@@ -103,7 +103,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public Command spinUpFlywheelCommand() {
         return setShooterVoltage(Shooter.speakerShootPower)
-        .andThen(Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds))) //! Optimize this, it doesn't normally take this long
+        .andThen(
+            Commands.waitUntil(() -> getShooterRPM().gte(Shooter.speakerShootVelocity))
+            .withTimeout(Shooter.flywheelChargeTime.in(Seconds))
+        ) 
         .withName("Spin Up Flywheel");
     }
 
