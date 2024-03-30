@@ -3,8 +3,6 @@ package frc.robot.subsystems;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,8 +15,7 @@ import frc.robot.lib.pneumatics.Piston;
 public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
 
     private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-    private final DoubleSolenoid leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.leftForwardChannel, Pneumatics.leftReverseChannel);
-    // private final DoubleSolenoid rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Pneumatics.rightForwardChannel, Pneumatics.rightReverseChannel);
+    private final Piston leftPiston = new Piston(Pneumatics.leftForwardChannel, Pneumatics.rightReverseChannel);
     private final Piston rightPiston = new Piston(Pneumatics.rightReverseChannel, Pneumatics.rightForwardChannel);
     private final Solenoid compressorFan = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.compressorFanChannel);
 
@@ -30,16 +27,14 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
 
     public Command extend() {
         return runOnce(() -> {
-            leftPiston.set(Value.kForward);
-            // rightPiston.set(Value.kForward);
+            leftPiston.extend();
             rightPiston.extend();
         });
     }
 
     public Command retract() {
         return runOnce(() -> {
-            leftPiston.set(Value.kReverse);
-            // rightPiston.set(Value.kReverse);
+            leftPiston.retract();
             rightPiston.retract();
         });
     }
@@ -47,7 +42,6 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     public Command enableCompressor() {
         return runOnce(() -> {
             compressor.enableDigital();
-            compressorFan.set(true); //! remove me!
         });
     }
 
@@ -55,14 +49,13 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
         return runOnce(() -> compressor.disable());
     }
 
-    public Command setFan(boolean val) { //! remove me!
-        return runOnce(() ->compressorFan.set(val));
+    public boolean isExtended() {
+        return leftPiston.isExtended() && rightPiston.isExtended();
     }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Left Piston Status", leftPiston.get());
-        // map.put("Right Piston Status", rightPiston.get());
+        map.put("Left Piston Extended", leftPiston.isExtended());
         map.put("Right Piston Extended", rightPiston.isExtended());
         map.put("Compressor Status", compressor.isEnabled());
         map.put("Compressor Current (A)", compressor.getCurrent());

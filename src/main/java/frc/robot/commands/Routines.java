@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -28,26 +27,26 @@ public class Routines {
     private Routines() {}
 
     public static Command enterStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Calibrate degrees, make constant
+        return Commands.either(armSubsystem.setAngleCommand(Arm.retractAngle), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.retractAngle) && pneumaticsSubsystem.isExtended())
         .andThen(pneumaticsSubsystem.retract())
-        .andThen(armSubsystem.setAngleCommand(Arm.stowAngle));
+        .andThen(armSubsystem.setAngleCommand(Arm.stowAngle))
+        .withName("Enter Full Stow");
     }
 
     public static Command leaveStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return armSubsystem.setAngleCommand(Degrees.of(0)) //! Calibrate degrees, make constant
+        return armSubsystem.setAngleCommand(Arm.retractAngle)
         .andThen(pneumaticsSubsystem.extend())
-        .andThen(armSubsystem.setAngleCommand(Arm.intakeAngle));
+        .withName("Leave Full Stow");
     }
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return leaveStow(armSubsystem, null)
+        return leaveStow(armSubsystem, pneumaticsSubsystem)
         .andThen(armSubsystem.setAngleCommand(Arm.intakeAngle))
         .andThen(
             armSubsystem.runOnce(armSubsystem::stop),
             intakeSubsystem.intakeCommand()
-            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(armSubsystem.stowCommand()))
+            .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(enterStow(armSubsystem, pneumaticsSubsystem)))
         )
-        .andThen(enterStow(armSubsystem, pneumaticsSubsystem))
         .withName("Intake Ground");
     }
 
@@ -68,9 +67,8 @@ public class Routines {
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            armSubsystem.stowCommand()
+            enterStow(armSubsystem, pneumaticsSubsystem)
         )
-        .andThen(enterStow(armSubsystem, pneumaticsSubsystem))    
         .withName("Score Speaker Base");
     }
 
@@ -80,7 +78,7 @@ public class Routines {
         .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
             shooterSubsystem.releaseNoteCommand(),
-            armSubsystem.stowCommand()
+            enterStow(armSubsystem, pneumaticsSubsystem)
         )    
         .withName("Score Speaker Vision");
     }
@@ -97,15 +95,15 @@ public class Routines {
 
     public static Command turnAndScoreSpeaker(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return turnToSpeaker(driveSubsystem)
-        .andThen(leaveStow(armSubsystem, pneumaticsSubsystem))
         .alongWith(
+            leaveStow(armSubsystem, pneumaticsSubsystem),
+            shooterSubsystem.spinUpFlywheelCommand()
+        )
+        .andThen(
             armSubsystem.setAngleCommand(() -> {
                 if (!driveSubsystem.hasInitalizedFieldPose()) return Arm.speakerBaseAngle;
                 return Shooter.getPredictedAngle(Field.getDistanceToSpeaker(driveSubsystem.getFieldPose()));
             }),
-            shooterSubsystem.spinUpFlywheelCommand()
-        )
-        .andThen(
             Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
             enterStow(armSubsystem, pneumaticsSubsystem)

@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -75,16 +74,11 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         talon.getConfigurator().apply(config);
     }
 
-    private double getFeedforward() {
-        // Not currently used.
-        return Arm.gravityFeedforward * Math.cos(getAngle().in(Radians));
-    }
-
     private void setAngle(Measure<Angle> angle) {
         if (!initalizedArm) return;
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
-        MotionMagicVoltage request = new MotionMagicVoltage(angle.in(Rotations)).withFeedForward(getFeedforward());
+        MotionMagicVoltage request = new MotionMagicVoltage(angle.in(Rotations));
         talon.setControl(request);
     }
 
