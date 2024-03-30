@@ -4,14 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.Meters;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Drive;
-import frc.robot.Constants.Field;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
@@ -79,20 +70,8 @@ public class RobotContainer {
         joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.onTrue(10, climbSubsystem.resetClimberCommand());
-        // joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
-        joystick.onTrue(12, Commands.runOnce(() -> {
-            Measure<Distance> waypointOffset = Feet.of(3.5);
-            // Pose2d fieldPose = driveSubsystem.getFieldPose(); 
-            Pose2d fieldPose = new Pose2d(1, 1, Rotation2d.fromDegrees(60));
-            Pose2d endPose = Field.getNearestChain(fieldPose);
-            Pose2d waypoint = endPose.plus(new Transform2d(waypointOffset, Meters.of(0), Rotation2d.fromDegrees(0)));
-            Pose2d computed = fieldPose.relativeTo(waypoint);
-            // Pose2d computed = waypoint.plus(new Transform2d(fieldPose.getTranslation(), Rotation2d.fromDegrees(0)));
-            System.out.println(computed);
-            System.out.println(computed.getRotation().getDegrees());
-            Field.simulatedField.getObject("waypoint").setPose(waypoint);
-            Field.simulatedField.getObject("obj").setPose(computed);
-        }).ignoringDisable(true));
+        joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
+        
         // Testing shooter map
         // joystick.onTrue(6, armSubsystem.setAngleCommand(armSubsystem.getAngle().plus(Degrees.of(0.5))));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(armSubsystem.getAngle().minus(Degrees.of(0.5))));

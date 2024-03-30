@@ -87,22 +87,23 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public Command intakeCommand() {
         return Commands.waitUntil(() -> getShooterRPM().lte(Shooter.minShooterVelocityBraking)) 
-        .andThen(brakeShooter())
-        .andThen(setIntakeSpeed(Intake.intakeSpeed))
-        .andThen(Commands.waitUntil(this::isSensorTripped))
-        .andThen(Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)))
-        .andThen(this::stop)
-        .andThen(Commands.waitSeconds(Intake.noteSettleTime.in(Seconds)))
-        .andThen(setIntakeSpeed(Intake.backOffSpeed))
-        .andThen(Commands.waitSeconds(Intake.backOffNoteTime.in(Seconds)))
-        .finallyDo(this::stop)
+        .andThen(
+            brakeShooter(),
+            setIntakeSpeed(Intake.intakeSpeed),
+            Commands.waitUntil(this::isSensorTripped),
+            Commands.waitSeconds(Intake.waitAfterTrip.in(Seconds)),
+            runOnce(this::stop),
+            Commands.waitSeconds(Intake.noteSettleTime.in(Seconds)),
+            setIntakeSpeed(Intake.backOffSpeed),
+            Commands.waitSeconds(Intake.backOffNoteTime.in(Seconds))
+        ).finallyDo(this::stop)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         .withName("Intake");
     }
 
     public Command spinUpFlywheelCommand() {
         return setShooterVoltage(Shooter.speakerShootPower)
-        .andThen(Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds)))
+        .andThen(Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds))) //! Optimize this, it doesn't normally take this long
         .withName("Spin Up Flywheel");
     }
 

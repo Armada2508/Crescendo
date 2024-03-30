@@ -11,6 +11,7 @@ import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -69,6 +70,10 @@ public class ClimbSubsystem extends SubsystemBase implements Loggable {
 
     public void stop() {
         talon.setControl(new NeutralOut());
+    }
+
+    public Measure<Angle> getPosition() {
+        return Rotations.of(talon.getPosition().getValueAsDouble());
     }
 
     @Override

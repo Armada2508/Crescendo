@@ -33,6 +33,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -199,8 +200,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     /**
      * Clamped Cubic Spline 
      */
-    public Trajectory generateTrajectory(Pose2d targetPose, boolean driveBackwards) {
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, Drive.trajectoryConfig.setReversed(driveBackwards));
+    public Trajectory generateTrajectory(Pose2d targetPose, TrajectoryConfig config) {
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, config);
         Field.simulatedField.getObject("Cubic Trajectory").setTrajectory(trajectory);
         return trajectory;
     }
@@ -209,9 +210,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      * Quintic Hermite Spline 
      * @param waypoints list of waypoints including end pose, doesn't include start pose
      */
-    public Trajectory generateTrajectory(List<Pose2d> waypoints, boolean driveBackwards) {
+    public Trajectory generateTrajectory(List<Pose2d> waypoints, TrajectoryConfig config) {
         waypoints.add(0, getFieldPose());
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, Drive.trajectoryConfig.setReversed(driveBackwards));
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, config);
         Field.simulatedField.getObject("Quintic Trajectory").setTrajectory(trajectory);
         return trajectory;
     }
