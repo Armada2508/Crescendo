@@ -12,10 +12,10 @@ import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.pneumatics.Piston;
 
-public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
+public class PneumaticsSubsystem extends SubsystemBase implements Loggable { //! Need to turn off compressor when shooting
 
     private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-    private final Piston leftPiston = new Piston(Pneumatics.leftForwardChannel, Pneumatics.rightReverseChannel);
+    private final Piston leftPiston = new Piston(Pneumatics.leftReverseChannel, Pneumatics.leftForwardChannel);
     private final Piston rightPiston = new Piston(Pneumatics.rightReverseChannel, Pneumatics.rightForwardChannel);
     private final Solenoid compressorFan = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.compressorFanChannel);
 
