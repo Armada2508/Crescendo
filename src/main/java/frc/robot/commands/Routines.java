@@ -1,28 +1,21 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
-import java.util.Set;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
 import frc.robot.Constants.Climb;
-import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
 import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
-import frc.robot.lib.util.Util;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -114,34 +107,32 @@ public class Routines {
         ));
     }
 
-    public static Command turnToNote(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
-        return driveSubsystem.turnCommand(() ->
-            Degrees.of(
-                Util.boundedAngleDegrees(
-                    visionSubsystem.getNoteYaw() + driveSubsystem.getFieldAngle().in(Degrees)
-                )
-            )
-        );
+    public static Command lockOnNote(VisionSubsystem visionSubsystem) {
+        return new NewDriveCommand(null, null, null, null, null, null, visionSubsystem);
     }
 
-    public static Command pickupNoteCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
-        //? === put into another method ?? ===
-        PIDController pid = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD); //! Find
-        pid.setSetpoint(0);
-        double voltageChange = 0.1; //! Tune
-        //? ==================================
-        return 
-        Commands.runOnce(() -> pid.reset())
-        .andThen(Commands.defer(() -> {
-            double volts = pid.calculate(visionSubsystem.getNoteYaw()); 
-            Measure<Voltage> leftVolts = Volts.of(-volts + voltageChange);
-            Measure<Voltage> rightVolts = Volts.of(volts + voltageChange);
-            return driveSubsystem.setVoltageCommand(leftVolts, rightVolts);
-        }, Set.of(driveSubsystem))
-        .repeatedly()
-        .until(intakeShooterSubsystem::isSensorTripped)
-        .alongWith(Routines.groundIntake(armSubsystem, intakeShooterSubsystem)))
-        .finallyDo(() -> pid.close());
-    }
+    // private static double voltageChange = 0;
 
+    // public static Command pickupNoteCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem) {
+    //      === put into another method  ===
+    //     PIDController pid = new PIDController(Drive.turnPIDConfig.kP, Drive.turnPIDConfig.kI, Drive.turnPIDConfig.kD); // Find
+    //     pid.setSetpoint(0);
+    //     voltageChange = 0.1; // Tune
+    //      ==================================
+    //     return 
+    //     Commands.runOnce(() -> pid.reset())
+    //     .andThen(Commands.defer(() -> {
+    //         double volts = pid.calculate(visionSubsystem.getNoteYaw());  // gets updated (lowers) every tick
+    //         if (Degrees.of(visionSubsystem.getNoteYaw()).lte(Degrees.of(visionSubsystem.getNoteYaw()).plus(Degrees.of(0.5)))) { // checks if the angle to note has decreased
+    //             voltageChange += 1; // increases voltage change ammount, thus bringing voltage values closer to the same
+    //         }
+    //         Measure<Voltage> rightVolts = Volts.of(volts + voltageChange); // in theory, these should approach to be the same as the note yaw gets smaller
+    //         Measure<Voltage> leftVolts = Volts.of(-volts + voltageChange);
+    //         return driveSubsystem.setVoltageCommand(leftVolts, rightVolts);
+    //     }, Set.of(driveSubsystem))
+    //     .repeatedly()
+    //     .until(intakeShooterSubsystem::isSensorTripped)
+    //     .alongWith(Routines.groundIntake(armSubsystem, intakeShooterSubsystem)))
+    //     .finallyDo(() -> pid.close());
+    // }
 }

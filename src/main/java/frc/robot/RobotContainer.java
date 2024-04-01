@@ -60,7 +60,7 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.onTrue(4, Routines.turnToNote(driveSubsystem, visionSubsystem));
+        joystick.whileTrue(4, Routines.lockOnNote(visionSubsystem));
         joystick.onTrue(1, Routines.scoreSpeaker(Arm.speakerBaseAngle, driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
