@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -10,10 +11,22 @@ import frc.robot.lib.drive.DriveCommand;
 
 public class NewDriveCommand extends DriveCommand {
 
-    public NewDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim,
-            DriveConfig config, BiConsumer<Double, Double> speedConsumer, Runnable onEnd,
-            Subsystem subsystem) {
+    private BooleanSupplier noteModeEnabled;
+    private DoubleSupplier noteAngle;
+    private final double maxYaw = 30;
+
+    public NewDriveCommand(DoubleSupplier joystickSpeed, 
+        DoubleSupplier joystickTurn, 
+        DoubleSupplier joystickTrim, 
+        DriveConfig config, 
+        BiConsumer<Double, Double> speedConsumer, 
+        Runnable onEnd,
+        Subsystem subsystem,
+        BooleanSupplier noteModeEnabled,
+        DoubleSupplier noteAngle) {
         super(joystickSpeed, joystickTurn, joystickTrim, () -> false, config, speedConsumer, onEnd, subsystem);
+        this.noteModeEnabled = noteModeEnabled;
+        this.noteAngle = noteAngle;
     }
 
     @Override
@@ -41,6 +54,10 @@ public class NewDriveCommand extends DriveCommand {
         // Constant Curvature, WPILib DifferentialDrive#curvatureDriveIK
         if (config.constantCurvature()) {
             turn = turn * speed + trim; 
+        }
+
+        if (noteModeEnabled.getAsBoolean()) {
+            turn += noteAngle.getAsDouble() / (maxYaw * 2);
         }
 
         double powerFactor = normalizeSpeed((speed - turn), (speed + turn));

@@ -31,10 +31,11 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
+        joystick.bindButtons(Joysticks.noteButton);
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
-        // driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
-        //     joystick::getYInverted, joystick::getXInverted, joystick::getZInverted
-        // ));
+        driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
+            joystick::getYInverted, joystick::getXInverted, joystick::getZInverted, () -> joystick.getRawButton(Joysticks.noteButton), () -> visionSubsystem.getNoteYaw()
+        ));
         addAutos();
         configureBindings();
     }

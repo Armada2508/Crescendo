@@ -10,6 +10,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
@@ -65,9 +66,12 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return noteResult.hasTargets();
     }
 
+    /**
+     * @return note yaw CCW+
+     */
     public double getNoteYaw() {
         if (canSeeNote()) {
-            return noteResult.getBestTarget().getYaw();
+            return -noteResult.getBestTarget().getYaw();
         }
         return 0;
     }
@@ -77,6 +81,12 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             return noteResult.getBestTarget().getPitch();
         }
         return 0;
+    }
+
+    public double getNoteDistance() {
+        double camToNoteDistance = PhotonUtils.calculateDistanceToTargetMeters(Vision.robotToCamera.getY(), 0, Math.toRadians(0), Math.toRadians(getNotePitch())); //! verify to make sure this works
+        double camHeight = Vision.robotToCamera.getY();
+        return Math.abs(Math.sqrt(Math.pow(camToNoteDistance, 2) - Math.pow(camHeight, 2)));
     }
 
     public Optional<VisionResult> getVisionResult() {
@@ -116,6 +126,13 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return Vision.singleTagVisionStdDevs;
     }
 
+    // public Pose2d getNotePose() {
+    //     if (!canSeeNote()) return null;
+    //     Translation2d noteTranslation = new Translation2d(getNoteDistance(), getNoteYaw());
+    //     Rotation2d noteRotations = new Rotation2d(Degrees.of(getNoteYaw()));
+    //     return new Pose2d(noteTranslation, noteRotations);
+    // }
+
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         if (canSeeTag()) {
@@ -132,7 +149,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             map.put("Note Pitch", target.getPitch());
         }
         latestEstimatedPose.ifPresent(p -> map.put("Estimated Pose Z (in.)", Units.metersToInches(p.estimatedPose.getZ())));
-        map.put("Camera Connected Note", tagCam.isConnected());
+        map.put("Camera Connected Note", noteCam.isConnected());
         map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());
         map.put("Can See Note", canSeeNote());

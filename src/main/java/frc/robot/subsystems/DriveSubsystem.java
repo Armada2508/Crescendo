@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -142,6 +143,10 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.setControl(request.withVelocity(toRotations(rightVelocity)));
     }
 
+    public Command setVoltageCommand(Measure<Voltage> leftVoltage, Measure<Voltage> rightVoltage) {
+        return runOnce(() -> setVoltage(leftVoltage, rightVoltage));
+    }
+
     public Command setVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity) {
         return runOnce(() -> {
             setVelocity(leftVelocity.in(MetersPerSecond), rightVelocity.in(MetersPerSecond));
@@ -262,8 +267,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return poseEstimator != null;
     }
 
-    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim) {
-        return new NewDriveCommand(joystickSpeed, joystickTurn, joystickTrim, Drive.joystickDriveConfig, this::setSpeed, this::stop, this);
+    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier noteModeEnabled,
+    DoubleSupplier noteAngle) {
+        return new NewDriveCommand(joystickSpeed, joystickTurn, joystickTrim, Drive.joystickDriveConfig, this::setSpeed, this::stop, this, noteModeEnabled, noteAngle);
     }
 
     @Override
