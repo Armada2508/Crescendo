@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +34,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -200,14 +202,32 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         .withName("Turn");
     }
 
-    public Command trajectoryToPoseCommand(Supplier<Pose2d> targetPose, Supplier<List<Translation2d>> waypoints, boolean driveBackwards) {
+    /**
+     * Clamped Cubic Spline 
+     */
+    public Trajectory generateTrajectory(Pose2d targetPose, TrajectoryConfig config) {
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, config);
+        Field.simulatedField.getObject("Cubic Trajectory").setTrajectory(trajectory);
+        return trajectory;
+    }
+
+    /**
+     * Quintic Hermite Spline 
+     * @param waypoints list of waypoints including end pose, doesn't include start pose
+     */
+    public Trajectory generateTrajectory(List<Pose2d> waypoints, TrajectoryConfig config) {
+        waypoints.add(0, getFieldPose());
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, config);
+        Field.simulatedField.getObject("Quintic Trajectory").setTrajectory(trajectory);
+        return trajectory;
+    }
+
+    public Command trajectoryToPoseCommand(Supplier<Trajectory> trajectory) {
         return Commands.defer(() -> {
             if (!hasInitalizedFieldPose()) {
                 return Commands.none();
             }
-            Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), waypoints.get(), targetPose.get(), Drive.trajectoryConfig.setReversed(driveBackwards));
-            Field.simulatedField.getObject("Trajectory").setTrajectory(trajectory);
-            return FollowTrajectory.getCommandTalon(trajectory, Field.origin, this::getFieldPose, this::setVelocity, this);
+            return FollowTrajectory.getCommandTalon(trajectory.get(), Field.origin, this::getFieldPose, this::setVelocity, this);
         }, Set.of(this));
     }
 

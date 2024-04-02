@@ -14,6 +14,7 @@ import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -35,6 +36,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     private PhotonPipelineResult tagResult = new PhotonPipelineResult();
     private PhotonPipelineResult noteResult = new PhotonPipelineResult();
     private Measure<Distance> lastAvgDist = Inches.of(-1);
+    private Matrix<N3, N1> lastStdDevs = VecBuilder.fill(0, 0, 0);
 
     public VisionSubsystem() {
         NTLogger.register(this);
@@ -92,7 +94,8 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         Pose2d robotPose = latestEstimatedPose.get().estimatedPose.toPose2d();
         double timestampSeconds = latestEstimatedPose.get().timestampSeconds;
         if (!isValidPose(robotPose)) return Optional.empty();
-        return Optional.of(new VisionResult(robotPose, timestampSeconds, getStdDevs(robotPose)));
+        lastStdDevs = getStdDevs(robotPose);
+        return Optional.of(new VisionResult(robotPose, timestampSeconds, lastStdDevs));
     }
 
     /**
@@ -103,7 +106,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     }
     
     private Matrix<N3, N1> getStdDevs(Pose2d estimatedPose) {
-        //? Still might wanna scale stdevs by avg distance along with cutoff filter
+        //? Still might wanna scale stdevs by avg distance 
         int numTags = 0;
         double avgDistMeters = 0; 
         for (var target : tagResult.getTargets()) {
@@ -119,7 +122,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         if (numTags > 1) return Vision.multiTagVisionStdDevs;
 
         if (avgDistMeters > Vision.maxAvgTagDistance.in(Meters)) return Vision.untrustedVisionStdDevs;
-
+        if (Vision.stageTags.contains(tagResult.getBestTarget().getFiducialId())) return Vision.multiTagVisionStdDevs; // Trust stage tags more for climbing
         return Vision.singleTagVisionStdDevs;
     }
 
@@ -137,7 +140,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             int id = target.getFiducialId();
             double distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
             map.put("Best Tag ID", id);
-            map.put("Best Tag Distance (in.)", distance);
+            map.put("Best Tag Distance (in.) CF", distance); // Camera Frame
             map.put("Num Tags Seen", tagResult.getTargets().size());
         }
         if (canSeeNote()) {
@@ -145,11 +148,13 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
             map.put("Note Yaw", target.getYaw());
             map.put("Note Pitch", target.getPitch());
         }
+        latestEstimatedPose.ifPresent(p -> map.put("Estimated Pose Z (in.)", Units.metersToInches(p.estimatedPose.getZ())));
         map.put("Camera Connected Note", noteCam.isConnected());
         map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());
         map.put("Can See Note", canSeeNote());
-        map.put("Average Distance to Tags (in.)", lastAvgDist.in(Inches));
+        map.put("Average Distance to Tags (in.) RF", lastAvgDist.in(Inches)); // Robot Frame
+        map.put("Last Stdevs", lastStdDevs);
         return map;
     }
 

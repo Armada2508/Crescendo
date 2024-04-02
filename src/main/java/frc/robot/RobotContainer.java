@@ -69,11 +69,11 @@ public class RobotContainer {
         joystick.onTrue(9, armSubsystem.stowCommand());
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem));
         joystick.onTrue(5, Commands.runOnce(this::stopEverything));
-        // joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        // joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        // joystick.onTrue(10, climbSubsystem.resetClimberCommand());
-        // joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
-
+        joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.onTrue(10, climbSubsystem.resetClimberCommand());
+        joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem));
+        
         // Testing shooter map
         // joystick.onTrue(6, armSubsystem.setAngleCommand(armSubsystem.getAngle().plus(Degrees.of(0.5))));
         // joystick.onTrue(4, armSubsystem.setAngleCommand(armSubsystem.getAngle().minus(Degrees.of(0.5))));
