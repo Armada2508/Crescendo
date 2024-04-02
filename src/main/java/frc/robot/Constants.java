@@ -57,6 +57,8 @@ public class Constants {
         // Ports
         public static final int joystickPort = 0;
         public static final int buttonBoardPort = 1;
+        // Buttons
+        public static final int noteButton = 2; 
     }
     
     public static class Drive {

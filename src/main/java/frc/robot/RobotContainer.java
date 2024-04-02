@@ -33,9 +33,10 @@ public class RobotContainer {
     private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
 
     public RobotContainer() {
+        joystick.bindButtons(Joysticks.noteButton);
         FollowTrajectory.config(Drive.ramseteB, Drive.ramseteZeta, Drive.trackWidth);
         driveSubsystem.setDefaultCommand(driveSubsystem.joystickDriveCommand(
-            joystick::getYInverted, joystick::getXInverted, joystick::getZInverted
+            joystick::getYInverted, joystick::getXInverted, joystick::getZInverted, () -> joystick.getRawButton(Joysticks.noteButton), () -> visionSubsystem.getNoteYaw()
         ));
         addAutos();
         configureBindings();
@@ -60,7 +61,6 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        joystick.whileTrue(4, Routines.lockOnNote(visionSubsystem));
         joystick.onTrue(1, Routines.scoreSpeaker(Arm.speakerBaseAngle, driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem));
         // joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
