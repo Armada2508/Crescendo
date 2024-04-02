@@ -134,6 +134,10 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         return RotationsPerSecond.of(talonShooter.getVelocity().getValueAsDouble());
     }
 
+    public Measure<Voltage> getShooterVoltage() {
+        return Volts.of(talonShooter.getMotorVoltage().getValueAsDouble());
+    }
+
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("TOF Status", timeOfFlight.getStatus().toString());

@@ -4,15 +4,19 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
 
 public class RobotContainer {
@@ -21,7 +25,7 @@ public class RobotContainer {
     // private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     // private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
     // private final ArmSubsystem armSubsystem = new ArmSubsystem();
-    // private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
+    private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
     // private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
     private final PneumaticsSubsystem pneumaticsSubsystem = new PneumaticsSubsystem();
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -54,6 +58,9 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
+        new Trigger(() -> intakeShooterSubsystem.getShooterVoltage().in(Volts) > 0)
+            .onTrue(pneumaticsSubsystem.disableCompressor())
+            .onFalse(pneumaticsSubsystem.enableCompressor());
         // joystick.onTrue(1, Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
         // joystick.onTrue(2, Routines.turnToSpeaker(driveSubsystem));
         // joystick.onTrue(3, intakeShooterSubsystem.shootAmpCommand());

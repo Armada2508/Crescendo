@@ -92,7 +92,7 @@ public class Constants {
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Time> calibrateTime = Seconds.of(0.25);
-        public static final Measure<Angle> encoderOffset = Degrees.of(56);
+        public static final Measure<Angle> encoderOffset = Degrees.of(56); //! Refind this
         public static final Measure<Angle> boreEncoderHardstop = Degrees.of(85);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); // Unfortunately this affects the shooter map, so don't change it
         public static final Measure<Angle> startAngle = Degrees.of(16); 
