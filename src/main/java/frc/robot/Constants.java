@@ -114,10 +114,10 @@ public class Constants {
     }
 
     public static class Pneumatics {
-        public static final int leftForwardChannel = 0;
-        public static final int leftReverseChannel = 1;
-        public static final int rightForwardChannel = 2;
-        public static final int rightReverseChannel = 3;
+        public static final int leftBottomChannel = 0;
+        public static final int leftTopChannel = 1;
+        public static final int rightBottomChannel = 2;
+        public static final int rightTopChannel = 3;
         public static final int compressorFanChannel = 4;
     }
 

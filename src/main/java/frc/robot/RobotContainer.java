@@ -16,14 +16,16 @@ import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
 import frc.robot.lib.controller.SmartJoystick;
 import frc.robot.lib.motion.FollowTrajectory;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeShooterSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
     private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
-    // private final VisionSubsystem visionSubsystem = new VisionSubsystem();
-    // private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
+    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
     // private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
     // private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
@@ -75,7 +77,7 @@ public class RobotContainer {
         // joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem, pneumaticsSubsystem));
 
         joystick.onTrue(1, pneumaticsSubsystem.enableCompressor());
-        joystick.onTrue(2, pneumaticsSubsystem.disableCompressor());
+        joystick.onTrue(3, pneumaticsSubsystem.disableCompressor());
         joystick.onTrue(4, pneumaticsSubsystem.retract());
         joystick.onTrue(6, pneumaticsSubsystem.extend());
         // Testing shooter map

@@ -15,8 +15,8 @@ import frc.robot.lib.pneumatics.Piston;
 public class PneumaticsSubsystem extends SubsystemBase implements Loggable { 
 
     private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-    private final Piston leftPiston = new Piston(Pneumatics.leftReverseChannel, Pneumatics.leftForwardChannel);
-    private final Piston rightPiston = new Piston(Pneumatics.rightReverseChannel, Pneumatics.rightForwardChannel);
+    private final Piston leftPiston = new Piston(Pneumatics.leftTopChannel, Pneumatics.leftBottomChannel);
+    private final Piston rightPiston = new Piston(Pneumatics.rightTopChannel, Pneumatics.rightBottomChannel);
     private final Solenoid compressorFan = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.compressorFanChannel);
 
     public PneumaticsSubsystem() {
