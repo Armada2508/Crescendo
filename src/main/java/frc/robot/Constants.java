@@ -99,7 +99,7 @@ public class Constants {
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
-        public static final Measure<Angle> speakerBaseAngle = Degrees.of(40.5);
+        public static final Measure<Angle> speakerBaseAngle = Degrees.of(41.5);
         public static final Measure<Angle> ampAngle = Degrees.of(75.0); 
         public static final Measure<Angle> retractAngle = Degrees.of(60); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
@@ -153,9 +153,9 @@ public class Constants {
             interpolatingShootingMap.put(90.5, 50.5); // Map testing ends here
             interpolatingShootingMap.put(86.0, 50.5);
             interpolatingShootingMap.put(80.5, 49.5);
-            interpolatingShootingMap.put(76.3, 48.0);
-            interpolatingShootingMap.put(71.1, 48.0);
-            interpolatingShootingMap.put(61.6, 43.5);
+            interpolatingShootingMap.put(76.3, 49.0);
+            interpolatingShootingMap.put(71.1, 49.0);
+            interpolatingShootingMap.put(61.6, 44.5);
             interpolatingShootingMap.put(52.6, Arm.speakerBaseAngle.in(Degrees));
         }
         public static Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
