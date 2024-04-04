@@ -64,7 +64,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         return runOnce(() -> {
             talonFollowShooter.setControl(new StrictFollower(talonShooter.getDeviceID()));
             talonShooter.setControl(new VoltageOut(voltage.in(Volts)));
-        });
+        }).withName("Set Shooter Voltage");
     }
 
     public void stop() {
@@ -82,7 +82,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     }
 
     public boolean isSensorTripped() {
-        return Util.inRange(timeOfFlight.getRange(), Intake.noteDetectionRange.in(Millimeters));
+        return Util.inRange(timeOfFlight.getRange(), Intake.noteDetectionRange.in(Millimeters)) && timeOfFlight.isRangeValid();
     }
 
     public Command intakeCommand() {
@@ -104,8 +104,7 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
     public Command spinUpFlywheelCommand() {
         return setShooterVoltage(Shooter.speakerShootPower)
         .andThen(
-            Commands.waitUntil(() -> getShooterRPM().gte(Shooter.speakerShootVelocity))
-            .withTimeout(Shooter.flywheelChargeTime.in(Seconds))
+            Commands.waitSeconds(Shooter.flywheelChargeTime.in(Seconds))
         ) 
         .withName("Spin Up Flywheel");
     }

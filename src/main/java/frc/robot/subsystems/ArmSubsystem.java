@@ -2,10 +2,10 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -20,7 +20,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -35,9 +34,11 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
+    private final BooleanSupplier isPistonExtended;
     private boolean initalizedArm = false;
 
-    public ArmSubsystem() {
+    public ArmSubsystem(BooleanSupplier isPistonExtended) {
+        this.isPistonExtended = isPistonExtended;
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
@@ -75,6 +76,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private void setAngle(Measure<Angle> angle) {
+        if (angle.lt(Arm.retractAngle) && !isPistonExtended.getAsBoolean()) return;
         if (!initalizedArm) return;
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
@@ -136,15 +138,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     public Command stowCommand() {
         return setAngleCommand(Arm.stowAngle).withName("Stow");
-    }
-
-    public Command initArmAngle() { 
-        return setAngleCommand(Arm.intakeAngle)
-        .andThen(this::stop)
-        .andThen(Commands.waitSeconds(Arm.calibrateTime.in(Seconds)))
-        .andThen(runOnce(() -> talon.setPosition(getBoreEncoderAngle().in(Rotations))))
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        .withName("Init Arm Angle");
     }
 
     @Override

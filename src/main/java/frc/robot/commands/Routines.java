@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import frc.robot.Constants.Arm;
 import frc.robot.Constants.Climb;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Field;
+import frc.robot.Constants.Pneumatics;
 import frc.robot.Constants.Shooter;
 import frc.robot.Robot;
 import frc.robot.lib.util.Util;
@@ -39,49 +41,61 @@ public class Routines {
     private Routines() {}
 
     public static Command enterStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return Commands.either(armSubsystem.setAngleCommand(Arm.retractAngle), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.retractAngle) && pneumaticsSubsystem.isExtended())
-        .andThen(pneumaticsSubsystem.retract())
-        .andThen(armSubsystem.setAngleCommand(Arm.stowAngle))
+        return armSubsystem.setAngleCommand(Arm.retractAngle)
+        .andThen(
+            pneumaticsSubsystem.retract(),
+            Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
+        )
         .withName("Enter Full Stow");
     }
 
     public static Command leaveStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return armSubsystem.setAngleCommand(Arm.retractAngle)
-        .andThen(pneumaticsSubsystem.extend())
+        .andThen(
+            pneumaticsSubsystem.extend(),
+            Commands.waitSeconds(Pneumatics.extensionTime.in(Seconds))
+        )
         .withName("Leave Full Stow");
     }
    
     public static Command groundIntake(ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return leaveStow(armSubsystem, pneumaticsSubsystem)
-        .andThen(armSubsystem.setAngleCommand(Arm.intakeAngle))
+        return Commands.either(intakeSubsystem.intakeCommand(), leaveStow(armSubsystem, pneumaticsSubsystem)
         .andThen(
+            armSubsystem.setAngleCommand(Arm.intakeAngle),
             armSubsystem.runOnce(armSubsystem::stop),
             intakeSubsystem.intakeCommand()
             .alongWith(Commands.waitUntil(intakeSubsystem::isSensorTripped).andThen(enterStow(armSubsystem, pneumaticsSubsystem)))
-        )
+        ), intakeSubsystem::isSensorTripped)
         .withName("Intake Ground");
     }
 
-    public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
+    public static Command ampPosition(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return leaveStow(armSubsystem, pneumaticsSubsystem)
-        .andThen(armSubsystem.setAngleCommand(Arm.speakerBaseAngle))
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand())
+        .andThen(armSubsystem.setAngleCommand(Arm.ampAngle))
+        .withName("Amp Position");
+    }
+
+    public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem, boolean stowAtEnd) {
+        Command endStowCommand = stowAtEnd ? enterStow(armSubsystem, pneumaticsSubsystem) : Commands.none();
+        return leaveStow(armSubsystem, pneumaticsSubsystem)
         .andThen(
+            armSubsystem.setAngleCommand(Arm.speakerBaseAngle)
+                .alongWith(shooterSubsystem.spinUpFlywheelCommand()),
             shooterSubsystem.releaseNoteCommand(),
-            enterStow(armSubsystem, pneumaticsSubsystem)
+            endStowCommand
         )
         .withName("Score Speaker Base");
     }
 
     public static Command scoreSpeaker(Measure<Angle> angle, DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return leaveStow(armSubsystem, pneumaticsSubsystem)
-        .andThen(armSubsystem.setAngleCommand(angle))
-        .alongWith(shooterSubsystem.spinUpFlywheelCommand())
         .andThen(
+            armSubsystem.setAngleCommand(angle)
+                .alongWith(shooterSubsystem.spinUpFlywheelCommand()),
             shooterSubsystem.releaseNoteCommand(),
             enterStow(armSubsystem, pneumaticsSubsystem)
-        )    
-        .withName("Score Speaker Vision");
+        )
+        .withName("Score Speaker");
     }
 
     public static Command turnToSpeaker(DriveSubsystem driveSubsystem) {
@@ -113,11 +127,21 @@ public class Routines {
     }
 
     public static Command extendClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return enterStow(armSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.setVoltage(Climb.climbPower)).withName("Extend Climber");
+        return Commands.either(Commands.none(), leaveStow(armSubsystem, pneumaticsSubsystem), () -> pneumaticsSubsystem.isExtended())
+        .andThen(
+            armSubsystem.stowCommand(),
+            climbSubsystem.setVoltage(Climb.climbPower)
+        )
+        .withName("Extend Climber");
     }
 
     public static Command retractClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return enterStow(armSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.setVoltage(Climb.climbPower.negate())).withName("Retract Climber");
+        return Commands.either(Commands.none(), leaveStow(armSubsystem, pneumaticsSubsystem), () -> pneumaticsSubsystem.isExtended())
+        .andThen(
+            armSubsystem.stowCommand(),
+            climbSubsystem.setVoltage(Climb.climbPower.negate())
+        )
+        .withName("Retract Climber");
     }
 
     public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
@@ -125,7 +149,7 @@ public class Routines {
         final Measure<Distance> minDistanceForWaypoint = Feet.of(3);
         return extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem)
         .alongWith(
-            Commands.waitSeconds(2)
+            Commands.waitSeconds(5)
                 .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
             .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
                 List<Pose2d> points = new ArrayList<>();

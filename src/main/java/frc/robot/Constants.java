@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -94,15 +93,15 @@ public class Constants {
         public static final Slot0Configs motionMagicConfig = new Slot0Configs().withKP(500).withKD(0);
         public static final FeedbackConfigs feedbackConfig = new FeedbackConfigs().withSensorToMechanismRatio(gearRatio);
         public static final Measure<Time> calibrateTime = Seconds.of(0.25);
-        public static final Measure<Angle> encoderOffset = Degrees.of(56); //! Refind this
+        public static final Measure<Angle> encoderOffset = Degrees.of(54); 
         public static final Measure<Angle> boreEncoderHardstop = Degrees.of(85);
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); // Unfortunately this affects the shooter map, so don't change it
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
-        public static final Measure<Angle> speakerBaseAngle = Degrees.of(39);
+        public static final Measure<Angle> speakerBaseAngle = Degrees.of(40.5);
         public static final Measure<Angle> ampAngle = Degrees.of(75.0); 
-        public static final Measure<Angle> retractAngle = Degrees.of(0); //! Find this
+        public static final Measure<Angle> retractAngle = Degrees.of(60); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -115,10 +114,10 @@ public class Constants {
 
     public static class Pneumatics {
         public static final int leftBottomChannel = 0;
-        public static final int leftTopChannel = 1;
         public static final int rightBottomChannel = 2;
-        public static final int rightTopChannel = 3;
         public static final int compressorFanChannel = 4;
+        public static final Measure<Time> extensionTime = Seconds.of(0.5);
+        public static final Measure<Time> retractionTime = Seconds.of(0.5);
     }
 
     public static class Intake {
@@ -126,7 +125,7 @@ public class Constants {
         public static final int timeOfFlightID = 0;
         public static final double intakeSpeed = 1; 
         public static final Measure<Distance> noteDetectionRange = Millimeters.of(130); 
-        public static final Measure<Time> waitAfterTrip = Seconds.of(0.25);
+        public static final Measure<Time> waitAfterTrip = Seconds.of(0);
         public static final Measure<Time> noteSettleTime = Seconds.of(0.25);
         public static final Measure<Time> backOffNoteTime = Seconds.of(0.05);
         public static final double backOffSpeed = -0.3;
@@ -138,7 +137,6 @@ public class Constants {
         public static final double indexSpeed = 1;
         public static final Measure<Time> flywheelChargeTime = Seconds.of(0.5);
         public static final Measure<Voltage> speakerShootPower = Volts.of(9);
-        public static final Measure<Velocity<Angle>> speakerShootVelocity = RotationsPerSecond.of(4800); // Velocity the shooter gets to at 9 volts 
         public static final Measure<Time> speakerTimeToShoot = Seconds.of(0.3);
         public static final Measure<Voltage> ampShootPower = Volts.of(-12); 
         public static final Measure<Time> ampTimeToShoot = Seconds.of(1.0); 
@@ -148,17 +146,17 @@ public class Constants {
         private static final InterpolatingDoubleTreeMap interpolatingShootingMap = new InterpolatingDoubleTreeMap(); 
         public static final Measure<Distance> maxShootDistance = Inches.of(90.0);
         static {
-            interpolatingShootingMap.put(117.0, 50.0);
-            interpolatingShootingMap.put(112.7, 49.5);
-            interpolatingShootingMap.put(102.1, 48.5);
-            interpolatingShootingMap.put(95.0, 48.0);
-            interpolatingShootingMap.put(90.5, 47.75);
-            interpolatingShootingMap.put(85.4, 47.50);
-            interpolatingShootingMap.put(81.9, 47.0);
-            interpolatingShootingMap.put(76.3, 45.0);
-            interpolatingShootingMap.put(70.9, 44.0);
-            interpolatingShootingMap.put(61.6, 42.0);
-            interpolatingShootingMap.put(52.6, 39.0);
+            interpolatingShootingMap.put(117.0, 50.5);
+            interpolatingShootingMap.put(112.7, 50.5);
+            interpolatingShootingMap.put(102.1, 50.5);
+            interpolatingShootingMap.put(95.0, 50.5); 
+            interpolatingShootingMap.put(90.5, 50.5); // Map testing ends here
+            interpolatingShootingMap.put(86.0, 50.5);
+            interpolatingShootingMap.put(80.5, 49.5);
+            interpolatingShootingMap.put(76.3, 48.0);
+            interpolatingShootingMap.put(71.1, 48.0);
+            interpolatingShootingMap.put(61.6, 43.5);
+            interpolatingShootingMap.put(52.6, Arm.speakerBaseAngle.in(Degrees));
         }
         public static Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
             return Degrees.of(interpolatingShootingMap.get(distance.in(Inches)));

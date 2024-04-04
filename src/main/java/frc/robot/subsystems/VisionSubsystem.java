@@ -10,7 +10,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
@@ -83,11 +82,11 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return 0;
     }
 
-    public double getNoteDistance() {
-        double camToNoteDistance = PhotonUtils.calculateDistanceToTargetMeters(Vision.robotToCamera.getY(), 0, Math.toRadians(0), Math.toRadians(getNotePitch())); //! verify to make sure this works
-        double camHeight = Vision.robotToCamera.getY();
-        return Math.abs(Math.sqrt(Math.pow(camToNoteDistance, 2) - Math.pow(camHeight, 2)));
-    }
+    // public double getNoteDistance() {
+    //     double camToNoteDistance = PhotonUtils.calculateDistanceToTargetMeters(Vision.robotToCamera.getY(), 0, Math.toRadians(0), Math.toRadians(getNotePitch())); //! verify to make sure this works
+    //     double camHeight = Vision.robotToCamera.getY();
+    //     return Math.abs(Math.sqrt(Math.pow(camToNoteDistance, 2) - Math.pow(camHeight, 2)));
+    // }
 
     public Optional<VisionResult> getVisionResult() {
         if (latestEstimatedPose.isEmpty()) return Optional.empty();
@@ -125,13 +124,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         if (Vision.stageTags.contains(tagResult.getBestTarget().getFiducialId())) return Vision.multiTagVisionStdDevs; // Trust stage tags more for climbing
         return Vision.singleTagVisionStdDevs;
     }
-
-    // public Pose2d getNotePose() {
-    //     if (!canSeeNote()) return null;
-    //     Translation2d noteTranslation = new Translation2d(getNoteDistance(), getNoteYaw());
-    //     Rotation2d noteRotations = new Rotation2d(Degrees.of(getNoteYaw()));
-    //     return new Pose2d(noteTranslation, noteRotations);
-    // }
 
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
