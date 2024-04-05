@@ -27,7 +27,7 @@ import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
-    private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
+    public static final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
@@ -84,7 +84,8 @@ public class RobotContainer {
         joystick.onTrue(11, Routines.groundIntake(armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
         joystick.whileTrue(4, Routines.retractClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
         joystick.whileTrue(6, Routines.extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        // joystick.onTrue(10, climbSubsystem.resetClimberCommand());
+        joystick.onTrue(8, climbSubsystem.resetClimberCommand());
+        joystick.onTrue(10, Routines.ampPositionAndCenter(driveSubsystem, armSubsystem, pneumaticsSubsystem));
         joystick.onTrue(12, Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem, pneumaticsSubsystem));
 
         // joystick.onTrue(4, pneumaticsSubsystem.retract());

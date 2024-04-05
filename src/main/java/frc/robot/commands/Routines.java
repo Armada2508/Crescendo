@@ -1,12 +1,14 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Constants.FeetPerSecondSquared;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +43,9 @@ public class Routines {
     private Routines() {}
 
     public static Command enterStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.retractAngle)
+        return pneumaticsSubsystem.extend()
         .andThen(
+            armSubsystem.setAngleCommand(Arm.retractAngle),
             pneumaticsSubsystem.retract(),
             Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
         )
@@ -73,6 +76,16 @@ public class Routines {
         return leaveStow(armSubsystem, pneumaticsSubsystem)
         .andThen(armSubsystem.setAngleCommand(Arm.ampAngle))
         .withName("Amp Position");
+    }
+ 
+    public static Command ampPositionAndCenter(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
+        return ampPosition(armSubsystem, pneumaticsSubsystem)
+        .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
+            TrajectoryConfig config = new TrajectoryConfig(FeetPerSecond.of(6), FeetPerSecondSquared.of(5));
+            
+            Pose2d ampPose = (Robot.onRedAlliance()) ? Field.redAmpScorePos : Field.blueAmpScorePos;
+            return driveSubsystem.generateTrajectory(ampPose, config);
+        }));
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem, boolean stowAtEnd) {
@@ -121,7 +134,9 @@ public class Routines {
             }),
             Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
-            enterStow(armSubsystem, pneumaticsSubsystem)
+            driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(9))
+            .andThen(Commands.waitSeconds(0.6)).finallyDo(driveSubsystem::stop)
+            .alongWith(enterStow(armSubsystem, pneumaticsSubsystem))
         )
         .withName("Aim and Score Speaker");
     }
@@ -149,8 +164,13 @@ public class Routines {
         final Measure<Distance> minDistanceForWaypoint = Feet.of(3);
         return extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem)
         .alongWith(
+            // Commands.defer(() -> {
+            //     Measure<Time> trajectoryTime;
+            //     double waitTime = MathUtil.clamp(Climb.timeToExtendClimbers.plus(Climb.timeToExtendClimbersMargin).minus(trajectoryTime).in(Seconds), 0, Double.MAX_VALUE);
+            //     return Commands.waitSeconds(waitTime);
+            // }, Set.of())
             Commands.waitSeconds(5)
-                .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
+            .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
             .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
                 List<Pose2d> points = new ArrayList<>();
                 TrajectoryConfig config = new TrajectoryConfig(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(1))

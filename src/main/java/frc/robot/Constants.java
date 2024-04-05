@@ -99,7 +99,7 @@ public class Constants {
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
-        public static final Measure<Angle> speakerBaseAngle = Degrees.of(41.5);
+        public static final Measure<Angle> speakerBaseAngle = Degrees.of(42.5);
         public static final Measure<Angle> ampAngle = Degrees.of(76.0); 
         public static final Measure<Angle> retractAngle = Degrees.of(60); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
@@ -159,7 +159,8 @@ public class Constants {
             interpolatingShootingMap.put(52.6, Arm.speakerBaseAngle.in(Degrees));
         }
         public static Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
-            return Degrees.of(interpolatingShootingMap.get(distance.in(Inches)));
+            Measure<Angle> fudgeAngle = RobotContainer.joystick.throttleOverHalf() ? Degrees.of(1) : Degrees.of(0);
+            return Degrees.of(interpolatingShootingMap.get(distance.in(Inches))).plus(fudgeAngle);
         }
     }
 
@@ -170,7 +171,9 @@ public class Constants {
         public static final Measure<Current> zeroTripTorqueCurrent = Amps.of(2);
         public static final Measure<Voltage> climbPower = Volts.of(12);
         public static final Measure<Angle> minPosition = Rotations.of(0);
-        public static final Measure<Angle> maxPosition = Rotations.of(295);
+        public static final Measure<Angle> maxPosition = Rotations.of(330);
+        public static final Measure<Time> timeToExtendClimbers = Seconds.of(3);
+        public static final Measure<Time> timeToExtendClimbersMargin = Seconds.of(1);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
             .withForwardSoftLimitEnable(true).withReverseSoftLimitEnable(true)
             .withForwardSoftLimitThreshold(maxPosition.in(Rotations)).withReverseSoftLimitThreshold(minPosition.in(Rotations));
@@ -207,11 +210,11 @@ public class Constants {
         public static final Pose2d blueAmpScorePos = new Pose2d(Inches.of(72.5), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         public static final Pose2d redAmpScorePos = new Pose2d(fieldLength.minus(Inches.of(72.5)), fieldWidth.minus(halfRobotLength), Rotation2d.fromDegrees(90));
         // Blue Notes, plus fudge for AUTO
-        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625 + 8)); 
+        public static final Translation2d blueTopNotePos = new Translation2d(Inches.of(114), Inches.of(275.625)); 
         public static final Translation2d blueMidNotePos = new Translation2d(Inches.of(114), Inches.of(218.625)); 
         public static final Translation2d blueLowNotePos = new Translation2d(Inches.of(114), Inches.of(161.625)); 
         // Red Notes, plus fudge for AUTO
-        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(275.625 + 8)); 
+        public static final Translation2d redTopNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(275.625)); 
         public static final Translation2d redMidNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(218.625)); 
         public static final Translation2d redLowNotePos = new Translation2d(Field.fieldLength.minus(Inches.of(114)), Inches.of(161.625)); 
         public enum Note {
