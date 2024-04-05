@@ -36,7 +36,7 @@ public class Autos {
      * Leaves the ROBOT STARTING ZONE.
      */
     public static Command leaveStartingZone(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem) {
-        return driveSubsystem.driveDistanceVelCommand(Feet.of(5), FeetPerSecond.of(2.5));
+        return driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(2.5));
     }
 
     /**
@@ -53,7 +53,7 @@ public class Autos {
         return scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem)
         .andThen(
             faceShooterTowardsWall(driveSubsystem),
-            driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(2.5))
+            driveSubsystem.driveDistanceVelCommand(Feet.of(14), FeetPerSecond.of(8))
         );
     }
 
@@ -123,6 +123,7 @@ public class Autos {
      * This is for when positioned to the right (in reference to the blue alliance) of the SPEAKER.
      * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE and scores it in the SPEAKER.
      */
+    @Deprecated
     public static Command scoreSpeakerTwiceSide(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return armSubsystem.stowCommand()
         .andThen(

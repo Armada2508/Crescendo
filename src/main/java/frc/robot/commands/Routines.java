@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Meters;
@@ -12,16 +13,20 @@ import static frc.robot.Constants.FeetPerSecondSquared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Arm;
@@ -43,11 +48,13 @@ public class Routines {
     private Routines() {}
 
     public static Command enterStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return pneumaticsSubsystem.extend()
+        return Commands.either(pneumaticsSubsystem.extend(), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.stowAngle))
         .andThen(
-            armSubsystem.setAngleCommand(Arm.retractAngle),
-            pneumaticsSubsystem.retract(),
-            Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
+            armSubsystem.setAngleCommand(Arm.retractAngle)
+            .alongWith(Commands.waitUntil(() -> armSubsystem.getAngle().gte(Arm.retractAngle.minus(Degrees.of(35)))).andThen(
+                pneumaticsSubsystem.retract(),
+                Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
+            ))
         )
         .withName("Enter Full Stow");
     }
@@ -85,7 +92,7 @@ public class Routines {
             
             Pose2d ampPose = (Robot.onRedAlliance()) ? Field.redAmpScorePos : Field.blueAmpScorePos;
             return driveSubsystem.generateTrajectory(ampPose, config);
-        }));
+        })).withName("Auto Amp Center");
     }
 
     public static Command scoreSpeakerBase(ArmSubsystem armSubsystem, IntakeShooterSubsystem shooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem, boolean stowAtEnd) {
@@ -144,8 +151,8 @@ public class Routines {
     public static Command extendClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return Commands.either(Commands.none(), leaveStow(armSubsystem, pneumaticsSubsystem), () -> pneumaticsSubsystem.isExtended())
         .andThen(
-            armSubsystem.stowCommand(),
-            climbSubsystem.setVoltage(Climb.climbPower)
+            armSubsystem.stowCommand()
+            .alongWith(climbSubsystem.setVoltage(Climb.climbPower))
         )
         .withName("Extend Climber");
     }
@@ -159,21 +166,15 @@ public class Routines {
         .withName("Retract Climber");
     }
 
+    private static Trajectory latestTrajectory;
     public static Command extendAndCenterOnChain(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         final Measure<Angle> climberDeadband = Rotations.of(3);
         final Measure<Distance> minDistanceForWaypoint = Feet.of(3);
         return extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem)
         .alongWith(
-            // Commands.defer(() -> {
-            //     Measure<Time> trajectoryTime;
-            //     double waitTime = MathUtil.clamp(Climb.timeToExtendClimbers.plus(Climb.timeToExtendClimbersMargin).minus(trajectoryTime).in(Seconds), 0, Double.MAX_VALUE);
-            //     return Commands.waitSeconds(waitTime);
-            // }, Set.of())
-            Commands.waitSeconds(5)
-            .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
-            .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
+            Commands.defer(() -> {
                 List<Pose2d> points = new ArrayList<>();
-                TrajectoryConfig config = new TrajectoryConfig(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(1))
+                TrajectoryConfig config = new TrajectoryConfig(MetersPerSecond.of(3.5), MetersPerSecondPerSecond.of(1))
                     .setKinematics(Drive.diffKinematics)
                     .setReversed(true)
                     .addConstraint(new CentripetalAccelerationConstraint(0.5));
@@ -185,8 +186,17 @@ public class Routines {
                     points.add(waypoint);
                 }
                 points.add(endPose);
-                return driveSubsystem.generateTrajectory(points, config); 
-            }))
+                latestTrajectory = driveSubsystem.generateTrajectory(points, config); 
+                Command trajectoryCmd = driveSubsystem.trajectoryToPoseCommand(() -> {
+                    return latestTrajectory;
+                });
+                Measure<Time> trajectoryTime = Seconds.of(latestTrajectory.getTotalTimeSeconds());
+                double waitTime = MathUtil.clamp(Climb.timeToExtendClimbers.plus(Climb.timeToExtendClimbersMargin).minus(trajectoryTime).in(Seconds), 0, Double.MAX_VALUE);
+                Command waitCommand = Commands.waitSeconds(waitTime);
+                return waitCommand
+                .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
+                .andThen(trajectoryCmd);
+            }, Set.of(driveSubsystem))
         )
         .withName("Go to Climb");
     }

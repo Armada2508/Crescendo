@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -36,6 +37,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
     private final BooleanSupplier isPistonExtended;
     private boolean initalizedArm = false;
+    private StatusCode lastControlStatusCode = StatusCode.StatusCodeNotInitialized;
 
     public ArmSubsystem(BooleanSupplier isPistonExtended) {
         this.isPistonExtended = isPistonExtended;
@@ -76,12 +78,15 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private void setAngle(Measure<Angle> angle) {
-        if (angle.lt(Arm.retractAngle) && !isPistonExtended.getAsBoolean()) return;
+        if (angle.lt(Arm.retractAngle) && !isPistonExtended.getAsBoolean()) {
+            System.out.println("OH NO WE'RE GONNA BREAK THE ARM");
+            return;
+        }
         if (!initalizedArm) return;
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
         MotionMagicVoltage request = new MotionMagicVoltage(angle.in(Rotations));
-        talon.setControl(request);
+        lastControlStatusCode = talon.setControl(request);
     }
 
     public Command setVoltage(Measure<Voltage> volts) {
@@ -147,6 +152,7 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
         map.put("Bore Encoder Angle Deg", getBoreEncoderAngle().in(Degrees));
         map.put("Target Angle", targetAngle.in(Degrees));
+        map.put("Control Status Code", lastControlStatusCode);
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);
