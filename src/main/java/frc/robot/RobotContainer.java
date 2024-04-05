@@ -30,10 +30,10 @@ public class RobotContainer {
     public static final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
+    private final ArmSubsystem armSubsystem = new ArmSubsystem();
     private final IntakeShooterSubsystem intakeShooterSubsystem = new IntakeShooterSubsystem();
     private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
     private final PneumaticsSubsystem pneumaticsSubsystem = new PneumaticsSubsystem();
-    private final ArmSubsystem armSubsystem = new ArmSubsystem(pneumaticsSubsystem::isExtended);
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {

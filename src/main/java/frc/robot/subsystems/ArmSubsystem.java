@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
@@ -35,12 +34,10 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
-    private final BooleanSupplier isPistonExtended;
     private boolean initalizedArm = false;
     private StatusCode lastControlStatusCode = StatusCode.StatusCodeNotInitialized;
 
-    public ArmSubsystem(BooleanSupplier isPistonExtended) {
-        this.isPistonExtended = isPistonExtended;
+    public ArmSubsystem() {
         configTalons();
         NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
@@ -78,10 +75,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     }
 
     private void setAngle(Measure<Angle> angle) {
-        if (angle.lt(Arm.retractAngle) && !isPistonExtended.getAsBoolean()) {
-            System.out.println("OH NO WE'RE GONNA BREAK THE ARM");
-            return;
-        }
         if (!initalizedArm) return;
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
