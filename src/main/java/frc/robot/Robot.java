@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.Map;
 
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
@@ -19,6 +20,7 @@ import frc.robot.lib.logging.NTLogger;
 public class Robot extends TimedRobot implements Loggable {
     
     private RobotContainer robotContainer;
+    private BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
     
     @Override
     public void robotInit() {
@@ -56,6 +58,10 @@ public class Robot extends TimedRobot implements Loggable {
         map.put("RIO Voltage (V)", RobotController.getInputVoltage());
         map.put("RIO Current (A)", RobotController.getInputCurrent());
         map.put("CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
+        map.put("Accelerometer X", accelerometer.getX());
+        map.put("Accelerometer Y", accelerometer.getY());
+        map.put("Accelerometer Z", accelerometer.getZ());
+
         return map;
     }
 

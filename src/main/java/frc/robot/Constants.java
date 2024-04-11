@@ -78,7 +78,7 @@ public class Constants {
         // RoboRIO PID auto turning
         public static final SlotConfigs turnPIDConfig = new SlotConfigs().withKP(0.1).withKD(0.009);
         public static final Measure<Angle> turnDeadband = Degrees.of(2);
-        public static final Measure<Voltage> minTurnPIDVoltage = Volts.of(0.3); 
+        public static final Measure<Voltage> minTurnPIDVoltage = Volts.of(0.4); 
         public static final Measure<Voltage> maxTurnPIDVoltage = Volts.of(4); 
         // Trajectories
         public static final double ramseteB = 2.0;
@@ -99,9 +99,9 @@ public class Constants {
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
         public static final Measure<Angle> stowAngle = Degrees.of(28); 
-        public static final Measure<Angle> speakerBaseAngle = Degrees.of(42.5);
+        public static final Measure<Angle> speakerBaseAngle = Degrees.of(41.5);
         public static final Measure<Angle> ampAngle = Degrees.of(76.0); 
-        public static final Measure<Angle> retractAngle = Degrees.of(65); 
+        public static final Measure<Angle> retractAngle = Degrees.of(60); 
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()

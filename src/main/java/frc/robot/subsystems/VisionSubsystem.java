@@ -118,11 +118,11 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         avgDistMeters /= numTags;
         lastAvgDist = Meters.of(avgDistMeters); // Logging
 
-        if (numTags > 1) return Vision.multiTagVisionStdDevs;
+        // if (numTags > 1) return Vision.multiTagVisionStdDevs;
 
         if (avgDistMeters > Vision.maxAvgTagDistance.in(Meters)) return Vision.untrustedVisionStdDevs;
-        if (Vision.stageTags.contains(tagResult.getBestTarget().getFiducialId())) return Vision.multiTagVisionStdDevs; // Trust stage tags more for climbing
-        return Vision.singleTagVisionStdDevs;
+        // if (Vision.stageTags.contains(tagResult.getBestTarget().getFiducialId())) return Vision.multiTagVisionStdDevs; // Trust stage tags more for climbing
+        return Vision.multiTagVisionStdDevs;
     }
 
     @Override

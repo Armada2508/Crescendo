@@ -51,7 +51,7 @@ public class Routines {
         return Commands.either(pneumaticsSubsystem.extend(), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.stowAngle))
         .andThen(
             armSubsystem.setAngleCommand(Arm.retractAngle)
-            .alongWith(Commands.waitUntil(() -> armSubsystem.getAngle().gte(Arm.retractAngle.minus(Degrees.of(35)))).andThen(
+            .alongWith(Commands.waitUntil(() -> armSubsystem.getAngle().gte(Arm.retractAngle.minus(Degrees.of(20)))).andThen(
                 pneumaticsSubsystem.retract(),
                 Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
             ))
@@ -125,6 +125,7 @@ public class Routines {
                 return Radians.of(driveSubsystem.getFieldPose().getTranslation().minus(speakerPos).getAngle().getRadians());
             }
         )
+        .withTimeout(2)
         .withName("Turn to Speaker");
     }
 
