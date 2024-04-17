@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Meters;
@@ -48,10 +47,10 @@ public class Routines {
     private Routines() {}
 
     public static Command enterStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return Commands.either(pneumaticsSubsystem.extend(), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.stowAngle))
+        return Commands.either(pneumaticsSubsystem.extend(), Commands.none(), () -> armSubsystem.getAngle().lt(Arm.climbAngle))
         .andThen(
-            armSubsystem.setAngleCommand(Arm.retractAngle)
-            .alongWith(Commands.waitUntil(() -> armSubsystem.getAngle().gte(Arm.retractAngle.minus(Degrees.of(20)))).andThen(
+            armSubsystem.setAngleCommand(Arm.stowAngle)
+            .alongWith(Commands.waitUntil(() -> armSubsystem.getAngle().gte(Arm.retractAngle)).andThen(
                 pneumaticsSubsystem.retract(),
                 Commands.waitSeconds(Pneumatics.retractionTime.in(Seconds))
             ))
@@ -60,7 +59,7 @@ public class Routines {
     }
 
     public static Command leaveStow(ArmSubsystem armSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
-        return armSubsystem.setAngleCommand(Arm.retractAngle)
+        return armSubsystem.setAngleCommand(Arm.stowAngle)
         .andThen(
             pneumaticsSubsystem.extend(),
             Commands.waitSeconds(Pneumatics.extensionTime.in(Seconds))
@@ -89,7 +88,6 @@ public class Routines {
         return ampPosition(armSubsystem, pneumaticsSubsystem)
         .andThen(driveSubsystem.trajectoryToPoseCommand(() -> {
             TrajectoryConfig config = new TrajectoryConfig(FeetPerSecond.of(6), FeetPerSecondSquared.of(5));
-            
             Pose2d ampPose = (Robot.onRedAlliance()) ? Field.redAmpScorePos : Field.blueAmpScorePos;
             return driveSubsystem.generateTrajectory(ampPose, config);
         })).withName("Auto Amp Center");
@@ -152,7 +150,7 @@ public class Routines {
     public static Command extendClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return Commands.either(Commands.none(), leaveStow(armSubsystem, pneumaticsSubsystem), () -> pneumaticsSubsystem.isExtended())
         .andThen(
-            armSubsystem.stowCommand()
+            armSubsystem.setAngleCommand(Arm.climbAngle)
             .alongWith(climbSubsystem.setVoltage(Climb.climbPower))
         )
         .withName("Extend Climber");
@@ -161,7 +159,7 @@ public class Routines {
     public static Command retractClimber(ArmSubsystem armSubsystem, ClimbSubsystem climbSubsystem, PneumaticsSubsystem pneumaticsSubsystem) {
         return Commands.either(Commands.none(), leaveStow(armSubsystem, pneumaticsSubsystem), () -> pneumaticsSubsystem.isExtended())
         .andThen(
-            armSubsystem.stowCommand(),
+            armSubsystem.setAngleCommand(Arm.climbAngle),
             climbSubsystem.setVoltage(Climb.climbPower.negate())
         )
         .withName("Retract Climber");
@@ -193,7 +191,7 @@ public class Routines {
                 });
                 Measure<Time> trajectoryTime = Seconds.of(latestTrajectory.getTotalTimeSeconds());
                 double waitTime = MathUtil.clamp(Climb.timeToExtendClimbers.plus(Climb.timeToExtendClimbersMargin).minus(trajectoryTime).in(Seconds), 0, Double.MAX_VALUE);
-                Command waitCommand = Commands.waitSeconds(waitTime);
+                Command waitCommand = Commands.waitSeconds(waitTime); // Only wait required time to extend climbers
                 return waitCommand
                 .until(() -> Util.inRange(climbSubsystem.getPosition().in(Rotations) - Climb.softLimitSwitchConfig.ForwardSoftLimitThreshold, climberDeadband.in(Rotations))) 
                 .andThen(trajectoryCmd);

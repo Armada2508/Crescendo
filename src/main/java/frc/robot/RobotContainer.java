@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Drive;
-import frc.robot.Constants.Field.Note;
 import frc.robot.Constants.Joysticks;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Routines;
@@ -28,7 +27,7 @@ import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
-    public static final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
+    private final SmartJoystick joystick = new SmartJoystick(Joysticks.joystickPort);
     private final VisionSubsystem visionSubsystem = new VisionSubsystem();
     private final DriveSubsystem driveSubsystem = new DriveSubsystem(visionSubsystem::getVisionResult);
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
@@ -63,11 +62,10 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        // autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
+        autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
         autoChooser.addOption("Score Speaker", Autos.scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
         autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
         autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem));
-        autoChooser.addOption("Score Speaker Twice Side Top", Autos.scoreSpeakerTwiceSide(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem, Note.TOP));
         autoChooser.setDefaultOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem));
         SmartDashboard.putData(autoChooser);
     }
@@ -100,7 +98,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return climbSubsystem.resetClimberCommand().alongWith(autoChooser.getSelected());
-        // return Commands.none();
     } 
 
 }

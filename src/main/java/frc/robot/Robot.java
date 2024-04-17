@@ -58,9 +58,9 @@ public class Robot extends TimedRobot implements Loggable {
         map.put("RIO Voltage (V)", RobotController.getInputVoltage());
         map.put("RIO Current (A)", RobotController.getInputCurrent());
         map.put("CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
-        map.put("Accelerometer X", accelerometer.getX());
-        map.put("Accelerometer Y", accelerometer.getY());
-        map.put("Accelerometer Z", accelerometer.getZ());
+        map.put("Accelerometer X (g)", accelerometer.getX());
+        map.put("Accelerometer Y (g)", accelerometer.getY());
+        map.put("Accelerometer Z (g)", accelerometer.getZ());
 
         return map;
     }

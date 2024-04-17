@@ -27,8 +27,6 @@ public class Autos {
 
     private Autos() {}
 
-    // private static Measure<Angle> robotStartingAngle;
-
     /**
      * Leaves the ROBOT STARTING ZONE.
      */
@@ -68,7 +66,7 @@ public class Autos {
                     intakeShooterSubsystem.intakeCommand(),
                     Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1.25)
                 ),
-            armSubsystem.stowCommand()
+            armSubsystem.setAngleCommand(Arm.climbAngle)
                 .alongWith( // Drive forward to score second note
                     driveSubsystem.setVelocityCommand(FeetPerSecond.of(-5), FeetPerSecond.of(-5))
                     .andThen(Commands.waitUntil(() -> Field.getDistanceToSpeaker(driveSubsystem.getFieldPose()).lte(Inches.of(66))).finallyDo(driveSubsystem::stop).withTimeout(3))
@@ -97,7 +95,7 @@ public class Autos {
             intakeShooterSubsystem.intakeCommand()
                 .alongWith(
                     Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(1),
-                    Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(armSubsystem.stowCommand())
+                    Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(armSubsystem.setAngleCommand(Arm.climbAngle))
                 ),
             turnToSpeaker(driveSubsystem),
             driveSubsystem.setVelocityCommand(FeetPerSecond.of(-6), FeetPerSecond.of(-6)), // Drive forward to score third note
@@ -117,16 +115,16 @@ public class Autos {
     }
 
     /**
+     * Still broken
      * Scores a preloaded NOTE at the SUBWOOFER into the SPEAKER, backs up to get a second NOTE and scores it in the SPEAKER.
      */
+    @Deprecated
     public static Command scoreSpeakerTwiceSide(DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, IntakeShooterSubsystem intakeShooterSubsystem, PneumaticsSubsystem pneumaticsSubsystem, Note note) {
         return Routines.leaveStow(armSubsystem, pneumaticsSubsystem)
         .andThen(
-            // Commands.runOnce(() -> robotStartingAngle = driveSubsystem.getFieldAngle()),
             driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(3.25), FeetPerSecond.of(3.25), FeetPerSecondSquared.of(3.25)),
             Commands.waitUntil(() -> Field.getDistanceToSpeaker(driveSubsystem.getFieldPose()).gte(Inches.of(70))).finallyDo(driveSubsystem::stop).withTimeout(4), // Back up to score
             shootNoStow(driveSubsystem, armSubsystem, intakeShooterSubsystem),
-            // faceStartingAngle(driveSubsystem), //? Could just use faceNote() here // that is so facts fr fr
             faceNote(note, driveSubsystem),
             driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(6)), // Drive back to get second note
             armSubsystem.setAngleCommand(Arm.intakeAngle),
@@ -134,7 +132,7 @@ public class Autos {
             intakeShooterSubsystem.intakeCommand()
                 .alongWith(
                     Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).finallyDo(driveSubsystem::stop).withTimeout(4),
-                    Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(armSubsystem.stowCommand())
+                    Commands.waitUntil(intakeShooterSubsystem::isSensorTripped).andThen(armSubsystem.setAngleCommand(Arm.climbAngle))
                 ),
             driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(-4), FeetPerSecond.of(-4), FeetPerSecondSquared.of(4)), // Drive forward to score second note
             Commands.waitUntil(() -> Field.getDistanceToSpeaker(driveSubsystem.getFieldPose()).lte(Inches.of(89))).finallyDo(driveSubsystem::stop).withTimeout(4),
@@ -164,13 +162,6 @@ public class Autos {
     private static Command faceShooterTowardsWall(DriveSubsystem driveSubsystem) {
         return driveSubsystem.turnCommand(() -> (Robot.onRedAlliance()) ? Degrees.of(180) : Degrees.of(0));
     }
-
-    /**
-     * Faces the robot towards the angle it was at when AUTO started.
-     */
-    // private static Command faceStartingAngle(DriveSubsystem driveSubsystem) {
-    //     return driveSubsystem.turnCommand(() -> robotStartingAngle);
-    // }
 
     /**
      * Faces the robot's intake towards a NOTE.

@@ -134,10 +134,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(angle, Arm.defaultVelocity, Arm.defaultAcceleration, Arm.defaultJerk);
     }
 
-    public Command stowCommand() {
-        return setAngleCommand(Arm.stowAngle).withName("Stow");
-    }
-
     @Override
     public Map<String, Object> log(Map<String, Object> map) {
         map.put("Arm Angle", getAngle().in(Degrees));

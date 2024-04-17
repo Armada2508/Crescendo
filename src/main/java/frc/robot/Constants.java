@@ -98,10 +98,11 @@ public class Constants {
         public static final Measure<Angle> angleDeadband = Degrees.of(0.75); // Unfortunately this affects the shooter map, so don't change it
         public static final Measure<Angle> startAngle = Degrees.of(16); 
         public static final Measure<Angle> intakeAngle = Degrees.of(18); 
-        public static final Measure<Angle> stowAngle = Degrees.of(28); 
+        public static final Measure<Angle> climbAngle = Degrees.of(28); // Just hovering off the ground
         public static final Measure<Angle> speakerBaseAngle = Degrees.of(41.5);
         public static final Measure<Angle> ampAngle = Degrees.of(76.0); 
-        public static final Measure<Angle> retractAngle = Degrees.of(60); 
+        public static final Measure<Angle> retractAngle = Degrees.of(40); // Safe to retract pistons
+        public static final Measure<Angle> stowAngle = Degrees.of(60);
         public static final Measure<Angle> minAngle = Degrees.of(18);
         public static final Measure<Angle> maxAngle = Degrees.of(80);
         public static final SoftwareLimitSwitchConfigs softLimitSwitchConfig = new SoftwareLimitSwitchConfigs()
@@ -159,8 +160,7 @@ public class Constants {
             interpolatingShootingMap.put(52.6, Arm.speakerBaseAngle.in(Degrees));
         }
         public static Measure<Angle> getPredictedAngle(Measure<Distance> distance) {
-            Measure<Angle> fudgeAngle = RobotContainer.joystick.throttleOverHalf() ? Degrees.of(1) : Degrees.of(0);
-            return Degrees.of(interpolatingShootingMap.get(distance.in(Inches))).plus(fudgeAngle);
+            return Degrees.of(interpolatingShootingMap.get(distance.in(Inches)));
         }
     }
 

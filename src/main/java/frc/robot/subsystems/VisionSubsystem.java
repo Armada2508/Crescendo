@@ -82,12 +82,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return 0;
     }
 
-    // public double getNoteDistance() {
-    //     double camToNoteDistance = PhotonUtils.calculateDistanceToTargetMeters(Vision.robotToCamera.getY(), 0, Math.toRadians(0), Math.toRadians(getNotePitch())); //! verify to make sure this works
-    //     double camHeight = Vision.robotToCamera.getY();
-    //     return Math.abs(Math.sqrt(Math.pow(camToNoteDistance, 2) - Math.pow(camHeight, 2)));
-    // }
-
     public Optional<VisionResult> getVisionResult() {
         if (latestEstimatedPose.isEmpty()) return Optional.empty();
         Pose2d robotPose = latestEstimatedPose.get().estimatedPose.toPose2d();
@@ -105,7 +99,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     }
     
     private Matrix<N3, N1> getStdDevs(Pose2d estimatedPose) {
-        //? Still might wanna scale stdevs by avg distance 
         int numTags = 0;
         double avgDistMeters = 0; 
         for (var target : tagResult.getTargets()) {
