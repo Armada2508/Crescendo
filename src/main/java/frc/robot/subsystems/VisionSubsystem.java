@@ -21,8 +21,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Field;
 import frc.robot.Constants.Vision;
+import frc.robot.Field;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 

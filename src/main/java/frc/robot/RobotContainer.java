@@ -62,11 +62,11 @@ public class RobotContainer {
     }
 
     private void addAutos() {
-        autoChooser.addOption("Leave Starting Zone", Autos.leaveStartingZone(driveSubsystem, armSubsystem));
-        autoChooser.addOption("Score Speaker", Autos.scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
-        autoChooser.addOption("Score Speaker and Leave", Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
-        autoChooser.addOption("Score Speaker Twice Base", Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem));
-        autoChooser.setDefaultOption("Score Speaker Thrice", Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem));
+        autoChooser.addOption("Leave Starting Zone", climbSubsystem.resetClimberCommand().alongWith(Autos.leaveStartingZone(driveSubsystem, armSubsystem)));
+        autoChooser.addOption("Score Speaker", climbSubsystem.resetClimberCommand().alongWith(Autos.scoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem)));
+        autoChooser.addOption("Score Speaker and Leave", climbSubsystem.resetClimberCommand().alongWith(Autos.scoreSpeakerAndLeave(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem)));
+        autoChooser.addOption("Score Speaker Twice Base", climbSubsystem.resetClimberCommand().alongWith(Autos.scoreSpeakerTwiceBase(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem)));
+        autoChooser.setDefaultOption("Score Speaker Thrice", climbSubsystem.resetClimberCommand().alongWith(Autos.scoreSpeakerThrice(driveSubsystem, armSubsystem, intakeShooterSubsystem, climbSubsystem, pneumaticsSubsystem)));
         SmartDashboard.putData(autoChooser);
     }
     
@@ -97,7 +97,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return climbSubsystem.resetClimberCommand().alongWith(autoChooser.getSelected());
+        return autoChooser.getSelected();
     } 
 
 }
