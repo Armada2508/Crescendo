@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
@@ -27,8 +26,7 @@ public class Robot extends TimedRobot implements Loggable {
         NTLogger.initDataLogger();
         NTLogger.register(this);
         robotContainer = new RobotContainer();
-        addPeriodic(NTLogger::log, kDefaultPeriod);
-        SmartDashboard.putData(Field.simulatedField);
+        addPeriodic(NTLogger::logEverything, kDefaultPeriod);
     }
     
     @Override

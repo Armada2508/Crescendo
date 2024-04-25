@@ -10,13 +10,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class Field {
     
     // Origin is always the blue alliance origin
     public static final Pose2d origin = new Pose2d();
-    public static final Field2d simulatedField = new Field2d();
     public static final Measure<Distance> fieldLength = Inches.of(651.25);
     public static final Measure<Distance> fieldWidth = Inches.of(323.25); // Also kind of like the height of the field
     public static final Measure<Angle> minAngle = Degrees.of(-180);

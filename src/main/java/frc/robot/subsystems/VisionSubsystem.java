@@ -13,13 +13,10 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Vision;
 import frc.robot.Field;
@@ -34,8 +31,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     private Optional<EstimatedRobotPose> latestEstimatedPose = Optional.empty();
     private PhotonPipelineResult tagResult = new PhotonPipelineResult();
     private PhotonPipelineResult noteResult = new PhotonPipelineResult();
-    private Measure<Distance> lastAvgDist = Inches.of(-1);
-    private Matrix<N3, N1> lastStdDevs = VecBuilder.fill(0, 0, 0);
 
     public VisionSubsystem() {
         NTLogger.register(this);
@@ -87,8 +82,9 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         Pose2d robotPose = latestEstimatedPose.get().estimatedPose.toPose2d();
         double timestampSeconds = latestEstimatedPose.get().timestampSeconds;
         if (!isValidPose(robotPose)) return Optional.empty();
-        lastStdDevs = getStdDevs(robotPose);
-        return Optional.of(new VisionResult(robotPose, timestampSeconds, lastStdDevs));
+        Matrix<N3, N1> stdDevs = getStdDevs(robotPose);
+        NTLogger.log(this, "Last StdDevs", stdDevs);
+        return Optional.of(new VisionResult(robotPose, timestampSeconds, stdDevs));
     }
 
     /**
@@ -109,7 +105,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         }
         if (numTags == 0) return Vision.singleTagVisionStdDevs;
         avgDistMeters /= numTags;
-        lastAvgDist = Meters.of(avgDistMeters); // Logging
+        NTLogger.log(this, "Average Distance to Tags (in.) RF", Meters.of(avgDistMeters).in(Inches)); // Logging
 
         // if (numTags > 1) return Vision.multiTagVisionStdDevs;
 
@@ -138,8 +134,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         map.put("Camera Connected Tag", tagCam.isConnected());
         map.put("Can See Tag", canSeeTag());
         map.put("Can See Note", canSeeNote());
-        map.put("Average Distance to Tags (in.) RF", lastAvgDist.in(Inches)); // Robot Frame
-        map.put("Last Stdevs", lastStdDevs);
         return map;
     }
 

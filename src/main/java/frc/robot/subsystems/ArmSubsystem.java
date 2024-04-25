@@ -35,7 +35,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
     private final DutyCycleEncoder throughBoreEncoder = new DutyCycleEncoder(Arm.throughBoreEncoderID);
     private boolean initalizedArm = false;
-    private StatusCode lastControlStatusCode = StatusCode.StatusCodeNotInitialized;
 
     public ArmSubsystem() {
         configTalons();
@@ -79,7 +78,8 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         if (angle.lt(Arm.minAngle)) angle = Arm.minAngle;
         if (angle.gt(Arm.maxAngle)) angle = Arm.maxAngle;
         MotionMagicVoltage request = new MotionMagicVoltage(angle.in(Rotations));
-        lastControlStatusCode = talon.setControl(request);
+        StatusCode code = talon.setControl(request);
+        NTLogger.log(this, "Last Status Code", code);
     }
 
     public Command setVoltage(Measure<Voltage> volts) {
@@ -141,7 +141,6 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
         map.put("Bore Encoder Angle Deg", getBoreEncoderAngle().in(Degrees));
         map.put("Target Angle", targetAngle.in(Degrees));
-        map.put("Control Status Code", lastControlStatusCode);
         NTLogger.putTalonLog(talon, "Arm TalonFX", map);
         NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
         NTLogger.putSubsystemLog(this, map);

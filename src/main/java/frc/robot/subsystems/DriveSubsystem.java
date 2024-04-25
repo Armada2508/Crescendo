@@ -91,7 +91,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         result.ifPresent((r) -> {
             poseEstimator.addVisionMeasurement(r.estimatedRobotPose(), r.timestampSeconds(), r.visionMeasurementStdDevs());
         });
-        Field.simulatedField.setRobotPose(getFieldPose());
     }
 
     private void configTalons() {
@@ -207,7 +206,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
      */
     public Trajectory generateTrajectory(Pose2d targetPose, TrajectoryConfig config) {
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(getFieldPose(), new ArrayList<>(), targetPose, config);
-        Field.simulatedField.getObject("Cubic Trajectory").setTrajectory(trajectory);
+        NTLogger.log(this, "Cubic Trajectory", trajectory);
         return trajectory;
     }
 
@@ -218,7 +217,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
     public Trajectory generateTrajectory(List<Pose2d> waypoints, TrajectoryConfig config) {
         waypoints.add(0, getFieldPose());
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(waypoints, config);
-        Field.simulatedField.getObject("Quintic Trajectory").setTrajectory(trajectory);
+        NTLogger.log(this, "Quintic Trajectory", trajectory);
         return trajectory;
     }
 
@@ -277,6 +276,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         if (pigeon.getState() == PigeonState.Ready) {
             map.put("Pigeon Yaw", pigeon.getYaw());
         }
+        map.put("Robot Pose", getFieldPose());
         map.put("Robot Angle", getFieldAngle().in(Degrees));
         map.put("Target Angle", targetAngle.in(Degrees));
         map.put("Turn PID Position Error", turnPIDController.getPositionError());
