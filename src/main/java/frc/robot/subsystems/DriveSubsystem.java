@@ -226,7 +226,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
             if (!hasInitalizedFieldPose()) {
                 return Commands.none();
             }
-            return FollowTrajectory.getCommandTalon(trajectory.get(), Field.origin, this::getFieldPose, this::setVelocity, this);
+            return FollowTrajectory.ramseteControllerCommand(trajectory.get(), Field.origin, this::getFieldPose, this::setVelocity, this);
         }, Set.of(this));
     }
 
