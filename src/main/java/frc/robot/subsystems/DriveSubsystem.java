@@ -48,7 +48,7 @@ import frc.robot.Constants.Drive;
 import frc.robot.Constants.Shooter;
 import frc.robot.Field;
 import frc.robot.Robot;
-import frc.robot.commands.NewDriveCommand;
+import frc.robot.commands.DriveCommands;
 import frc.robot.lib.Encoder;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
@@ -121,7 +121,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         talonR.getConfigurator().apply(config);
     }
 
-    private void setSpeed(double leftSpeed, double rightSpeed) {
+    public void setSpeed(double leftSpeed, double rightSpeed) {
         talonL.setControl(new DutyCycleOut(leftSpeed));
         talonR.setControl(new DutyCycleOut(rightSpeed));
     }
@@ -152,7 +152,8 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         });
     }
 
-    public Command motionMagicVelocityCommand(Measure<Velocity<Distance>> leftVelocity, Measure<Velocity<Distance>> rightVelocity, Measure<Velocity<Velocity<Distance>>> acceleration) {
+    public Command motionMagicVelocityCommand(Measure<Velocity<Distance>> leftVelocity, 
+            Measure<Velocity<Distance>> rightVelocity, Measure<Velocity<Velocity<Distance>>> acceleration) {
         return runOnce(() -> {
             configMotionMagic(0, Math.abs(acceleration.in(MetersPerSecondPerSecond)));
             MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0);
@@ -266,9 +267,9 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return poseEstimator != null;
     }
 
-    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, BooleanSupplier noteModeEnabled,
-    DoubleSupplier noteAngle) {
-        return new NewDriveCommand(joystickSpeed, joystickTurn, joystickTrim, Drive.joystickDriveConfig, this::setSpeed, this::stop, this, noteModeEnabled, noteAngle);
+    public Command joystickDriveCommand(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, 
+            BooleanSupplier noteModeEnabled, DoubleSupplier noteAngle) {
+        return DriveCommands.drive(joystickSpeed, joystickTurn, joystickTrim, noteModeEnabled, noteAngle, this);
     }
 
     @Override

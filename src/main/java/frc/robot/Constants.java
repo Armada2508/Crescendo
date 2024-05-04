@@ -37,7 +37,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
-import frc.robot.lib.drive.DriveCommand.DriveConfig;
 
 public class Constants {
 
@@ -60,10 +59,6 @@ public class Constants {
         public static final int RID = 2;
         public static final int RFollowerID = 3;
         public static final int pigeonID = 9;
-        public static final DriveConfig joystickDriveConfig = new DriveConfig(
-            1, 0.5, 0.25, 0.2, true, true, 1.5, 0.07 // Speed Multi, Turn Multi, Trim Multi, Slow Speed, Square Inputs, Constant Curvature, Slew Rate, Joystick Deadband
-        );
-        public static final double trimFadeout = 0.25;
         public static final double gearRatio = 10.71;
         public static final Measure<Distance> wheelDiameter = Inches.of(6.125); 
         public static final Measure<Distance> trackWidth = Inches.of(24.5); 
@@ -78,6 +73,17 @@ public class Constants {
         // Trajectories
         public static final double ramseteB = 2.0;
         public static final double ramseteZeta = 0.7;
+    }
+
+    public static class Driving {
+        public static final double speedAdjustment = 1;
+        public static final double turnAdjustment = 0.5;
+        public static final double trimAdjustment = 0.25;
+        public static final double trimFadeout = 0.25;
+        public static final boolean squareInputs = true;
+        public static final boolean constantCurvature = true;
+        public static final double joystickDeadband = 0.07;
+        public static final double deadbandSmoothing = 1.5;
     }
 
     public static class Arm {
@@ -185,6 +191,7 @@ public class Constants {
         public static final Matrix<N3, N1> multiTagVisionStdDevs = VecBuilder.fill(0.5, 0.5, 1); 
         public static final Matrix<N3, N1> untrustedVisionStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         public static final List<Integer> stageTags = List.of(11, 12, 13, 14, 15, 16);
+        public static final Measure<Angle> maxYaw = Degrees.of(30);
     }
 
     public class LED {
