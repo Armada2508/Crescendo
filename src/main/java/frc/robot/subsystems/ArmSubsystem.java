@@ -42,6 +42,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        System.out.println(talon.getClosedLoopReference());
         logArm();
     }
 

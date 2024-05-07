@@ -77,18 +77,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (pigeon.getState() != PigeonState.Ready) return;
+        boolean pigeonValid = (pigeon.getState() == PigeonState.Ready);
         Optional<VisionResult> result = visionSupplier.get();
-        if (poseEstimator == null) { // Initialize field pose
+        if (poseEstimator == null && pigeonValid) { // Initialize field pose
             result.ifPresent((r) -> {
                 poseEstimator = new DifferentialDrivePoseEstimator(Drive.diffKinematics, getAngle(), getLeftPosition(), getRightPosition(), r.estimatedRobotPose());
             });
-            return;
         }
-        poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
-        result.ifPresent((r) -> {
-            poseEstimator.addVisionMeasurement(r.estimatedRobotPose(), r.timestampSeconds(), r.visionMeasurementStdDevs());
-        });
+        else if (pigeonValid) { // Pose is initalized and ready to be updated
+            poseEstimator.update(getAngle(), getLeftPosition(), getRightPosition());
+            result.ifPresent((r) -> {
+                poseEstimator.addVisionMeasurement(r.estimatedRobotPose(), r.timestampSeconds(), r.visionMeasurementStdDevs());
+            });
+        }
         logDrive();
     }
 

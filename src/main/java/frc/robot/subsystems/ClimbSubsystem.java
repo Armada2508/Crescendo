@@ -79,7 +79,7 @@ public class ClimbSubsystem extends SubsystemBase {
 
     private void logClimb() {
         log(this, "Climb TalonFX", talon);
-        log(this, "Climb Follow TalonFX", talon);
+        log(this, "Climb Follow TalonFX", talonFollow);
         log(this, "Subsystem", this);
     }
     
