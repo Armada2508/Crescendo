@@ -6,8 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
-
-import java.util.Map;
+import static frc.robot.lib.logging.NTLogger.log;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -27,12 +26,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Shooter;
-import frc.robot.lib.logging.Loggable;
-import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 
-public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
+public class IntakeShooterSubsystem extends SubsystemBase {
 
     private final TalonFX talonIntake = new TalonFX(Intake.intakeID);
     private final TalonFX talonShooter = new TalonFX(Shooter.shooterID); 
@@ -41,8 +38,12 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
 
     public IntakeShooterSubsystem() {
         configTalons();
-        NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonIntake, talonShooter);
+    }
+
+    @Override
+    public void periodic() {
+        logIntakeShooter();
     }
 
     private void configTalons() {
@@ -137,19 +138,17 @@ public class IntakeShooterSubsystem extends SubsystemBase implements Loggable {
         return Volts.of(talonShooter.getMotorVoltage().getValueAsDouble());
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
-        map.put("TOF Status", timeOfFlight.getStatus().toString());
-        map.put("TOF Distance MM", timeOfFlight.getRange());
-        map.put("Is TOF Tripped", isSensorTripped());
-        map.put("Shooter RPM", getShooterRPM().in(Rotations.per(Minute)));
-        map.put("Shooter Follower RPM", talonFollowShooter.getVelocity().getValueAsDouble() * 60);
-        map.put("Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
-        NTLogger.putTalonLog(talonIntake, "Intake TalonFX", map);
-        NTLogger.putTalonLog(talonShooter, "Shooter TalonFX", map);
-        NTLogger.putTalonLog(talonFollowShooter, "Shooter Follow TalonFX", map);
-        NTLogger.putSubsystemLog(this, map);
-        return map;
+    private void logIntakeShooter() {
+        log(this, "TOF Status", timeOfFlight.getStatus().toString());
+        log(this, "TOF Distance MM", timeOfFlight.getRange());
+        log(this, "Is TOF Tripped", isSensorTripped());
+        log(this, "Shooter RPM", getShooterRPM().in(Rotations.per(Minute)));
+        log(this, "Shooter Follower RPM", talonFollowShooter.getVelocity().getValueAsDouble() * 60);
+        log(this, "Intake RPM", talonIntake.getVelocity().getValueAsDouble() * 60);
+        log(this, "Intake TalonFX", talonIntake); 
+        log(this, "Shooter TalonFX", talonShooter); 
+        log(this, "Shooter Follow TalonFX", talonFollowShooter); 
+        log(this, "Subsystem", this);
     }
 
 }

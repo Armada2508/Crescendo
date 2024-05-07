@@ -6,10 +6,10 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.lib.logging.NTLogger.log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -50,14 +50,13 @@ import frc.robot.Field;
 import frc.robot.Robot;
 import frc.robot.commands.DriveCommands;
 import frc.robot.lib.Encoder;
-import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 import frc.robot.subsystems.VisionSubsystem.VisionResult;
 
-public class DriveSubsystem extends SubsystemBase implements Loggable {
+public class DriveSubsystem extends SubsystemBase {
 
     private final TalonFX talonL = new TalonFX(Drive.LID);
     private final TalonFX talonR = new TalonFX(Drive.RID);
@@ -73,7 +72,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         turnPIDController.setTolerance(Drive.turnDeadband.in(Degrees)); 
         turnPIDController.enableContinuousInput(Field.minAngle.in(Degrees), Field.maxAngle.in(Degrees));
         configTalons();
-        NTLogger.register(this);
         TalonMusic.addTalonFX(this, talonL, talonR);
     }
 
@@ -91,6 +89,7 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         result.ifPresent((r) -> {
             poseEstimator.addVisionMeasurement(r.estimatedRobotPose(), r.timestampSeconds(), r.visionMeasurementStdDevs());
         });
+        logDrive();
     }
 
     private void configTalons() {
@@ -272,27 +271,26 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         return DriveCommands.drive(joystickSpeed, joystickTurn, joystickTrim, noteModeEnabled, noteAngle, this);
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
+    private void logDrive() {
         if (pigeon.getState() == PigeonState.Ready) {
-            map.put("Pigeon Yaw", pigeon.getYaw());
+            log(this, "Pigeon Yaw", pigeon.getYaw());
         }
-        map.put("Robot Pose", getFieldPose());
-        map.put("Robot Angle", getFieldAngle().in(Degrees));
-        map.put("Target Angle", targetAngle.in(Degrees));
-        map.put("Turn PID Position Error", turnPIDController.getPositionError());
-        map.put("Turn PID Velocity Error", turnPIDController.getVelocityError());
-        map.put("Distance to Speaker", Field.getDistanceToSpeaker(getFieldPose()).in(Inches));
+        log(this, "Robot Pose", getFieldPose());
+        log(this, "Robot Angle", getFieldAngle().in(Degrees));
+        log(this, "Target Angle", targetAngle.in(Degrees));
+        log(this, "Turn PID Position Error", turnPIDController.getPositionError());
+        log(this, "Turn PID Velocity Error", turnPIDController.getVelocityError());
+        log(this, "Distance to Speaker", Field.getDistanceToSpeaker(getFieldPose()).in(Inches));
         Translation2d speaker = Field.blueSpeakerPosition;
         if (Robot.onRedAlliance()) speaker = Field.redSpeakerPosition;
-        map.put("Lateral Speaker Distance", getFieldPose().getY() - speaker.getY());
-        map.put("In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
-        map.put("Has Initalized Pose", hasInitalizedFieldPose());
-        NTLogger.putTalonLog(talonL, "Left TalonFX", map);
-        NTLogger.putTalonLog(talonLFollow, "Left Follow TalonFX", map);
-        NTLogger.putTalonLog(talonR, "Right TalonFX", map);
-        NTLogger.putTalonLog(talonRFollow, "Right Follow TalonFX", map);
-        NTLogger.putSubsystemLog(this, map);
-        return map;
+        log(this, "Lateral Speaker Distance", getFieldPose().getY() - speaker.getY());
+        log(this, "In Range", Field.getDistanceToSpeaker(getFieldPose()).lte(Shooter.maxShootDistance));
+        log(this, "Has Initalized Pose", hasInitalizedFieldPose());
+        log(this, "Left TalonFX", talonL);
+        log(this, "Left Follow TalonFX", talonLFollow);
+        log(this, "Right TalonFX", talonR);
+        log(this, "Right Follow TalonFX", talonRFollow);
+        log(this, "Subsystem", this);
     }
+    
 }

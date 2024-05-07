@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.lib.logging.NTLogger.log;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -20,10 +20,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Vision;
 import frc.robot.Field;
-import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 
-public class VisionSubsystem extends SubsystemBase implements Loggable {
+public class VisionSubsystem extends SubsystemBase {
 
     private final PhotonCamera tagCam = new PhotonCamera(Vision.tagCameraName); 
     private final PhotonCamera noteCam = new PhotonCamera(Vision.noteCameraName); 
@@ -31,10 +30,6 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
     private Optional<EstimatedRobotPose> latestEstimatedPose = Optional.empty();
     private PhotonPipelineResult tagResult = new PhotonPipelineResult();
     private PhotonPipelineResult noteResult = new PhotonPipelineResult();
-
-    public VisionSubsystem() {
-        NTLogger.register(this);
-    }
 
     @Override
     public void periodic() {
@@ -48,6 +43,7 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         if (noteCam.isConnected()) {
             noteResult = noteCam.getLatestResult();
         }
+        logVision();
     }
 
     public boolean canSeeTag() {
@@ -114,27 +110,25 @@ public class VisionSubsystem extends SubsystemBase implements Loggable {
         return Vision.multiTagVisionStdDevs;
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
+    private void logVision() {
         if (canSeeTag()) {
             var target = tagResult.getBestTarget();
             int id = target.getFiducialId();
             double distance = Units.metersToInches(target.getBestCameraToTarget().getTranslation().getNorm());
-            map.put("Best Tag ID", id);
-            map.put("Best Tag Distance (in.) CF", distance); // Camera Frame
-            map.put("Num Tags Seen", tagResult.getTargets().size());
+            log(this, "Best Tag ID", id);
+            log(this, "Best Tag Distance (in.) CF", distance); // Camera Frame
+            log(this, "Num Tags Seen", tagResult.getTargets().size());
         }
         if (canSeeNote()) {
             var target = noteResult.getBestTarget();
-            map.put("Note Yaw", target.getYaw());
-            map.put("Note Pitch", target.getPitch());
+            log(this, "Note Yaw", target.getYaw());
+            log(this, "Note Pitch", target.getPitch());
         }
-        latestEstimatedPose.ifPresent(p -> map.put("Estimated Pose Z (in.)", Units.metersToInches(p.estimatedPose.getZ())));
-        map.put("Camera Connected Note", noteCam.isConnected());
-        map.put("Camera Connected Tag", tagCam.isConnected());
-        map.put("Can See Tag", canSeeTag());
-        map.put("Can See Note", canSeeNote());
-        return map;
+        latestEstimatedPose.ifPresent(p -> log(this, "Estimated Pose Z (in.)", Units.metersToInches(p.estimatedPose.getZ())));
+        log(this, "Camera Connected Note", noteCam.isConnected());
+        log(this, "Camera Connected Tag", tagCam.isConnected());
+        log(this, "Can See Tag", canSeeTag());
+        log(this, "Can See Note", canSeeNote());
     }
 
     /**

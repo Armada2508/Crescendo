@@ -3,8 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
-
-import java.util.Map;
+import static frc.robot.lib.logging.NTLogger.log;
 
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
@@ -19,18 +18,20 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Climb;
-import frc.robot.lib.logging.Loggable;
-import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.util.Util;
 
-public class ClimbSubsystem extends SubsystemBase implements Loggable {
+public class ClimbSubsystem extends SubsystemBase {
 
     private final TalonFX talon = new TalonFX(Climb.climbID);
     private final TalonFX talonFollow = new TalonFX(Climb.climbFollowID);
 
     public ClimbSubsystem() {
         configTalons();
-        NTLogger.register(this);
+    }
+
+    @Override
+    public void periodic() {
+        logClimb();
     }
 
     private void configTalons() {
@@ -76,11 +77,10 @@ public class ClimbSubsystem extends SubsystemBase implements Loggable {
         return Rotations.of(talon.getPosition().getValueAsDouble());
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
-        NTLogger.putTalonLog(talon, "Climb TalonFX", map);
-        NTLogger.putTalonLog(talonFollow, "Climb Follow TalonFX", map);
-        NTLogger.putSubsystemLog(this, map);
-        return map;
+    private void logClimb() {
+        log(this, "Climb TalonFX", talon);
+        log(this, "Climb Follow TalonFX", talon);
+        log(this, "Subsystem", this);
     }
+    
 }

@@ -3,8 +3,8 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.lib.logging.NTLogger.log;
 
-import java.util.Map;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
@@ -24,12 +24,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Arm;
-import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.music.TalonMusic;
 import frc.robot.lib.util.Util;
 
-public class ArmSubsystem extends SubsystemBase implements Loggable {
+public class ArmSubsystem extends SubsystemBase {
     
     private final TalonFX talon = new TalonFX(Arm.ID);
     private final TalonFX talonFollow = new TalonFX(Arm.followerID);
@@ -38,8 +37,12 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
 
     public ArmSubsystem() {
         configTalons();
-        NTLogger.register(this);
         TalonMusic.addTalonFX(this, talon);
+    }
+
+    @Override
+    public void periodic() {
+        logArm();
     }
 
     private void configTalons() {
@@ -134,17 +137,15 @@ public class ArmSubsystem extends SubsystemBase implements Loggable {
         return setAngleCommand(angle, Arm.defaultVelocity, Arm.defaultAcceleration, Arm.defaultJerk);
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Arm Angle", getAngle().in(Degrees));
-        map.put("Arm Initalized", initalizedArm);
-        map.put("Bore Encoder Connected", throughBoreEncoder.isConnected());
-        map.put("Bore Encoder Angle Deg", getBoreEncoderAngle().in(Degrees));
-        map.put("Target Angle", targetAngle.in(Degrees));
-        NTLogger.putTalonLog(talon, "Arm TalonFX", map);
-        NTLogger.putTalonLog(talonFollow, "Arm Follow TalonFX", map);
-        NTLogger.putSubsystemLog(this, map);
-        return map;
+    private void logArm() {
+        log(this, "Arm Angle", getAngle().in(Degrees));
+        log(this, "Arm Initalized", initalizedArm);
+        log(this, "Bore Encoder Connected", throughBoreEncoder.isConnected());
+        log(this, "Bore Encoder Angle Deg", getBoreEncoderAngle().in(Degrees));
+        log(this, "Target Angle", targetAngle.in(Degrees));
+        log(this, "Arm TalonFX", talon);
+        log(this, "Arm Follow TalonFX", talonFollow);
+        log(this, "Subsystem", this);
     }
 
 }

@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import java.util.Map;
+import static frc.robot.lib.logging.NTLogger.log;
 
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,10 +12,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 
-public class Robot extends TimedRobot implements Loggable {
+public class Robot extends TimedRobot {
     
     private RobotContainer robotContainer;
     private BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
@@ -24,14 +23,14 @@ public class Robot extends TimedRobot implements Loggable {
     public void robotInit() {
         DriverStation.silenceJoystickConnectionWarning(true);
         NTLogger.initDataLogger();
-        NTLogger.register(this);
         robotContainer = new RobotContainer();
-        addPeriodic(NTLogger::logEverything, kDefaultPeriod);
     }
     
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        NTLogger.logDriverStation();
+        logRobot();
     }
 
     @Override
@@ -49,17 +48,14 @@ public class Robot extends TimedRobot implements Loggable {
         robotContainer.stopEverything();
     }
 
-    @Override
-    public Map<String, Object> log(Map<String, Object> map) {
-        map.put("Battery Voltage (V)", RobotController.getBatteryVoltage());
-        map.put("RIO Voltage (V)", RobotController.getInputVoltage());
-        map.put("RIO Current (A)", RobotController.getInputCurrent());
-        map.put("CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
-        map.put("Accelerometer X (g)", accelerometer.getX());
-        map.put("Accelerometer Y (g)", accelerometer.getY());
-        map.put("Accelerometer Z (g)", accelerometer.getZ());
-
-        return map;
+    private void logRobot() {
+        log(this, "Battery Voltage (V)", RobotController.getBatteryVoltage());
+        log(this, "RIO Voltage (V)", RobotController.getInputVoltage());
+        log(this, "RIO Current (A)", RobotController.getInputCurrent());
+        log(this, "CAN Bus Utilization %", RobotController.getCANStatus().percentBusUtilization);
+        log(this, "Accelerometer X (g)", accelerometer.getX());
+        log(this, "Accelerometer Y (g)", accelerometer.getY());
+        log(this, "Accelerometer Z (g)", accelerometer.getZ());
     }
 
     public static boolean onRedAlliance() {
