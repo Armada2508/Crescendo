@@ -140,9 +140,10 @@ public class Routines {
             }),
             Commands.waitSeconds(0.5), // Wait for arm to settle
             shooterSubsystem.releaseNoteCommand(),
-            driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(9))
-            .andThen(Commands.waitSeconds(0.6)).finallyDo(driveSubsystem::stop)
-            .alongWith(enterStow(armSubsystem, pneumaticsSubsystem))
+            // driveSubsystem.motionMagicVelocityCommand(FeetPerSecond.of(6), FeetPerSecond.of(6), FeetPerSecondSquared.of(9))
+            // .andThen(Commands.waitSeconds(0.6)).finallyDo(driveSubsystem::stop)
+            // .alongWith(enterStow(armSubsystem, pneumaticsSubsystem))
+            enterStow(armSubsystem, pneumaticsSubsystem)
         )
         .withName("Aim and Score Speaker");
     }
