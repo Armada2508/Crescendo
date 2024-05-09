@@ -43,12 +43,6 @@ public class RobotContainer {
         ));
         addAutos();
         configureBindings();
-        CommandScheduler.getInstance().onCommandInterrupt((c, oc) -> {
-            System.out.println("Interrupted Command: " + c.getName());
-            oc.ifPresent((ca) -> {
-                System.out.println("Interrupting Command: " + ca.getName());
-            });
-        });
     }
 
     public void stopEverything() {
