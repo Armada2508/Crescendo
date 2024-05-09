@@ -117,7 +117,6 @@ public class Constants {
     public static class Pneumatics {
         public static final int leftBottomChannel = 0;
         public static final int rightBottomChannel = 2;
-        public static final int compressorFanChannel = 4;
         public static final Measure<Time> extensionTime = Seconds.of(0);
         public static final Measure<Time> retractionTime = Seconds.of(0.5);
     }

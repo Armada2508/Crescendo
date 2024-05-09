@@ -49,11 +49,11 @@ import frc.robot.Constants.Shooter;
 import frc.robot.Field;
 import frc.robot.Robot;
 import frc.robot.commands.DriveCommands;
-import frc.robot.lib.Encoder;
 import frc.robot.lib.logging.Loggable;
 import frc.robot.lib.logging.NTLogger;
 import frc.robot.lib.motion.FollowTrajectory;
 import frc.robot.lib.music.TalonMusic;
+import frc.robot.lib.util.Encoder;
 import frc.robot.lib.util.Util;
 import frc.robot.subsystems.VisionSubsystem.VisionResult;
 

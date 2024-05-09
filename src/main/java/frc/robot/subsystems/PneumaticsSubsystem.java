@@ -17,12 +17,10 @@ public class PneumaticsSubsystem extends SubsystemBase implements Loggable {
     private final Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
     private final Solenoid leftPiston = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.leftBottomChannel);
     private final Solenoid rightPiston = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.rightBottomChannel);
-    private final Solenoid compressorFan = new Solenoid(PneumaticsModuleType.CTREPCM, Pneumatics.compressorFanChannel);
 
     public PneumaticsSubsystem() {
         NTLogger.register(this);
         compressor.enableDigital();
-        compressorFan.set(true);
     }
 
     public Command extend() {
