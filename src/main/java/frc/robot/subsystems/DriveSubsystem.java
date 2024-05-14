@@ -19,7 +19,6 @@ import java.util.function.Supplier;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StrictFollower;
@@ -119,11 +118,6 @@ public class DriveSubsystem extends SubsystemBase implements Loggable {
         config.MotionMagicAcceleration = toRotations(acceleration);
         talonL.getConfigurator().apply(config);
         talonR.getConfigurator().apply(config);
-    }
-
-    public void setSpeed(double leftSpeed, double rightSpeed) {
-        talonL.setControl(new DutyCycleOut(leftSpeed));
-        talonR.setControl(new DutyCycleOut(rightSpeed));
     }
 
     private void setVoltage(Measure<Voltage> left, Measure<Voltage> right) {

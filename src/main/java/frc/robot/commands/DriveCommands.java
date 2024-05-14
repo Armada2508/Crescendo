@@ -1,14 +1,17 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Volts;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.Constants.Driving;
 import frc.robot.Constants.Vision;
 import frc.robot.lib.drive.DriveUtil;
@@ -18,7 +21,9 @@ public class DriveCommands {
 
     public static Command drive(DoubleSupplier joystickSpeed, DoubleSupplier joystickTurn, DoubleSupplier joystickTrim, 
             BooleanSupplier noteModeEnabled, DoubleSupplier noteAngle, DriveSubsystem driveSubsystem) {
-        return Commands.runEnd(() -> {
+        var leftVoltage = MutableMeasure.zero(Volts);
+        var rightVoltage = MutableMeasure.zero(Volts);
+        return Commands.sequence(Commands.runOnce(() -> {
             double speed = joystickSpeed.getAsDouble();
             double turn = joystickTurn.getAsDouble();
             double trim = joystickTrim.getAsDouble();
@@ -50,8 +55,10 @@ public class DriveCommands {
             double leftSpeed = (speed - turn);
             double rightSpeed = (speed + turn);
             Pair<Double, Double> speeds = DriveUtil.normalizeValues(leftSpeed, rightSpeed);
-            driveSubsystem.setSpeed(speeds.getFirst(), speeds.getSecond());
-        }, driveSubsystem::stop, driveSubsystem); 
+            leftVoltage.mut_replace(Volts.of(speeds.getFirst() * Constants.maxBatteryVoltage));
+            rightVoltage.mut_replace(Volts.of(speeds.getSecond() * Constants.maxBatteryVoltage));
+        }), driveSubsystem.setVoltageCommand(leftVoltage, rightVoltage)
+        ).repeatedly().finallyDo(driveSubsystem::stop); 
     }
 
 }

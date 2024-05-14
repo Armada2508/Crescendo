@@ -41,6 +41,7 @@ import edu.wpi.first.units.Voltage;
 public class Constants {
 
     public static final double degreesPerRotation = 360;
+    public static final double maxBatteryVoltage = 12;
     public static final Measure<Distance> robotLength = Inches.of(29 + 6); // Robot is 29 in. by 29 in. Bumper width is 3 in.
     public static final Measure<Distance> halfRobotLength = robotLength.divide(2);
     public static final Velocity<Velocity<Distance>> FeetPerSecondSquared = FeetPerSecond.per(Second);
