@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Drive;
 import frc.robot.Constants.Joysticks;
@@ -70,16 +69,28 @@ public class RobotContainer {
         joystick.b1().onTrue(Routines.turnAndScoreSpeaker(driveSubsystem, armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
         // joystick.b2().onTrue(Routines.turnToSpeaker(driveSubsystem));
         joystick.b3().onTrue(intakeShooterSubsystem.shootAmpCommand());
-        joystick.b5().onTrue(Commands.runOnce(this::stopEverything));
+        // joystick.b5().onTrue(Commands.runOnce(this::stopEverything));
         joystick.b7().onTrue(Routines.ampPosition(armSubsystem, pneumaticsSubsystem));
         joystick.b9().onTrue(Routines.enterStow(armSubsystem, pneumaticsSubsystem));
         joystick.b11().onTrue(Routines.groundIntake(armSubsystem, intakeShooterSubsystem, pneumaticsSubsystem));
-        // joystick.b4().whileTrue(Routines.retractClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
-        // joystick.b6().whileTrue(Routines.extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.b4().whileTrue(Routines.retractClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.b6().whileTrue(Routines.extendClimber(armSubsystem, climbSubsystem, pneumaticsSubsystem).andThen(climbSubsystem.run(()->{})).finallyDo(climbSubsystem::stop));
+        joystick.b12().onTrue(Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem, pneumaticsSubsystem));
 
-        // joystick.b8().onTrue(climbSubsystem.resetClimberCommand());
+        /*
+        * TRIGGER -> SHOOT SPEAKER
+        * 3 -> SHOOT AMP
+        * 7 -> ENTER AMP SHOOTING POSITION
+        * 9 -> ENTER STOW
+        * 11 -> GROUND INTAKE
+        * 4 -> HOLD RETRACT CLIMBER
+        * 6 -> HOLD EXTEND CLIMBER
+        * 12 -> AUTO CLIMB
+
+         */
+
+        joystick.b8().onTrue(climbSubsystem.resetClimberCommand());
         // joystick.b10().onTrue(Routines.ampPositionAndCenter(driveSubsystem, armSubsystem, pneumaticsSubsystem));
-        // joystick.b12().onTrue(Routines.extendAndCenterOnChain(driveSubsystem, armSubsystem, climbSubsystem, pneumaticsSubsystem));
 
         // joystick.b4().onTrue(pneumaticsSubsystem.retract());
         // joystick.b6().onTrue(pneumaticsSubsystem.extend());
